@@ -57,6 +57,37 @@ class PuzzleBoard():
         for col in range(1, len(row) - 1, 2):
             row[col].setAsBlocked()
 
+    def clearSolution(self):
+        for rowNum in range(1, (len(self.puzzleBoard) - 1)):
+            row = self.puzzleBoard[rowNum]
+            if ((rowNum % 2) == 0):
+                # Even Rows
+                for colNum in range(1, len(row)-1, 2):
+                    row[colNum].setAsOpen()
+            else:
+                # Odd Rows
+                for colNum in range(2, len(row)-2, 2):
+                    row[colNum].setAsOpen()
+
+    def drawLineUp(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum - 1][intColNum].setAsLine()
+
+    def drawLineDown(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum + 1][intColNum].setAsLine()
+
+    def drawLineLeft(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum - 1].setAsLine()
+
+    def drawLineRight(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum + 1].setAsLine()
+
+    def __mapRowAndCol(self, rowNum, colNum):
+        return((rowNum*2) + 1, (colNum*2) + 1)
+
 
 
     # Internal method for creating a pathway row that
@@ -96,6 +127,7 @@ class PuzzleBoard():
                 else:
                     cell.print()
             print()
+        print()
 
     def clone(self):
         #todo: needs to be implemented
@@ -113,4 +145,11 @@ if __name__ == "__main__":
     print("Beginning Testing")
 
     b = PuzzleBoard()
+    b.print()
+
+    b.drawLineUp(3, 4)
+    b.drawLineLeft(2, 1)
+    b.print()
+
+    b.clearSolution()
     b.print()
