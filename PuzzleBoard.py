@@ -23,10 +23,13 @@ class PuzzleBoard():
         if ((size == None) and (puzzleData == None)):
             self.numRows = PuzzleBoard.__DEFAULT_NUM_ROWS
             self.numCols = PuzzleBoard.__DEFAULT_NUM_COLS
-            self.puzzleData = self.__createPuzzleBoard()
-        elif (size != None):
+            self.__createPuzzleBoard()
+        elif (puzzleData != None):
+            # todo: define this case
+            print("not implemented")
+        else:
             self.numRows, self.numCols = size
-            self.puzzleData = self.__createPuzzleBoard()
+            self.__createPuzzleBoard()
 
     # Internal method for creating an empty PuzzleBoard
     # for the specified numRows and numCols
@@ -41,6 +44,20 @@ class PuzzleBoard():
             self.puzzleBoard.append(rowB)
 
         self.puzzleBoard.append(self.__createRowA())
+
+        self.__blockTopOrBottomRow(self.puzzleBoard[0])
+
+        for row in range(1, (len(self.puzzleBoard) - 1), 2):
+            self.puzzleBoard[row][0].setAsBlocked()
+            self.puzzleBoard[row][len(self.puzzleBoard[row]) - 1].setAsBlocked()
+
+        self.__blockTopOrBottomRow(self.puzzleBoard[len(self.puzzleBoard) - 1])
+
+    def __blockTopOrBottomRow(self, row):
+        for col in range(1, len(row) - 1, 2):
+            row[col].setAsBlocked()
+
+
 
     # Internal method for creating a pathway row that
     # represents pathways above and below the cell row:
@@ -79,6 +96,18 @@ class PuzzleBoard():
                 else:
                     cell.print()
             print()
+
+    def clone(self):
+        #todo: needs to be implemented
+        print("not implemented")
+
+    def cloneBoardOnly(self):
+        #todo: needs to be implemented
+        print("not implemented")
+
+    def reset(self):
+        self.state = PuzzleBoard.STATE_UNSOLVED
+        self.puzzleData = self.__createPuzzleBoard()
 
 if __name__ == "__main__":
     print("Beginning Testing")
