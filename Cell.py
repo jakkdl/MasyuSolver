@@ -92,8 +92,9 @@ class Cell():
     def getType(self):
         return(self.type)
 
-    # Prints the cell type: 'D' for DOT, 'B' for BLACK CIRCLE, 'W' for WHITE CIRCLE,
-    #   or '?' for anything else
+    # Prints the cell type: 'D' for DOT,
+    # 'B' for BLACK CIRCLE, 'W' for WHITE CIRCLE,
+    # or '?' for anything else
     #
     def print(self):
         if self.type == Cell.TYPE_DOT:

@@ -55,8 +55,9 @@ class Pathway():
     def getType(self):
         return(self.type)
 
-    # Prints the type of the Pathway: 'O' for Open, 'L' for Line, 'X' for Blocked,
-    #       or '?' for anything else
+    # Prints the type of the Pathway: 'O' for Open,
+    # 'L' for Line, 'X' for Blocked,
+    # or '?' for anything else
     #
     def print(self):
         if self.type == Pathway.TYPE_OPEN:

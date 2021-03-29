@@ -8,6 +8,15 @@ class PuzzleBoard():
     __DEFAULT_NUM_ROWS = 8
     __DEFAULT_NUM_COLS = 8
 
+    # Constructor
+    # If given, the 'size' parameter is a tuple,
+    # specifying the number of rows and the number of columns
+    # If given, the 'puzzleData' parameter can either be just
+    # the puzzle definition, or it can be a tuple specifying
+    # both the puzzle definition and the solution information
+    # If neither parameter is specified, then a default
+    # 8X8 empty board is created
+    #
     def __init__(self, size = None, puzzleData = None):
         self.state = PuzzleBoard.STATE_UNSOLVED
 
@@ -19,6 +28,9 @@ class PuzzleBoard():
             self.numRows, self.numCols = size
             self.puzzleData = self.__createPuzzleBoard()
 
+    # Internal method for creating an empty PuzzleBoard
+    # for the specified numRows and numCols
+    #
     def __createPuzzleBoard(self):
         self.puzzleBoard = []
         for r in range(0, self.numRows):
@@ -30,6 +42,10 @@ class PuzzleBoard():
 
         self.puzzleBoard.append(self.__createRowA())
 
+    # Internal method for creating a pathway row that
+    # represents pathways above and below the cell row:
+    #  'N P N P ... P N'
+    #
     def __createRowA(self):
         rowA = []
 
@@ -40,6 +56,9 @@ class PuzzleBoard():
         rowA.append(None)
         return(rowA)
 
+    # Internal method for creating the cell row:
+    # 'P C P C ... C P'
+    #
     def __createRowB(self):
         rowB = []
 
@@ -50,13 +69,15 @@ class PuzzleBoard():
         rowB.append(Pathway())
         return (rowB)
 
+    # Print the PuzzleBoard
+    #
     def print(self):
-        for l in self.puzzleBoard:
-            for e in l:
-                if e == None:
+        for row in self.puzzleBoard:
+            for cell in row:
+                if cell == None:
                     print("N", end = "")
                 else:
-                    e.print()
+                    cell.print()
             print()
 
 if __name__ == "__main__":
