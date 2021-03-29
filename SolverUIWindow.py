@@ -55,120 +55,69 @@ class SolverUIWindow():
     # Returns the bounding box (x1, y1, x2, y2) for the indicated item.
     # This represents the "selectable" area for that particular item; it
     # is the area inside of where the highlight will be drawn.
-    def __getItemBounds(self, item):
-        x1 = self.ITEM_PADDING + self.ITEM_HIGHLIGHT_THICKNESS
-        y1 = self.ITEM_PADDING + self.ITEM_HIGHLIGHT_THICKNESS + \
-             ((self.ITEM_HEIGHT + self.ITEM_PADDING + self.ITEM_HIGHLIGHT_THICKNESS) * item)
-        x2 = x1 + self.ITEM_WIDTH
-        y2 = y1 + self.ITEM_HEIGHT
+    def __getItemBounds(self):
+        x1 = 0
+        y1 = 0
+        x2 = (self.ITEM_WIDTH + (self.ITEM_HIGHLIGHT_THICKNESS * 2)) - 1
+        y2 = (self.ITEM_HEIGHT + (self.ITEM_HIGHLIGHT_THICKNESS * 2)) - 1
         return(x1, y1, x2, y2)
 
-    # Returns 'True' if the selection occurred in the region of the item being checked.
-    # Used when processing "Button-1" events within the item canvas, to help map the
-    # event (x,y) into an item.
-    def __isSelectionInItem(self, xPos, yPos, item):
-        x1, y1, x2, y2 = self.__getItemBounds(item)
+    # Event handler for processing <button-1> events in one of the items;
+    # causes the selected item to becoome the active item.
+    def __itemSelectionHandler(self, event):
 
-        return((x1 <= xPos <= x2) and (y1 <= yPos <= y2))
-
-    # Event handler for Button-1 presses in the item canvas.
-    # We need to map the (x,y) position within the canvas, into
-    # the corresponding item, and then move the selection to that
-    # item.
-    def __processActiveItemSelection(self, event):
-        xPos = event.x
-        yPos = event.y
-        print("pos = ", xPos, ",", yPos)
-
-        # See which item was selected
-        if (self.__isSelectionInItem(xPos, yPos, self.WHITE_ITEM)):
-            self.__changeActiveItem(self.WHITE_ITEM)
-        elif (self.__isSelectionInItem(xPos, yPos, self.BLACK_ITEM)):
-            self.__changeActiveItem(self.BLACK_ITEM)
-        elif (self.__isSelectionInItem(xPos, yPos, self.DOT_ITEM)):
-            self.__changeActiveItem(self.DOT_ITEM)
-
-    # Draw (or erase) the highlight around the active item.
-    # Whether it acts as a "draw" or and "erase" depends upon
-    # the color used to draw the highlight.
-    def __drawActiveItemHighlight(self, item, color):
-        itemX1, itemY1, itemX2, itemY2 = self.__getItemBounds(item)
-
-        # The highlight is drawn outside of the item region, so we need to
-        # adjust the bounds to factor this in
-        itemX1 -= self.ITEM_HIGHLIGHT_THICKNESS
-        itemY1 -= self.ITEM_HIGHLIGHT_THICKNESS
-        itemX2 += self.ITEM_HIGHLIGHT_THICKNESS
-        itemY2 += self.ITEM_HIGHLIGHT_THICKNESS
-        self.itemCanvas.create_line(itemX1, itemY1, itemX2, itemY1, fill=color,
-                                    width=self.ITEM_HIGHLIGHT_THICKNESS)
-        self.itemCanvas.create_line(itemX2, itemY1, itemX2, itemY2, fill=color,
-                                    width=self.ITEM_HIGHLIGHT_THICKNESS)
-        self.itemCanvas.create_line(itemX2, itemY2, itemX1, itemY2, fill=color,
-                                    width=self.ITEM_HIGHLIGHT_THICKNESS)
-        self.itemCanvas.create_line(itemX1, itemY2, itemX1, itemY1, fill=color,
-                                    width=self.ITEM_HIGHLIGHT_THICKNESS)
+        item = event.widget
+        self.__setActiveItem(item)
 
     # Draw the highlight around the indicated item.
     # If the item is already the selected item, then nothing needs to be done.
-    def __changeActiveItem(self, item):
+    def __setActiveItem(self, item):
 
         # If this is already the selected item, then do nothing
         if (item == self.selectedItem):
             return
 
         # Start by removing the highlight around the currently selected item (if there is one)
-        if (self.selectedItem != self.NO_ITEM):
-            self.__drawActiveItemHighlight(self.selectedItem, self.itemCanvasColor)
+        if (self.selectedItem != None):
+            self.selectedItem.itemconfigure('hilite', fill=self.itemCanvasColor)
 
         # Now draw the highlight around the selected item
         self.selectedItem = item
-        self.__drawActiveItemHighlight(self.selectedItem, "red")
+        item.itemconfigure('hilite', fill='red')
+
+    # Create a single item in the item selection area
+    def __createItem(self, parent, circleSize, circleColor):
+
+        item = tk.Canvas(master=parent, relief=tk.FLAT, borderwidth=0, highlightthickness=0,
+                                   height=(self.ITEM_HEIGHT + (2 * self.ITEM_HIGHLIGHT_THICKNESS)),
+                                   width=(self.ITEM_WIDTH + (2 * self.ITEM_HIGHLIGHT_THICKNESS)),
+                                   bg=self.itemCanvasColor)
+        item.pack(side=tk.TOP)
+        item.bind('<Button-1>', lambda event: self.__itemSelectionHandler(event))
+
+        itemX1, itemY1, itemX2, itemY2 = self.__getItemBounds()
+        print(itemX1, itemY1, itemX2, itemY2)
+        itemCenterX = (itemX2 + 1) / 2
+        itemCenterY = (itemY2 + 1) / 2
+        x1 = itemCenterX - (circleSize / 2)
+        y1 = itemCenterY - (circleSize / 2)
+        x2 = x1 + circleSize
+        y2 = y1 + circleSize
+        item.create_oval(x1, y1, x2, y2, fill=circleColor)
+
+        item.create_line(itemX1, itemY1, itemX2, itemY1, fill=self.itemCanvasColor, tags=('hilite'))
+        item.create_line(itemX2, itemY1, itemX2, itemY2, fill=self.itemCanvasColor, tags=('hilite'))
+        item.create_line(itemX2, itemY2, itemX1, itemY2, fill=self.itemCanvasColor, tags=('hilite'))
+        item.create_line(itemX1, itemY2, itemX1, itemY1, fill=self.itemCanvasColor, tags=('hilite'))
+
+        return(item)
 
     # Create the canvas widget for holding the 3 items, and then draw the items
-    def __createItemCanvas(self, parent):
-        itemCanvasHeight = ((self.ITEM_HEIGHT + (self.ITEM_HIGHLIGHT_THICKNESS * 2)) * self.NUM_ITEMS) + \
-                           (self.ITEM_PADDING * (self.NUM_ITEMS + 1))
-        itemCanvasWidth = (self.ITEM_PADDING * 2) + (self.ITEM_HIGHLIGHT_THICKNESS * 2) + self.ITEM_WIDTH
+    def __createItems(self, parent):
 
-        print("Item canvas size=", itemCanvasWidth, "x", itemCanvasHeight)
-
-        self.itemCanvas = tk.Canvas(master=parent, relief=tk.FLAT, borderwidth=0, highlightthickness=0,
-                               height=itemCanvasHeight, width=itemCanvasWidth, bg=self.itemCanvasColor)
-        self.itemCanvas.pack(fill=tk.X, side=tk.TOP)
-
-        # Add a callback to capture "Button-1" events which occur within the item canvas
-        self.itemCanvas.bind('<Button-1>', self.__processActiveItemSelection)
-
-        # Draw the White circle Item
-        itemX1, itemY1, itemX2, itemY2 = self.__getItemBounds(self.WHITE_ITEM)
-        itemCenterY = itemY1 + self.ITEM_HEIGHT / 2
-        itemCenterX = itemX1 + self.ITEM_WIDTH / 2
-        x1 = itemCenterX - self.ITEM_WHITE_CIRCLE_SIZE / 2
-        y1 = itemCenterY - self.ITEM_WHITE_CIRCLE_SIZE / 2
-        x2 = x1 + self.ITEM_WHITE_CIRCLE_SIZE
-        y2 = y1 + self.ITEM_WHITE_CIRCLE_SIZE
-        whiteCircleItem = self.itemCanvas.create_oval(x1, y1, x2, y2, fill='white')
-
-        # Draw the Black Circle
-        itemX1, itemY1, itemX2, itemY2 = self.__getItemBounds(self.BLACK_ITEM)
-        itemCenterY = itemY1 + self.ITEM_HEIGHT / 2
-        itemCenterX = itemX1 + self.ITEM_WIDTH / 2
-        x1 = itemCenterX - self.ITEM_BLACK_CIRCLE_SIZE / 2
-        y1 = itemCenterY - self.ITEM_BLACK_CIRCLE_SIZE / 2
-        x2 = x1 + self.ITEM_BLACK_CIRCLE_SIZE
-        y2 = y1 + self.ITEM_BLACK_CIRCLE_SIZE
-        blackCircleItem = self.itemCanvas.create_oval(x1, y1, x2, y2, fill='black')
-
-        # Draw the Dot
-        itemX1, itemY1, itemX2, itemY2 = self.__getItemBounds(self.DOT_ITEM)
-        itemCenterY = itemY1 + self.ITEM_HEIGHT / 2
-        itemCenterX = itemX1 + self.ITEM_WIDTH / 2
-        x1 = itemCenterX - self.ITEM_DOT_SIZE / 2
-        y1 = itemCenterY - self.ITEM_DOT_SIZE / 2
-        x2 = x1 + self.ITEM_DOT_SIZE
-        y2 = y1 + self.ITEM_DOT_SIZE
-        dotItem = self.itemCanvas.create_oval(x1, y1, x2, y2, fill='dark grey')
+        self.whiteItem = self.__createItem(parent, self.ITEM_WHITE_CIRCLE_SIZE, 'white')
+        self.blackItem = self.__createItem(parent, self.ITEM_BLACK_CIRCLE_SIZE, 'black')
+        self.dotItem = self.__createItem(parent, self.ITEM_DOT_SIZE, 'dark grey')
 
     # ------ End of private helper functions ------
 
@@ -198,7 +147,7 @@ class SolverUIWindow():
         # Initialize some instance variables
         self.state = SolverUIWindow.STATE_1
         self.puzzleBoardObject = None
-        self.selectedItem = self.NO_ITEM
+        self.selectedItem = None
 
         # Create the top-level application window
         self.mainWindow = tk.Tk()
@@ -217,8 +166,8 @@ class SolverUIWindow():
         itemFrame = tk.Frame(master=frame1, relief=tk.RAISED, borderwidth=5, bg=self.itemCanvasColor)
 
         # Create a Canvas, in which we will draw the items (dot, black circle and white circle)
-        self.__createItemCanvas(itemFrame)
-        self.__changeActiveItem(self.DOT_ITEM)
+        self.__createItems(itemFrame)
+        self.__setActiveItem(self.dotItem)
 
         itemFrame.pack(fill=tk.X, side=tk.TOP, padx=15, pady=75)
 
