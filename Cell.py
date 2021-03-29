@@ -58,6 +58,16 @@ class Cell():
     def getType(self):
         return(self.type)
 
+    def print(self):
+        if self.type == Cell.TYPE_DOT:
+            print("D", end = "")
+        elif self.type == Cell.TYPE_BLACK_CIRCLE:
+            print("B", end = "")
+        elif self.type == Cell.TYPE_WHITE_CIRCLE:
+            print("W", end = "")
+        else:
+            print("?", end = "")
+
 if __name__ == "__main__":
     print("Running Tests")
 
@@ -86,3 +96,5 @@ if __name__ == "__main__":
         print("Test 4 passed")
     else:
         print("Test 4 failed")
+
+

@@ -33,6 +33,16 @@ class Pathway():
     def getType(self):
         return(self.type)
 
+    def print(self):
+        if self.type == Pathway.TYPE_OPEN:
+            print("O", end = "")
+        elif self.type == Pathway.TYPE_LINE:
+            print("L", end = "")
+        elif self.type == Pathway.TYPE_BLOCKED:
+            print("X", end = "")
+        else:
+            print("?", end = "")
+
 if __name__ == "__main__":
     print("Running Tests")
 
