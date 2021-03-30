@@ -34,6 +34,8 @@ class SolverUIWindow():
 
     # Tags used to identify all items of a given type
     ALL_PATHWAYS_TAG = "allPathways"
+    ALL_LINES_TAG = "allLines"
+    ALL_BLOCKS_TAG = "allBlocks"
     ALL_WHITE_CIRCLES_TAG = "allWhiteCircles"
     ALL_BLACK_CIRCLES_TAG = "allBlackCircles"
     ALL_DOTS_TAG = "allDots"
@@ -203,7 +205,7 @@ class SolverUIWindow():
         circleX2 = circleX1 + circleSize
         circleY2 = circleY1 + circleSize
         item = self.puzzleBoardCanvas.create_oval(circleX1, circleY1, circleX2, circleY2, fill=color, tags=itemTags,
-                                           state=state)
+                                           state=state, width=0)
         return(item)
 
     # ------ End of private helper functions ------
@@ -346,14 +348,16 @@ class SolverUIWindow():
                 y1 = row * self.ITEM_HEIGHT
                 x2 = x1 + self.ITEM_WIDTH
                 y2 = y1 + self.ITEM_HEIGHT
+                middleX = x1 + (self.ITEM_WIDTH / 2)
+                middleY = y1 + (self.ITEM_HEIGHT / 2)
                 itemTagBase = 'C' + str(row) + 'x' + str(col)
                 print("Creating:", itemTagBase, ":", x1, y1, x2, y2)
 
-                itemTagAll = itemTagBase + self.CELL_ALL_TAG
+                #itemTagAll = itemTagBase + self.CELL_ALL_TAG
 
                 # We must set "width=0", to turn off the spacing reserved for a highlight border!
                 backgroundTag = itemTagBase + self.CELL_BACKGROUND_TAG
-                tags = (itemTagBase, itemTagAll, backgroundTag)
+                tags = (itemTagBase, backgroundTag)
                 item = self.puzzleBoardCanvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color,
                                                         tags=tags, width=0)
                 print("BG: ", self.puzzleBoardCanvas.gettags(item))
@@ -389,12 +393,52 @@ class SolverUIWindow():
                 print("BC: ", self.puzzleBoardCanvas.gettags(item))
 
                 # Create the left line (which is also part of the right line for the cell on our left)
+                leftLineTag = itemTagBase + self.CELL_LEFT_LINE_TAG
+                allCellLinesTag = itemTagBase + self.CELL_ALL_LINES_TAG
+                allCellPathwaysTag = itemTagBase + self.CELL_ALL_PATHWAYS_TAG
+                allLinesTag = self.ALL_LINES_TAG
+                allPathwaysTag = self.ALL_PATHWAYS_TAG
+                leftCellRightLineTag = 'C' + str(row) + 'x' + str(col-1) + self.CELL_RIGHT_LINE_TAG
+                tags = (itemTagBase, allLinesTag, allPathwaysTag, leftLineTag, allCellLinesTag,
+                        allCellPathwaysTag, leftCellRightLineTag)
+                item = self.puzzleBoardCanvas.create_line(middleX, middleY, x1, middleY, width=3,
+                                                          tags=tags, state='normal')
 
                 # Create the right line (which is also part of the left line for the cell on our right)
+                rightLineTag = itemTagBase + self.CELL_RIGHT_LINE_TAG
+                allCellLinesTag = itemTagBase + self.CELL_ALL_LINES_TAG
+                allCellPathwaysTag = itemTagBase + self.CELL_ALL_PATHWAYS_TAG
+                allLinesTag = self.ALL_LINES_TAG
+                allPathwaysTag = self.ALL_PATHWAYS_TAG
+                rightCellLeftLineTag = 'C' + str(row) + 'x' + str(col + 1) + self.CELL_LEFT_LINE_TAG
+                tags = (itemTagBase, allLinesTag, allPathwaysTag, rightLineTag, allCellLinesTag,
+                        allCellPathwaysTag, rightCellLeftLineTag)
+                item = self.puzzleBoardCanvas.create_line(middleX, middleY, x2, middleY, width=3,
+                                                          tags=tags, state='normal')
 
                 # Create the top line (which is also part of the bottom line for the cell above)
+                topLineTag = itemTagBase + self.CELL_TOP_LINE_TAG
+                allCellLinesTag = itemTagBase + self.CELL_ALL_LINES_TAG
+                allCellPathwaysTag = itemTagBase + self.CELL_ALL_PATHWAYS_TAG
+                allLinesTag = self.ALL_LINES_TAG
+                allPathwaysTag = self.ALL_PATHWAYS_TAG
+                topCellBottomLineTag = 'C' + str(row-1) + 'x' + str(col) + self.CELL_BOTTOM_LINE_TAG
+                tags = (itemTagBase, allLinesTag, allPathwaysTag, topLineTag, allCellLinesTag,
+                        allCellPathwaysTag, topCellBottomLineTag)
+                item = self.puzzleBoardCanvas.create_line(middleX, middleY, middleX, y1, width=3,
+                                                          tags=tags, state='normal')
 
                 # Create the bottom line (which is also part of the top line for the cell below)
+                bottomLineTag = itemTagBase + self.CELL_BOTTOM_LINE_TAG
+                allCellLinesTag = itemTagBase + self.CELL_ALL_LINES_TAG
+                allCellPathwaysTag = itemTagBase + self.CELL_ALL_PATHWAYS_TAG
+                allLinesTag = self.ALL_LINES_TAG
+                allPathwaysTag = self.ALL_PATHWAYS_TAG
+                bottomCellTopLineTag = 'C' + str(row+1) + 'x' + str(col) + self.CELL_TOP_LINE_TAG
+                tags = (itemTagBase, allLinesTag, allPathwaysTag, bottomLineTag, allCellLinesTag,
+                        allCellPathwaysTag, bottomCellTopLineTag)
+                item = self.puzzleBoardCanvas.create_line(middleX, middleY, middleX, y2, width=3,
+                                                          tags=tags, state='normal')
 
                 # Create the left block (which is also part of the right block for the cell on our left)
 
