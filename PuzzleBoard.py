@@ -120,6 +120,8 @@ class PuzzleBoard():
     def __mapRowAndCol(self, rowNum, colNum):
         return((rowNum*2) + 1, (colNum*2) + 1)
 
+    def getDimensions(self):
+        return ((self.numRows,self.numCols))
 
 
     # Internal method for creating a pathway row that
