@@ -1,4 +1,5 @@
 import tkinter as tk
+from PuzzleBoard import *
 
 class SolverUIWindow():
 
@@ -15,14 +16,56 @@ class SolverUIWindow():
     ITEM_HIGHLIGHT_THICKNESS = 2    # Thickness of highlight drawn around active item
     ITEM_WIDTH = 30                 # Width of each item
     ITEM_HEIGHT = 30                # Height of each item
-    ITEM_WHITE_CIRCLE_SIZE = 20      # Size of the white circle item
-    ITEM_BLACK_CIRCLE_SIZE = 20      # Size of the black circle item
-    ITEM_DOT_SIZE = 8               # Size of the dot item
+    MENU_ITEM_WHITE_CIRCLE_SIZE = 20      # Size of the white circle item
+    MENU_ITEM_BLACK_CIRCLE_SIZE = 20      # Size of the black circle item
+    MENU_ITEM_DOT_SIZE = 8               # Size of the dot item
+    BOARD_ITEM_WHITE_CIRCLE_SIZE = 10  # Size of the white circle item
+    BOARD_ITEM_BLACK_CIRCLE_SIZE = 10  # Size of the black circle item
+    BOARD_ITEM_DOT_SIZE = 4  # Size of the dot item
 
     NO_ITEM = -1
     WHITE_ITEM = 0
     BLACK_ITEM = 1
     DOT_ITEM = 2
+
+    ####################
+    # Item tag patterns
+    ####################
+
+    # Tags used to identify all items of a given type
+    ALL_PATHWAYS_TAG = "allPathways"
+    ALL_WHITE_CIRCLES_TAG = "allWhiteCircles"
+    ALL_BLACK_CIRCLES_TAG = "allBlackCircles"
+    ALL_DOTS_TAG = "allDots"
+
+    # Tag used to identify all items within a given cell
+    CELL_ALL_TAG = "_All"
+
+    # Tag used to identify the rectangular cell background item
+    CELL_BACKGROUND_TAG = "_Background"
+
+    # Tags used to identify the dot, black circle and white circle
+    # items in a cell
+    CELL_DOT_TAG = "_Dot"
+    CELL_WHITE_CIRCLE_TAG = "_WhiteCircle"
+    CELL_BLACK_CIRCLE_TAG = "_BlackCircle"
+
+    # Tags used to identify all items of a specific type within a cell
+    CELL_ALL_PATHWAYS_TAG = "_AllPathways"
+    CELL_ALL_LINES_TAG = "_AllLines"
+    CELL_ALL_BLOCKS_TAG = "_AllBlocks"
+
+    # Tags used to identify the different 'blocked' items in a cell
+    CELL_LEFT_BLOCK_TAG = "_LeftBlock"
+    CELL_RIGHT_BLOCK_TAG = "_RightBlock"
+    CELL_TOP_BLOCK_TAG = "_Top"
+    CELL_BOTTOM_BLOCK_TAG = "_Bottom"
+
+    # Tags used to identify the different lines items in a cell
+    CELL_LEFT_LINE_TAG = "_LeftLine"
+    CELL_RIGHT_LINE_TAG = "_RightLine"
+    CELL_TOP_LINE_TAG = "_TopLine"
+    CELL_BOTTOM_LINE_TAG= "_BottomLine"
 
     # -------- Start of menu bar handlers ------
 
@@ -30,27 +73,43 @@ class SolverUIWindow():
     def donothing(self):
         print("do nothing")
 
-    # Test increasing the size of the Puzzle Board canvas
+    # Test modifying the size of the puzzle board
     def increaseMainCanvasSize(self, canvas):
-        currentWidth = canvas.winfo_width()
-        currentHeight = canvas.winfo_height()
-        print("Canvas size =", currentWidth, "x", currentHeight)
-        currentWidth += 50
-        currentHeight += 50
-        canvas.config(width=currentWidth, height=currentHeight)
+        numRows = canvas.numRows
+        numCols = canvas.numCols
 
-    # Test decreasing the size of the Puzzle Board Canvas
+        if (numRows > 7):
+            numRows -= 2
+
+        if (numCols < 14):
+            numCols += 2
+
+        pb = PuzzleBoard(size=(numRows, numCols))
+        pb.print()
+        self.registerPuzzleBoard(pb)
+
+    # Test modifying the size of the Puzzle Board
     def decreaseMainCanvasSize(self, canvas):
-        currentWidth = canvas.winfo_width()
-        currentHeight = canvas.winfo_height()
-        print("Canvas size =", currentWidth, "x", currentHeight)
-        currentWidth -= 50
-        currentHeight -= 50
-        canvas.config(width=currentWidth, height=currentHeight)
+        numRows = canvas.numRows
+        numCols = canvas.numCols
+
+        if (numRows < 14):
+            numRows += 2
+
+        if (numCols > 7):
+            numCols -= 2
+
+        pb = PuzzleBoard(size=(numRows, numCols))
+        pb.print()
+        self.registerPuzzleBoard(pb)
 
     # -------- End of menu bar handlers --------
 
     # ------ Start of private helper functions ------
+
+    ##########################################################
+    # Helper functions associated with the item selection area
+    ##########################################################
 
     # Returns the bounding box (x1, y1, x2, y2) for the indicated item.
     # This represents the "selectable" area for that particular item; it
@@ -113,12 +172,39 @@ class SolverUIWindow():
 
         return(item)
 
-    # Create the canvas widget for holding the 3 items, and then draw the items
+    # Create the 3 items in the item selection area
     def __createItems(self, parent):
 
-        self.whiteItem = self.__createItem(parent, self.ITEM_WHITE_CIRCLE_SIZE, 'white')
-        self.blackItem = self.__createItem(parent, self.ITEM_BLACK_CIRCLE_SIZE, 'black')
-        self.dotItem = self.__createItem(parent, self.ITEM_DOT_SIZE, 'dark grey')
+        self.whiteItem = self.__createItem(parent, self.MENU_ITEM_WHITE_CIRCLE_SIZE, 'white')
+        self.blackItem = self.__createItem(parent, self.MENU_ITEM_BLACK_CIRCLE_SIZE, 'black')
+        self.dotItem = self.__createItem(parent, self.MENU_ITEM_DOT_SIZE, 'dark grey')
+
+    ######################################################################
+    # Helper methods used during the construction of the Game Board canvas
+    ######################################################################
+
+    # Event handler for when the cursor enters a cell in the game board
+    def __cellEnterHandler(self, event, tag):
+        print("Entered cell:", tag)
+
+    # Event handler for when Button-1 is pressed in a cell in the game board
+    def __cellSelectedHandler(self, event, tag):
+        print("Button press in cell:", tag)
+
+    # Based on the parameters passed in, create a circle on the puzzle board canvas.
+    # Can be a white circle, a black circle or a dot
+    def __createBoardItem(self, x1, y1, circleSize, color, itemTags, state):
+        itemX2 = x1 + self.ITEM_WIDTH - 1
+        itemY2 = y1 + self.ITEM_HEIGHT - 1
+        itemCenterX = x1 + (self.ITEM_WIDTH / 2)
+        itemCenterY = y1 + (self.ITEM_HEIGHT / 2)
+        circleX1 = itemCenterX - (circleSize / 2)
+        circleY1 = itemCenterY - (circleSize / 2)
+        circleX2 = circleX1 + circleSize
+        circleY2 = circleY1 + circleSize
+        item = self.puzzleBoardCanvas.create_oval(circleX1, circleY1, circleX2, circleY2, fill=color, tags=itemTags,
+                                           state=state)
+        return(item)
 
     # ------ End of private helper functions ------
 
@@ -187,6 +273,7 @@ class SolverUIWindow():
         puzzleBoardCanvas = tk.Canvas(master=puzzleBoardFrame, bg=puzzleBoardCanvasColor, height=300, width=300,
                                       highlightthickness=0, relief=tk.FLAT, borderwidth=0)
         puzzleBoardCanvas.pack(side=tk.TOP)
+        self.puzzleBoardCanvas = puzzleBoardCanvas
 
         # Create a frame for holding the checkboxes
         checkboxFrame = tk.Frame(master=frame2, bg=checkboxFrameColor, relief=tk.GROOVE, borderwidth=5)
@@ -213,8 +300,8 @@ class SolverUIWindow():
         # Create the 'File' menu
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="New", command=self.donothing)
-        filemenu.add_command(label="Open", command=lambda: self.increaseMainCanvasSize(puzzleBoardCanvas))
-        filemenu.add_command(label="Save", command=lambda: self.decreaseMainCanvasSize(puzzleBoardCanvas))
+        filemenu.add_command(label="Open", command=lambda: self.increaseMainCanvasSize(self))
+        filemenu.add_command(label="Save", command=lambda: self.decreaseMainCanvasSize(self))
         filemenu.add_command(label="Save As ..", command=self.donothing)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=self.mainWindow.quit)
@@ -233,13 +320,113 @@ class SolverUIWindow():
     def showWindow(self):
         self.mainWindow.mainloop()
 
-    # Method for assigning a PuzzleBoard object to this UI window
-    def registerPuzzleBoard(self):
-        print("Todo - save puzzle board object, resize canvas and force a refresh of the canvas")
+    # Method for assigning a PuzzleBoard object to this UI window.
+    # The Puzzle Board canvas will be set to the necessary size,
+    # the cells will be created, along with all of the other pieces
+    # making up a cell: circles, dots, lines and blocks
+    def registerPuzzleBoard(self, puzzleBoard):
+        numRows, numCols = puzzleBoard.getDimensions()
+        print (numRows, numCols)
+        self.numRows = numRows
+        self.numCols = numCols
+
+        # Delete any existing items in the canvas
+        self.puzzleBoardCanvas.delete('all')
+
+        # Calculate the new canvas height and width
+        canvasHeight = numRows * self.ITEM_HEIGHT
+        canvasWidth = numCols * self.ITEM_WIDTH
+        self.puzzleBoardCanvas.config(width=canvasWidth, height=canvasHeight)
+        print(canvasWidth, "x", canvasHeight)
+
+        color = 'red'
+        for row in range (0, numRows):
+            for col in range (0, numCols):
+                x1 = col * self.ITEM_WIDTH
+                y1 = row * self.ITEM_HEIGHT
+                x2 = x1 + self.ITEM_WIDTH
+                y2 = y1 + self.ITEM_HEIGHT
+                itemTagBase = 'C' + str(row) + 'x' + str(col)
+                print("Creating:", itemTagBase, ":", x1, y1, x2, y2)
+
+                itemTagAll = itemTagBase + self.CELL_ALL_TAG
+
+                # We must set "width=0", to turn off the spacing reserved for a highlight border!
+                backgroundTag = itemTagBase + self.CELL_BACKGROUND_TAG
+                tags = (itemTagBase, itemTagAll, backgroundTag)
+                item = self.puzzleBoardCanvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color,
+                                                        tags=tags, width=0)
+                print("BG: ", self.puzzleBoardCanvas.gettags(item))
+
+                # For testing purposed, alternate the color of the cells
+                if (color == 'green'):
+                    color = 'red'
+                else:
+                    color = 'green'
+
+                # Create the dot for this cell; it is initially visible
+                # The set of tags must be a tuple!
+                dotTag = itemTagBase + self.CELL_DOT_TAG
+                allDotsTag = self.ALL_DOTS_TAG
+                tags = (itemTagBase, allDotsTag, dotTag)
+                item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_DOT_SIZE, 'dark grey', tags, 'normal')
+                print("Dot: ", self.puzzleBoardCanvas.gettags(item))
+
+                # Create the white circle for this cell; it is initially hidden
+                # The set of tags must be a tuple!
+                whiteCircleTag = itemTagBase + self.CELL_WHITE_CIRCLE_TAG
+                allWhiteCirclesTag = self.ALL_WHITE_CIRCLES_TAG
+                tags=(itemTagBase, allWhiteCirclesTag, whiteCircleTag)
+                item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_WHITE_CIRCLE_SIZE, 'white', tags, 'normal')
+                print("WC: ", self.puzzleBoardCanvas.gettags(item))
+
+                # Create the black circle for this cell; it is initially hidden
+                # The set of tags must be a tuple!
+                blackCircleTag = itemTagBase + self.CELL_BLACK_CIRCLE_TAG
+                allBlackCirclesTag = self.ALL_BLACK_CIRCLES_TAG
+                tags = (itemTagBase, allBlackCirclesTag, blackCircleTag)
+                item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_BLACK_CIRCLE_SIZE, 'black', tags, 'normal')
+                print("BC: ", self.puzzleBoardCanvas.gettags(item))
+
+                # Create the left line (which is also part of the right line for the cell on our left)
+
+                # Create the right line (which is also part of the left line for the cell on our right)
+
+                # Create the top line (which is also part of the bottom line for the cell above)
+
+                # Create the bottom line (which is also part of the top line for the cell below)
+
+                # Create the left block (which is also part of the right block for the cell on our left)
+
+                # Create the right block (which is also part of the left block for the cell on our right)
+
+                # Create the top block (which is also part of the bottom block for the cell above)
+
+                # Create the bottom block (which is also part of the top block for the cell below)
+
+                # Add a listener for notifications that the item was "entered" by the mouse
+                self.puzzleBoardCanvas.tag_bind(itemTagBase, '<Enter>',
+                                                lambda event, tag=itemTagBase: self.__cellEnterHandler(event, tag))
+
+                # Add a listener for notifications that the item was selected by mouse button 1
+                self.puzzleBoardCanvas.tag_bind(itemTagBase, '<Button-1>',
+                                                lambda event, tag=itemTagBase: self.__cellSelectedHandler(event, tag))
+
+        # Hide all the white circles and black circles
+        self.puzzleBoardCanvas.itemconfigure(self.ALL_BLACK_CIRCLES_TAG, state='hidden')
+        self.puzzleBoardCanvas.itemconfigure(self.ALL_WHITE_CIRCLES_TAG, state='hidden')
+
+        # Turn on all of the dots
+        self.puzzleBoardCanvas.itemconfigure(self.ALL_DOTS_TAG, state='normal')
+
+
 
     # ------ End of public class methods ------
 
 # ------ Begin test code ------
 if __name__ == '__main__':
     uiWindow = SolverUIWindow()
+    pb = PuzzleBoard(size=(5,5))
+    pb.print()
+    uiWindow.registerPuzzleBoard(pb)
     uiWindow.showWindow()
