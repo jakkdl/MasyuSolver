@@ -79,11 +79,11 @@ class SolverUIWindow():
 
         # Start by removing the highlight around the currently selected item (if there is one)
         if (self.selectedItem != None):
-            self.selectedItem.itemconfigure('hilite', fill=self.itemCanvasColor)
+            self.selectedItem.itemconfigure('hilite', state='hidden')
 
         # Now draw the highlight around the selected item
         self.selectedItem = item
-        item.itemconfigure('hilite', fill='red')
+        item.itemconfigure('hilite', state='normal')
 
     # Create a single item in the item selection area
     def __createItem(self, parent, circleSize, circleColor):
@@ -105,10 +105,11 @@ class SolverUIWindow():
         y2 = y1 + circleSize
         item.create_oval(x1, y1, x2, y2, fill=circleColor)
 
-        item.create_line(itemX1, itemY1, itemX2, itemY1, fill=self.itemCanvasColor, tags=('hilite'))
-        item.create_line(itemX2, itemY1, itemX2, itemY2, fill=self.itemCanvasColor, tags=('hilite'))
-        item.create_line(itemX2, itemY2, itemX1, itemY2, fill=self.itemCanvasColor, tags=('hilite'))
-        item.create_line(itemX1, itemY2, itemX1, itemY1, fill=self.itemCanvasColor, tags=('hilite'))
+        item.create_line(itemX1, itemY1, itemX2, itemY1,
+                         itemX2, itemY2, itemX1, itemY2,
+                         itemX1, itemY1, fill='red', tags=('hilite'))
+
+        item.itemconfigure('hilite', state = 'hidden')
 
         return(item)
 
