@@ -1,3 +1,5 @@
+import re
+
 class CanvasManager():
 
     ITEM_WIDTH = 30  # Width of each item
@@ -285,12 +287,14 @@ class CanvasManager():
     # Event handler for when the cursor enters a cell in the game board
     def __cellEnterHandler(self, event, tag):
         # Todo: change cursor based on cell state (disabled, invalid, valid)
-        print("Entered cell:", tag)
+        rowNum, colNum = self.__mapTagIdToRowColNums(tag)
+        print("Entered cell:", tag, "row =", rowNum, "col =", colNum)
 
     # Event handler for when Button-1 is pressed in a cell in the game board
     def __cellSelectedHandler(self, event, tag):
         # Todo: invoke callback, if one is supplied
-        print("Button press in cell:", tag)
+        rowNum, colNum = self.__mapTagIdToRowColNums(tag)
+        print("Button press in cell:", tag, "row =", rowNum, "col =", colNum)
 
     # Based on the parameters passed in, create a circle on the puzzle board canvas.
     # Can be a white circle, a black circle or a dot
@@ -315,6 +319,21 @@ class CanvasManager():
     # string used to reference cell[rowNum, colNum]
     def __createBaseItemTag(self, rowNum, colNum):
         return ('C' + str(rowNum) + 'x' + str(colNum))
+
+    # Given a tag id for a cell (i.e. "C5x7") use regular expressions to
+    # extract out the row and column numbers
+    def __mapTagIdToRowColNums(self, tag):
+        # Match the pattern: "C<integer>x<integer>"
+        regex = r"[C]([0-9]+)[x]([0-9]+)"
+
+        # findall() returns a list of tuples.
+        # We want the first list item, whose tuple then
+        # contains the 2 numbers extracted from the
+        # tag string.
+        match = re.findall(regex, tag)
+        firstMatch = match[0]
+        rowNum, colNum = firstMatch
+        return(int(rowNum), int(colNum))
 
     #################################################
     # Internal methods for enabling canvas items
