@@ -123,6 +123,77 @@ class PuzzleBoard():
     def getDimensions(self):
         return ((self.numRows,self.numCols))
 
+    def setBlackCircleAt(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].setAsBlackCircle()
+
+    def setWhiteCircleAt(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].setAsWhiteCircle()
+
+    def setDotAt(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].setAsDot()
+
+    def isBlackCircleAt(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return(self.puzzleBoard[intRowNum][intColNum].isBlackCircle())
+
+    def isWhiteCircleAt(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum].isWhiteCircle())
+
+    def isDotAt(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum].isDot())
+
+    def hasLineUp(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum - 1][intColNum].isLine())
+
+    def hasLineDown(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum + 1][intColNum].isLine())
+
+    def hasLineLeft(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum - 1].isLine())
+
+    def hasLineRight(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum + 1].isLine())
+
+    def isBlockedUp(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum - 1][intColNum].isBlocked())
+
+    def isBlockedDown(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum + 1][intColNum].isBlocked())
+
+    def isBlockedLeft(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum - 1].isBlocked())
+
+    def isBlockedRight(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum + 1].isBlocked())
+
+    def isOpenUp(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum - 1][intColNum].isOpen())
+
+    def isOpenDown(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum + 1][intColNum].isOpen())
+
+    def isOpenLeft(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum - 1].isOpen())
+
+    def isOpenRight(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum + 1].isOpen())
 
     # Internal method for creating a pathway row that
     # represents pathways above and below the cell row:
@@ -187,7 +258,11 @@ if __name__ == "__main__":
 
     b.markBlockedLeft(3, 4)
     b.markOpenLeft(2, 1)
+    b.setBlackCircleAt(6,5)
+    b.setWhiteCircleAt(4,2)
     b.print()
 
     b.clearSolution()
+    b.setDotAt(6,5)
+    b.setDotAt(4,2)
     b.print()

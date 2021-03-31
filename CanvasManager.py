@@ -273,11 +273,115 @@ class CanvasManager():
         self.puzzleBoardCanvas.itemconfigure(self.ALL_PATHWAYS_TAG, state='hidden')
         self.puzzleBoardCanvas.itemconfigure(self.ALL_DOTS_TAG, state='normal')
 
-        # TODO: Set the canvas state to match the PuzzleBoard object state
+        self.__refreshCanvas()
 
         # TODO: debug only
         #self.__drawLineRight(2,3)
         #self.__blockRight(1,3)
+
+    def __setCircleAt(self, rowNum, colNum):
+        if self.puzzleBoard.isBlackCircleAt(rowNum, colNum):
+            self.__setBlackCircleAt(rowNum, colNum)
+        elif self.puzzleBoard.isWhiteCircleAt(rowNum, colNum):
+            self.__setWhiteCircleAt(rowNum, colNum)
+        else:
+            self.__setDotAt(rowNum, colNum)
+
+    def __setBlackCircleAt(self, rowNum, colNum):
+        baseTag = self.__createBaseItemTag(rowNum, colNum)
+        blackItemTag = baseTag + self.CELL_BLACK_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(blackItemTag, state = 'normal')
+        whiteItemTag = baseTag + self.CELL_WHITE_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(whiteItemTag, state = 'hidden')
+        dotItemTag = baseTag + self.CELL_DOT_TAG
+        self.puzzleBoardCanvas.itemconfigure(dotItemTag, state = 'hidden')
+
+    def __setWhiteCircleAt(self, rowNum, colNum):
+        baseTag = self.__createBaseItemTag(rowNum, colNum)
+        blackItemTag = baseTag + self.CELL_BLACK_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(blackItemTag, state = 'hidden')
+        whiteItemTag = baseTag + self.CELL_WHITE_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(whiteItemTag, state = 'normal')
+        dotItemTag = baseTag + self.CELL_DOT_TAG
+        self.puzzleBoardCanvas.itemconfigure(dotItemTag, state = 'hidden')
+
+    def __setDotAt(self, rowNum, colNum):
+        baseTag = self.__createBaseItemTag(rowNum, colNum)
+        blackItemTag = baseTag + self.CELL_BLACK_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(blackItemTag, state = 'hidden')
+        whiteItemTag = baseTag + self.CELL_WHITE_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(whiteItemTag, state = 'hidden')
+        dotItemTag = baseTag + self.CELL_DOT_TAG
+        self.puzzleBoardCanvas.itemconfigure(dotItemTag, state = 'normal')
+
+    def __drawLines(self, rowNum, colNum):
+        baseTag = self.__createBaseItemTag(rowNum, colNum)
+
+        leftLineTag = baseTag + self.CELL_LEFT_LINE_TAG
+        if self.puzzleBoard.hasLineLeft(rowNum, colNum):
+            state = 'normal'
+        else:
+            state = 'hidden'
+        self.puzzleBoardCanvas.itemconfigure(leftLineTag, state = state)
+
+        rightLineTag = baseTag + self.CELL_RIGHT_LINE_TAG
+        if self.puzzleBoard.hasLineRight(rowNum, colNum):
+            state = 'normal'
+        else:
+            state = 'hidden'
+        self.puzzleBoardCanvas.itemconfigure(rightLineTag, state=state)
+
+        topLineTag = baseTag + self.CELL_TOP_LINE_TAG
+        if self.puzzleBoard.hasLineUp(rowNum, colNum):
+            state = 'normal'
+        else:
+            state = 'hidden'
+        self.puzzleBoardCanvas.itemconfigure(topLineTag, state=state)
+
+        bottomLineTag = baseTag + self.CELL_BOTTOM_LINE_TAG
+        if self.puzzleBoard.hasLineDown(rowNum, colNum):
+            state = 'normal'
+        else:
+            state = 'hidden'
+        self.puzzleBoardCanvas.itemconfigure(bottomLineTag, state=state)
+
+    def __drawBlocks(self, rowNum, colNum):
+        baseTag = self.__createBaseItemTag(rowNum, colNum)
+
+        topBlockedTag = baseTag + self.CELL_TOP_BLOCK_TAG
+        if self.puzzleBoard.isBlockedUp(rowNum, colNum):
+            state = 'normal'
+        else:
+            state = 'hidden'
+        self.puzzleBoardCanvas.itemconfigure(topBlockedTag, state=state)
+
+        bottomBlockedTag = baseTag + self.CELL_BOTTOM_BLOCK_TAG
+        if self.puzzleBoard.isBlockedDown(rowNum, colNum):
+            state = 'normal'
+        else:
+            state = 'hidden'
+        self.puzzleBoardCanvas.itemconfigure(bottomBlockedTag, state=state)
+
+        leftBlockedTag = baseTag + self.CELL_LEFT_BLOCK_TAG
+        if self.puzzleBoard.isBlockedLeft(rowNum, colNum):
+            state = 'normal'
+        else:
+            state = 'hidden'
+        self.puzzleBoardCanvas.itemconfigure(leftBlockedTag, state=state)
+
+        rightBlockedTag = baseTag + self.CELL_RIGHT_BLOCK_TAG
+        if self.puzzleBoard.isBlockedRight(rowNum, colNum):
+            state = 'normal'
+        else:
+            state = 'hidden'
+        self.puzzleBoardCanvas.itemconfigure(rightBlockedTag, state=state)
+
+    def __refreshCanvas(self):
+        for rowNum in range(0, self.numRows):
+            for colNum in range(0, self.numCols):
+                self.__setCircleAt(rowNum, colNum)
+                self.__drawLines(rowNum, colNum)
+                self.__drawBlocks(rowNum, colNum)
 
 
     ######################################################################
