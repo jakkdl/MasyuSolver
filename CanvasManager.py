@@ -348,33 +348,37 @@ class CanvasManager():
     def __drawBlocks(self, rowNum, colNum):
         baseTag = self.__createBaseItemTag(rowNum, colNum)
 
-        topBlockedTag = baseTag + self.CELL_TOP_BLOCK_TAG
-        if self.puzzleBoard.isBlockedUp(rowNum, colNum):
-            state = 'normal'
-        else:
-            state = 'hidden'
-        self.puzzleBoardCanvas.itemconfigure(topBlockedTag, state=state)
+        if (rowNum != 0):
+            topBlockedTag = baseTag + self.CELL_TOP_BLOCK_TAG
+            if self.puzzleBoard.isBlockedUp(rowNum, colNum):
+                state = 'normal'
+            else:
+                state = 'hidden'
+            self.puzzleBoardCanvas.itemconfigure(topBlockedTag, state=state)
 
-        bottomBlockedTag = baseTag + self.CELL_BOTTOM_BLOCK_TAG
-        if self.puzzleBoard.isBlockedDown(rowNum, colNum):
-            state = 'normal'
-        else:
-            state = 'hidden'
-        self.puzzleBoardCanvas.itemconfigure(bottomBlockedTag, state=state)
+        if (rowNum != self.numRows - 1):
+            bottomBlockedTag = baseTag + self.CELL_BOTTOM_BLOCK_TAG
+            if self.puzzleBoard.isBlockedDown(rowNum, colNum):
+                state = 'normal'
+            else:
+                state = 'hidden'
+            self.puzzleBoardCanvas.itemconfigure(bottomBlockedTag, state=state)
 
-        leftBlockedTag = baseTag + self.CELL_LEFT_BLOCK_TAG
-        if self.puzzleBoard.isBlockedLeft(rowNum, colNum):
-            state = 'normal'
-        else:
-            state = 'hidden'
-        self.puzzleBoardCanvas.itemconfigure(leftBlockedTag, state=state)
+        if (colNum != 0):
+            leftBlockedTag = baseTag + self.CELL_LEFT_BLOCK_TAG
+            if self.puzzleBoard.isBlockedLeft(rowNum, colNum):
+                state = 'normal'
+            else:
+                state = 'hidden'
+            self.puzzleBoardCanvas.itemconfigure(leftBlockedTag, state=state)
 
-        rightBlockedTag = baseTag + self.CELL_RIGHT_BLOCK_TAG
-        if self.puzzleBoard.isBlockedRight(rowNum, colNum):
-            state = 'normal'
-        else:
-            state = 'hidden'
-        self.puzzleBoardCanvas.itemconfigure(rightBlockedTag, state=state)
+        if (colNum != self.numCols - 1):
+            rightBlockedTag = baseTag + self.CELL_RIGHT_BLOCK_TAG
+            if self.puzzleBoard.isBlockedRight(rowNum, colNum):
+                state = 'normal'
+            else:
+                state = 'hidden'
+            self.puzzleBoardCanvas.itemconfigure(rightBlockedTag, state=state)
 
     def __refreshCanvas(self):
         for rowNum in range(0, self.numRows):
