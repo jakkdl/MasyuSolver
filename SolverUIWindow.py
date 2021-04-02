@@ -88,6 +88,7 @@ class SolverUIWindow():
 
         item = event.widget
         self.__setActiveItem(item)
+        self.puzzleBoardCanvasManager.refreshCanvas()
 
     # Draw the highlight around the indicated item.
     # If the item is already the selected item, then nothing needs to be done.

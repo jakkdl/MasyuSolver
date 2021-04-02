@@ -283,6 +283,10 @@ class CanvasManager():
         #self.__drawLineRight(2,3)
         #self.__blockRight(1,3)
 
+    def refreshCanvas(self):
+        self.__refreshCanvas()
+        print("canvas being refreshed")
+
     def __setCircleAt(self, rowNum, colNum):
         if self.puzzleBoard.isBlackCircleAt(rowNum, colNum):
             self.__setBlackCircleAt(rowNum, colNum)
@@ -401,6 +405,10 @@ class CanvasManager():
         # Todo: change cursor based on cell state (disabled, invalid, valid)
         rowNum, colNum = self.__mapTagIdToRowColNums(tag)
         print("Entered cell:", tag, "row =", rowNum, "col =", colNum)
+        if (self.puzzleBoard.isCellEnabled(rowNum, colNum)):
+            self.puzzleBoardCanvas.config(cursor="spider")
+        else:
+            self.puzzleBoardCanvas.config(cursor="X_cursor")
 
     # Event handler for when Button-1 is pressed in a cell in the game board
     def __cellSelectedHandler(self, event, tag):
