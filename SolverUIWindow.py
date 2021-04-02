@@ -88,6 +88,11 @@ class SolverUIWindow():
 
         item = event.widget
         self.__setActiveItem(item)
+        if (item == self.whiteItem):
+            self.puzzleBoardObject.setCellDisabled(0, 0)
+        else:
+            self.puzzleBoardObject.setCellEnabled(0, 0)
+
         self.puzzleBoardCanvasManager.refreshCanvas()
 
     # Draw the highlight around the indicated item.
@@ -276,6 +281,7 @@ class SolverUIWindow():
     # making up a cell: circles, dots, lines and blocks
     def registerPuzzleBoard(self, puzzleBoard):
         self.puzzleBoardCanvasManager.registerPuzzleBoard(puzzleBoard)
+        self.puzzleBoardObject = puzzleBoard
 
     # ------ End of public class methods ------
 

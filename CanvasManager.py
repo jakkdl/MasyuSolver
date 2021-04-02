@@ -91,7 +91,8 @@ class CanvasManager():
             self.puzzleBoardCanvas.config(width=canvasWidth, height=canvasHeight)
             print(canvasWidth, "x", canvasHeight)
 
-            color = 'red'
+            # color = 'AntiqueWhite1'
+            color = 'Snow2'
             for row in range(0, numRows):
                 for col in range(0, numCols):
                     x1 = col * self.ITEM_WIDTH
@@ -111,10 +112,11 @@ class CanvasManager():
                     print("BG: ", self.puzzleBoardCanvas.gettags(item))
 
                     # For testing purposed, alternate the color of the cells
-                    if (color == 'green'):
-                        color = 'red'
-                    else:
-                        color = 'green'
+                    #
+                    # if (color == 'green'):
+                    #    color = 'red'
+                    # else:
+                    #    color = 'green'
 
                     # Create the dot for this cell; it is initially visible
                     # The set of tags must be a tuple!
@@ -394,7 +396,11 @@ class CanvasManager():
                 self.__setCircleAt(rowNum, colNum)
                 self.__drawLines(rowNum, colNum)
                 self.__drawBlocks(rowNum, colNum)
-
+                baseItemTag = self.__createBaseItemTag(rowNum, colNum)
+                if (self.puzzleBoard.isCellEnabled(rowNum, colNum)):
+                    self.puzzleBoardCanvas.itemconfigure(baseItemTag, stipple="")
+                else:
+                    self.puzzleBoardCanvas.itemconfigure(baseItemTag, stipple="gray25")
 
     ######################################################################
     # Helper methods used during the construction of the Game Board canvas
