@@ -165,6 +165,23 @@ class PuzzleBoard():
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum].isDot())
 
+    def getLines(self, rowNum, colNum):
+        count = 0
+        up = self.hasLineUp(rowNum, colNum)
+        if (up):
+            count += 1
+        down = self.hasLineDown(rowNum, colNum)
+        if (down):
+            count += 1
+        left = self. hasLineLeft(rowNum, colNum)
+        if (left):
+            count += 1
+        right = self.hasLineRight(rowNum, colNum)
+        if (right):
+            count += 1
+        return ((count, left, right, up, down))
+
+
     def hasLineUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum - 1][intColNum].isLine())
@@ -181,6 +198,22 @@ class PuzzleBoard():
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum + 1].isLine())
 
+    def getBlockedPaths(self, rowNum, colNum):
+        count = 0
+        up = self.isBlockedUp(rowNum, colNum)
+        if (up):
+            count += 1
+        down = self.isBlockedDown(rowNum, colNum)
+        if (down):
+            count += 1
+        left = self. isBlockedLeft(rowNum, colNum)
+        if (left):
+            count += 1
+        right = self.isBlockedRight(rowNum, colNum)
+        if (right):
+            count += 1
+        return ((count, left, right, up, down))
+
     def isBlockedUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum - 1][intColNum].isBlocked())
@@ -196,6 +229,23 @@ class PuzzleBoard():
     def isBlockedRight(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum + 1].isBlocked())
+
+
+    def getOpenPaths(self, rowNum, colNum):
+        count = 0
+        up = self.isOpenUp(rowNum, colNum)
+        if (up):
+            count += 1
+        down = self.isOpenDown(rowNum, colNum)
+        if (down):
+            count += 1
+        left = self. isOpenLeft(rowNum, colNum)
+        if (left):
+            count += 1
+        right = self.isOpenRight(rowNum, colNum)
+        if (right):
+            count += 1
+        return ((count, left, right, up, down))
 
     def isOpenUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
@@ -284,3 +334,5 @@ if __name__ == "__main__":
     b.setDotAt(6,5)
     b.setDotAt(4,2)
     b.print()
+
+
