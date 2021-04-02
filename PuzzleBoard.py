@@ -57,6 +57,24 @@ class PuzzleBoard():
         for colNum in range(1, len(row) - 1, 2):
             row[colNum].setAsBlocked()
 
+    def isSolved(self):
+        return (self.state == PuzzleBoard.STATE_SOLVED)
+
+    def isUnsolved(self):
+        return (self.state == PuzzleBoard.STATE_UNSOLVED)
+
+    def isInvalid(self):
+        return (self.state == PuzzleBoard.STATE_INVALID)
+
+    def setSolved(self):
+        self.state = PuzzleBoard.STATE_SOLVED
+
+    def setUnsolved(self):
+        self.state = PuzzleBoard.STATE_UNSOLVED
+
+    def setInvalid(self):
+        self.state = PuzzleBoard.STATE_INVALID
+
     def clearSolution(self):
         for rowNum in range(1, (len(self.puzzleBoard) - 1)):
             row = self.puzzleBoard[rowNum]
