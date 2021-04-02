@@ -13,8 +13,15 @@ def workArea2():
 def nonConflictingMerge():
     print("This should be a non-conflicting merge!")
 
+# This block is a non-conflicting change
+def workArea3():
+    print("Entering workArea3()")
+    print("\tFred's initial work in workArea3()")
+    print("Leaving workArea3()")
+
 if __name__ == "__main__":
     workArea1()
     workArea2()
     # This is probably a conflicting merge .. will have to be manually dealt with
     nonConflictingMerge()
+    workArea3()  # Conflicting change
