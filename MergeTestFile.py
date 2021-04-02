@@ -5,6 +5,9 @@ def workArea1():
     print("\tFred's initial work in workArea1()")
     print("Leaving workArea1()")
 
+def newMethod():
+    print("Just another method")
+
 def workArea2():
     print("Entering workArea2()")
     print("\tFred's initial work in workArea2()")
