@@ -57,6 +57,30 @@ class PuzzleBoard():
         for colNum in range(1, len(row) - 1, 2):
             row[colNum].setAsBlocked()
 
+    def isCellEnabled(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum].isEnabled())
+
+    def setCellEnabled(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].setEnabled()
+
+    def setCellDisabled(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].setDisabled()
+
+    def isCellValid(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum].isValid())
+
+    def setCellValid(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].setValid()
+
+    def setCellInvalid(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].setInvalid()
+
     def isSolved(self):
         return (self.state == PuzzleBoard.STATE_SOLVED)
 
