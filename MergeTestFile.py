@@ -32,3 +32,4 @@ if __name__ == "__main__":
     nonConflictingMerge()
     workArea3()  # Conflicting change
     # Just adding a comment
+    # Just another comment
