@@ -60,6 +60,10 @@ class CanvasManager():
         self.numRows = 0
         self.numCols = 0
         self.buttonPressCallback = None
+        self.buttonCallback = None
+
+    def registerButtonCallback(self, callback):
+        self.buttonPressCallback = callback
 
     def registerPuzzleBoard(self, puzzleBoard):
         self.puzzleBoard = puzzleBoard
@@ -403,6 +407,8 @@ class CanvasManager():
         # Todo: invoke callback, if one is supplied
         rowNum, colNum = self.__mapTagIdToRowColNums(tag)
         print("Button press in cell:", tag, "row =", rowNum, "col =", colNum)
+        if (self.buttonPressCallback != None):
+            self.buttonPressCallback(rowNum, colNum)
 
     # Based on the parameters passed in, create a circle on the puzzle board canvas.
     # Can be a white circle, a black circle or a dot
