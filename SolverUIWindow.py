@@ -312,5 +312,17 @@ if __name__ == '__main__':
     print("is solved =", pb.isSolved())
     print("is unsolved =", pb.isUnsolved())
     print("is invalid =", pb.isInvalid())
+
+    print("is Enabled =", pb.isCellEnabled(0, 0))
+    print("is Valid =", pb.isCellValid(1, 1))
+    pb.setCellDisabled(0, 0)
+    pb.setCellInvalid(1, 1)
+    print("is Enabled =", pb.isCellEnabled(0, 0))
+    print("is Valid =", pb.isCellValid(1, 1))
+    pb.setCellEnabled(0, 0)
+    pb.setCellValid(1, 1)
+    print("is Enabled =", pb.isCellEnabled(0, 0))
+    print("is Valid =", pb.isCellValid(1, 1))
+
     uiWindow.registerPuzzleBoard(pb)
     uiWindow.showWindow()
