@@ -99,6 +99,14 @@ class PuzzleBoard():
     def setInvalid(self):
         self.state = PuzzleBoard.STATE_INVALID
 
+    def getSolution(self):
+        print("get solution not implemeted")
+        # todo implement getSolution()
+
+    def setSolution(self, solution):
+        print("set solution not implemented")
+        # todo implement setSolution()
+
     def clearSolution(self):
         for rowNum in range(1, (len(self.puzzleBoard) - 1)):
             row = self.puzzleBoard[rowNum]
@@ -326,13 +334,48 @@ class PuzzleBoard():
             print()
         print()
 
+    def __clone(self, doFullClone, pbClone):
+        for rowNum in range (0, self.numRows):
+            for colNum in range (0, self.numCols):
+                if (self.isBlackCircleAt(rowNum, colNum)):
+                    pbClone.setBlackCircleAt(rowNum, colNum)
+                elif (self.isWhiteCircleAt(rowNum, colNum)):
+                    pbClone.setWhiteCircleAt(rowNum, colNum)
+
+                if (doFullClone):
+                    if (self.hasLineUp(rowNum, colNum)):
+                        pbClone.drawLineUp(rowNum, colNum)
+                    if (self.hasLineDown(rowNum, colNum)):
+                        pbClone.drawLineDown(rowNum, colNum)
+                    if (self.hasLineLeft(rowNum, colNum)):
+                        pbClone.drawLineLeft(rowNum, colNum)
+                    if (self.hasLineRight(rowNum, colNum)):
+                        pbClone.drawLineRight(rowNum, colNum)
+                    if (self.isBlockedUp(rowNum, colNum)):
+                        pbClone.markBlockedUp(rowNum, colNum)
+                    if (self.isBlockedDown(rowNum, colNum)):
+                        pbClone.markBlockedDown(rowNum, colNum)
+                    if (self.isBlockedLeft(rowNum, colNum)):
+                        pbClone.markBlockedLeft(rowNum, colNum)
+                    if (self.isBlockedRight(rowNum, colNum)):
+                        pbClone.markBlockedRight(rowNum, colNum)
+
+                if (self.isSolved() and doFullClone):
+                    pbClone.setSolved()
+                elif (self.isInValid()):
+                    pbClone.setInvalid()
+                else:
+                    pbClone.setUnsolved()
+
+
     def clone(self):
-        #todo: needs to be implemented
-        print("not implemented")
+        pbClone = PuzzleBoard(size=(self.numRows, self.numCols))
+        self.__clone(True, pbClone)
 
     def cloneBoardOnly(self):
-        #todo: needs to be implemented
-        print("not implemented")
+        pbClone = PuzzleBoard(size=(self.numRows, self.numCols))
+        self.__clone(False, pbClone)
+
 
     def reset(self):
         self.state = PuzzleBoard.STATE_UNSOLVED
