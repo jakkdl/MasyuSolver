@@ -54,13 +54,28 @@ class CanvasManager():
     CELL_TOP_LINE_TAG = "_TopLine"
     CELL_BOTTOM_LINE_TAG = "_BottomLine"
 
-    def __init__(self, canvas):
+    def __init__(self, canvas, showProgress, showBlockedPaths, showDisabledCells):
         self.puzzleBoardCanvas = canvas
         self.puzzleBoard = None
         self.numRows = 0
         self.numCols = 0
         self.buttonPressCallback = None
         self.buttonCallback = None
+        self.showProgress = showProgress
+        self.showBlockedPaths = showBlockedPaths
+        self.showDisabledCells = showDisabledCells
+
+    def setShowProgress(self, isEnabled):
+        self.showProgress = isEnabled
+        self.__refreshCanvas()
+
+    def setShowBlockedPaths(self, isEnabled):
+        self.showBlockedPaths = isEnabled
+        self.__refreshCanvas()
+
+    def setShowDisabledCells(self, isEnabled):
+        self.showDisabledCells = isEnabled
+        self.__refreshCanvas()
 
     def registerButtonCallback(self, callback):
         self.buttonPressCallback = callback
@@ -355,6 +370,21 @@ class CanvasManager():
             state = 'hidden'
         self.puzzleBoardCanvas.itemconfigure(bottomLineTag, state=state)
 
+    def __hideLines(self, rowNum, colNum):
+        baseTag = self.__createBaseItemTag(rowNum, colNum)
+
+        leftLineTag = baseTag + self.CELL_LEFT_LINE_TAG
+        self.puzzleBoardCanvas.itemconfigure(leftLineTag, state='hidden')
+
+        rightLineTag = baseTag + self.CELL_RIGHT_LINE_TAG
+        self.puzzleBoardCanvas.itemconfigure(rightLineTag, state='hidden')
+
+        topLineTag = baseTag + self.CELL_TOP_LINE_TAG
+        self.puzzleBoardCanvas.itemconfigure(topLineTag, state='hidden')
+
+        bottomLineTag = baseTag + self.CELL_BOTTOM_LINE_TAG
+        self.puzzleBoardCanvas.itemconfigure(bottomLineTag, state='hidden')
+
     def __drawBlocks(self, rowNum, colNum):
         baseTag = self.__createBaseItemTag(rowNum, colNum)
 
@@ -390,14 +420,35 @@ class CanvasManager():
                 state = 'hidden'
             self.puzzleBoardCanvas.itemconfigure(rightBlockedTag, state=state)
 
+    def __hideBlocks(self, rowNum, colNum):
+        baseTag = self.__createBaseItemTag(rowNum, colNum)
+
+        topBlockedTag = baseTag + self.CELL_TOP_BLOCK_TAG
+        self.puzzleBoardCanvas.itemconfigure(topBlockedTag, state='hidden')
+
+        bottomBlockedTag = baseTag + self.CELL_BOTTOM_BLOCK_TAG
+        self.puzzleBoardCanvas.itemconfigure(bottomBlockedTag, state='hidden')
+
+        leftBlockedTag = baseTag + self.CELL_LEFT_BLOCK_TAG
+        self.puzzleBoardCanvas.itemconfigure(leftBlockedTag, state='hidden')
+
+        rightBlockedTag = baseTag + self.CELL_RIGHT_BLOCK_TAG
+        self.puzzleBoardCanvas.itemconfigure(rightBlockedTag, state='hidden')
+
     def __refreshCanvas(self):
         for rowNum in range(0, self.numRows):
             for colNum in range(0, self.numCols):
                 self.__setCircleAt(rowNum, colNum)
-                self.__drawLines(rowNum, colNum)
-                self.__drawBlocks(rowNum, colNum)
+                if (self.showProgress):
+                    self.__drawLines(rowNum, colNum)
+                else:
+                    self.__hideLines(rowNum, colNum)
+                if (self.showBlockedPaths):
+                    self.__drawBlocks(rowNum, colNum)
+                else:
+                    self.__hideBlocks(rowNum, colNum)
                 baseItemTag = self.__createBaseItemTag(rowNum, colNum)
-                if (self.puzzleBoard.isCellEnabled(rowNum, colNum)):
+                if (self.puzzleBoard.isCellEnabled(rowNum, colNum) or not self.showDisabledCells):
                     self.puzzleBoardCanvas.itemconfigure(baseItemTag, stipple="")
                 else:
                     self.puzzleBoardCanvas.itemconfigure(baseItemTag, stipple="gray25")

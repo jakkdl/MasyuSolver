@@ -146,6 +146,15 @@ class SolverUIWindow():
         self.blackItem = self.__createItem(parent, self.MENU_ITEM_BLACK_CIRCLE_SIZE, 'black')
         self.dotItem = self.__createItem(parent, self.MENU_ITEM_DOT_SIZE, 'dark grey')
 
+    def __showProgressCallback(self):
+        self.puzzleBoardCanvasManager.setShowProgress(self.showProgressVar.get())
+
+    def __showBlockedPathsCallback(self):
+        self.puzzleBoardCanvasManager.setShowBlockedPaths(self.showBlockedPathsVar.get())
+
+    def __showDisabledCellsCallback(self):
+        self.puzzleBoardCanvasManager.setShowDisabledCells(self.showDisabledCellsVar.get())
+
     ###############################################
     # ------ End of private helper functions ------
     ###############################################
@@ -229,19 +238,22 @@ class SolverUIWindow():
         checkboxFrame = tk.Frame(master=frame2, bg=checkboxFrameColor, relief=tk.GROOVE, borderwidth=5)
         checkboxFrame.pack(pady=10)
 
-        showProgress = tk.IntVar()
-        showProgressCheckbox = tk.Checkbutton(checkboxFrame, text="Show progress", variable=showProgress,
-                                              bg=checkboxColor)
+        self.showProgressVar = tk.BooleanVar()
+        self.showProgressVar.set(True)
+        showProgressCheckbox = tk.Checkbutton(checkboxFrame, text="Show progress", variable=self.showProgressVar,
+                                              bg=checkboxColor, command=self.__showProgressCallback)
         showProgressCheckbox.pack(side=tk.TOP, anchor=tk.W)
 
-        showBlockedPaths = tk.IntVar()
-        showBlockedPaths = tk.Checkbutton(checkboxFrame, text="Show blocked paths", variable=showBlockedPaths,
-                                          bg=checkboxColor)
+        self.showBlockedPathsVar = tk.BooleanVar()
+        self.showBlockedPathsVar.set(True)
+        showBlockedPaths = tk.Checkbutton(checkboxFrame, text="Show blocked paths", variable=self.showBlockedPathsVar,
+                                          bg=checkboxColor, command=self.__showBlockedPathsCallback)
         showBlockedPaths.pack(side=tk.BOTTOM, anchor=tk.W)
 
-        showDisabledCells = tk.IntVar()
-        showDisabledCells = tk.Checkbutton(checkboxFrame, text="Show disabled cells", variable=showDisabledCells,
-                                           bg=checkboxColor)
+        self.showDisabledCellsVar = tk.BooleanVar()
+        self.showDisabledCellsVar.set(True)
+        showDisabledCells = tk.Checkbutton(checkboxFrame, text="Show disabled cells", variable=self.showDisabledCellsVar,
+                                           bg=checkboxColor, command=self.__showDisabledCellsCallback)
         showDisabledCells.pack(side=tk.BOTTOM, anchor=tk.W)
 
         # Create the menubar components
@@ -267,7 +279,8 @@ class SolverUIWindow():
         self.mainWindow.config(menu=menubar)
 
         # Create the puzzle board canvas manager, and register our puzzle board canvas
-        self.puzzleBoardCanvasManager = CanvasManager(self.puzzleBoardCanvas)
+        self.puzzleBoardCanvasManager = CanvasManager(self.puzzleBoardCanvas, self.showProgressVar.get(),
+                                                      self.showBlockedPathsVar.get(), self.showDisabledCellsVar.get())
         self.puzzleBoardCanvasManager.registerButtonCallback(self.__buttonCallBack)
 
 
