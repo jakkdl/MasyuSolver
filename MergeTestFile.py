@@ -18,6 +18,7 @@ def workArea2():
 
 def nonConflictingMerge():
     print("This should be a non-conflicting merge!")
+    print("this is another print in non-conflicting")
 
 # This block is a non-conflicting change
 def workArea3():
