@@ -93,7 +93,11 @@ class SolverUIWindow():
         else:
             self.puzzleBoardObject.setCellEnabled(0, 0)
 
+        # Make clone of puzzleboard
+        clonedPB = self.puzzleBoardObject.cloneAll()
+        # todo Make call to solver
         self.puzzleBoardCanvasManager.refreshCanvas()
+
 
     # Draw the highlight around the indicated item.
     # If the item is already the selected item, then nothing needs to be done.

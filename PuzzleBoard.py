@@ -362,20 +362,21 @@ class PuzzleBoard():
 
                 if (self.isSolved() and doFullClone):
                     pbClone.setSolved()
-                elif (self.isInValid()):
+                elif (self.isInvalid()):
                     pbClone.setInvalid()
                 else:
                     pbClone.setUnsolved()
 
 
-    def clone(self):
+    def cloneAll(self):
         pbClone = PuzzleBoard(size=(self.numRows, self.numCols))
         self.__clone(True, pbClone)
+        return(pbClone)
 
     def cloneBoardOnly(self):
         pbClone = PuzzleBoard(size=(self.numRows, self.numCols))
         self.__clone(False, pbClone)
-
+        return(pbClone)
 
     def reset(self):
         self.state = PuzzleBoard.STATE_UNSOLVED
