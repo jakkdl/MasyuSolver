@@ -23,6 +23,7 @@ def nonConflictingMerge():
 def workArea3():
     print("Entering workArea3()")
     print("\tFred's initial work in workArea3()")
+    print("Aaron made a change here")
     print("Leaving workArea3()")
 
 if __name__ == "__main__":
