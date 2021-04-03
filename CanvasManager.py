@@ -412,7 +412,7 @@ class CanvasManager():
         rowNum, colNum = self.__mapTagIdToRowColNums(tag)
         print("Entered cell:", tag, "row =", rowNum, "col =", colNum)
         if (self.puzzleBoard.isCellEnabled(rowNum, colNum)):
-            self.puzzleBoardCanvas.config(cursor="spider")
+            self.puzzleBoardCanvas.config(cursor="")
         else:
             self.puzzleBoardCanvas.config(cursor="X_cursor")
 
@@ -436,7 +436,7 @@ class CanvasManager():
         circleX2 = circleX1 + circleSize
         circleY2 = circleY1 + circleSize
         item = self.puzzleBoardCanvas.create_oval(circleX1, circleY1, circleX2, circleY2, fill=color, tags=itemTags,
-                                                  state=state, width=0)
+                                                  state=state, width=1, outline='black')
         return (item)
 
     ##########################
