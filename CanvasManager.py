@@ -10,7 +10,7 @@ class CanvasManager():
     BOARD_ITEM_DOT_SIZE = 4  # Size of the dot item
 
     CELL_LINE_WIDTH = 2
-    CELL_BLOCKS_WIDTH = 1
+    CELL_BLOCKS_WIDTH = 2
     CELL_BLOCKS_OFFSET = 5
 
     ####################
