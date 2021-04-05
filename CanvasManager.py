@@ -59,8 +59,7 @@ class CanvasManager():
         self.puzzleBoard = None
         self.numRows = 0
         self.numCols = 0
-        self.buttonPressCallback = None
-        self.buttonCallback = None
+        self.cellSelectionCallback = None
         self.showProgress = showProgress
         self.showBlockedPaths = showBlockedPaths
         self.showDisabledCells = showDisabledCells
@@ -77,8 +76,8 @@ class CanvasManager():
         self.showDisabledCells = isEnabled
         self.__refreshCanvas()
 
-    def registerButtonCallback(self, callback):
-        self.buttonPressCallback = callback
+    def registerCellSelectionCallback(self, callback):
+        self.cellSelectionCallback = callback
 
     def registerPuzzleBoard(self, puzzleBoard):
         self.puzzleBoard = puzzleBoard
@@ -93,7 +92,7 @@ class CanvasManager():
         # need to do is reset it back to the initial state, and then set the
         # items to match the specified puzzle board.
         if ((numRows != self.numRows) or (numCols != self.numCols)):
-            print("Resizing canvas: ", numRows, numCols)
+            # print("Resizing canvas: ", numRows, numCols)
             self.numRows = numRows
             self.numCols = numCols
 
@@ -104,7 +103,7 @@ class CanvasManager():
             canvasHeight = numRows * self.ITEM_HEIGHT
             canvasWidth = numCols * self.ITEM_WIDTH
             self.puzzleBoardCanvas.config(width=canvasWidth, height=canvasHeight)
-            print(canvasWidth, "x", canvasHeight)
+            # print(canvasWidth, "x", canvasHeight)
 
             # color = 'AntiqueWhite1'
             color = 'Snow2'
@@ -117,14 +116,14 @@ class CanvasManager():
                     middleX = x1 + (self.ITEM_WIDTH / 2)
                     middleY = y1 + (self.ITEM_HEIGHT / 2)
                     itemTagBase = self.__createBaseItemTag(row, col)
-                    print("Creating:", itemTagBase, ":", x1, y1, x2, y2)
+                    # print("Creating:", itemTagBase, ":", x1, y1, x2, y2)
 
                     # We must set "width=0", to turn off the spacing reserved for a highlight border!
                     backgroundTag = itemTagBase + self.CELL_BACKGROUND_TAG
                     tags = (itemTagBase, backgroundTag)
                     item = self.puzzleBoardCanvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color,
                                                                    tags=tags, width=0)
-                    print("BG: ", self.puzzleBoardCanvas.gettags(item))
+                    # print("BG: ", self.puzzleBoardCanvas.gettags(item))
 
                     # For testing purposed, alternate the color of the cells
                     #
@@ -139,7 +138,7 @@ class CanvasManager():
                     allDotsTag = self.ALL_DOTS_TAG
                     tags = (itemTagBase, allDotsTag, dotTag)
                     item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_DOT_SIZE, 'dark grey', tags, 'normal')
-                    print("Dot: ", self.puzzleBoardCanvas.gettags(item))
+                    # print("Dot: ", self.puzzleBoardCanvas.gettags(item))
 
                     # Create the white circle for this cell; it is initially hidden
                     # The set of tags must be a tuple!
@@ -147,7 +146,7 @@ class CanvasManager():
                     allWhiteCirclesTag = self.ALL_WHITE_CIRCLES_TAG
                     tags = (itemTagBase, allWhiteCirclesTag, whiteCircleTag)
                     item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_WHITE_CIRCLE_SIZE, 'white', tags, 'normal')
-                    print("WC: ", self.puzzleBoardCanvas.gettags(item))
+                    # print("WC: ", self.puzzleBoardCanvas.gettags(item))
 
                     # Create the black circle for this cell; it is initially hidden
                     # The set of tags must be a tuple!
@@ -155,7 +154,7 @@ class CanvasManager():
                     allBlackCirclesTag = self.ALL_BLACK_CIRCLES_TAG
                     tags = (itemTagBase, allBlackCirclesTag, blackCircleTag)
                     item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_BLACK_CIRCLE_SIZE, 'black', tags, 'normal')
-                    print("BC: ", self.puzzleBoardCanvas.gettags(item))
+                    # print("BC: ", self.puzzleBoardCanvas.gettags(item))
 
                     # Create the left line (which is also part of the right line for the cell on our left)
                     leftLineTag = itemTagBase + self.CELL_LEFT_LINE_TAG
@@ -302,7 +301,7 @@ class CanvasManager():
 
     def refreshCanvas(self):
         self.__refreshCanvas()
-        print("canvas being refreshed")
+        # print("canvas being refreshed")
 
     def __setCircleAt(self, rowNum, colNum):
         if self.puzzleBoard.isBlackCircleAt(rowNum, colNum):
@@ -461,7 +460,7 @@ class CanvasManager():
     def __cellEnterHandler(self, event, tag):
         # Todo: change cursor based on cell state (disabled, invalid, valid)
         rowNum, colNum = self.__mapTagIdToRowColNums(tag)
-        print("Entered cell:", tag, "row =", rowNum, "col =", colNum)
+        # print("Entered cell:", tag, "row =", rowNum, "col =", colNum)
         if (self.puzzleBoard.isCellEnabled(rowNum, colNum)):
             self.puzzleBoardCanvas.config(cursor="")
         else:
@@ -469,11 +468,11 @@ class CanvasManager():
 
     # Event handler for when Button-1 is pressed in a cell in the game board
     def __cellSelectedHandler(self, event, tag):
-        # Todo: invoke callback, if one is supplied
+        # Invoke cell selection callback, if one is supplied
         rowNum, colNum = self.__mapTagIdToRowColNums(tag)
         print("Button press in cell:", tag, "row =", rowNum, "col =", colNum)
-        if (self.buttonPressCallback != None):
-            self.buttonPressCallback(rowNum, colNum)
+        if (self.cellSelectionCallback != None):
+            self.cellSelectionCallback(rowNum, colNum)
 
     # Based on the parameters passed in, create a circle on the puzzle board canvas.
     # Can be a white circle, a black circle or a dot

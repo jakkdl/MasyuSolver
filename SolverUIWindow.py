@@ -285,7 +285,7 @@ class SolverUIWindow():
         # Create the puzzle board canvas manager, and register our puzzle board canvas
         self.puzzleBoardCanvasManager = CanvasManager(self.puzzleBoardCanvas, self.showProgressVar.get(),
                                                       self.showBlockedPathsVar.get(), self.showDisabledCellsVar.get())
-        self.puzzleBoardCanvasManager.registerButtonCallback(self.__buttonCallBack)
+        self.puzzleBoardCanvasManager.registerCellSelectionCallback(self.__buttonCallBack)
 
 
     # Method for displaying the solver UI window
