@@ -140,22 +140,6 @@ class CanvasManager():
                     item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_DOT_SIZE, 'dark grey', tags, 'normal')
                     # print("Dot: ", self.puzzleBoardCanvas.gettags(item))
 
-                    # Create the white circle for this cell; it is initially hidden
-                    # The set of tags must be a tuple!
-                    whiteCircleTag = itemTagBase + self.CELL_WHITE_CIRCLE_TAG
-                    allWhiteCirclesTag = self.ALL_WHITE_CIRCLES_TAG
-                    tags = (itemTagBase, allWhiteCirclesTag, whiteCircleTag)
-                    item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_WHITE_CIRCLE_SIZE, 'white', tags, 'normal')
-                    # print("WC: ", self.puzzleBoardCanvas.gettags(item))
-
-                    # Create the black circle for this cell; it is initially hidden
-                    # The set of tags must be a tuple!
-                    blackCircleTag = itemTagBase + self.CELL_BLACK_CIRCLE_TAG
-                    allBlackCirclesTag = self.ALL_BLACK_CIRCLES_TAG
-                    tags = (itemTagBase, allBlackCirclesTag, blackCircleTag)
-                    item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_BLACK_CIRCLE_SIZE, 'black', tags, 'normal')
-                    # print("BC: ", self.puzzleBoardCanvas.gettags(item))
-
                     # Create the left line (which is also part of the right line for the cell on our left)
                     leftLineTag = itemTagBase + self.CELL_LEFT_LINE_TAG
                     allCellLinesTag = itemTagBase + self.CELL_ALL_LINES_TAG
@@ -274,6 +258,25 @@ class CanvasManager():
                                                               y2 - self.CELL_BLOCKS_OFFSET,
                                                               width=self.CELL_BLOCKS_WIDTH,
                                                               tags=tags, state='normal')
+
+                    # We create the black and white circle *after* the path lines, because we want both
+                    # of these items to be higher in the stacking order than the path lines!
+
+                    # Create the black circle for this cell; it is initially hidden
+                    # The set of tags must be a tuple!
+                    blackCircleTag = itemTagBase + self.CELL_BLACK_CIRCLE_TAG
+                    allBlackCirclesTag = self.ALL_BLACK_CIRCLES_TAG
+                    tags = (itemTagBase, allBlackCirclesTag, blackCircleTag)
+                    item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_BLACK_CIRCLE_SIZE, 'black', tags, 'normal')
+                    # print("BC: ", self.puzzleBoardCanvas.gettags(item))
+
+                    # Create the white circle for this cell; it is initially hidden
+                    # The set of tags must be a tuple!
+                    whiteCircleTag = itemTagBase + self.CELL_WHITE_CIRCLE_TAG
+                    allWhiteCirclesTag = self.ALL_WHITE_CIRCLES_TAG
+                    tags = (itemTagBase, allWhiteCirclesTag, whiteCircleTag)
+                    item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_WHITE_CIRCLE_SIZE, 'white', tags, 'normal')
+                    # print("WC: ", self.puzzleBoardCanvas.gettags(item))
 
                     # Add a listener for notifications that the item was "entered" by the mouse
                     self.puzzleBoardCanvas.tag_bind(itemTagBase, '<Enter>',
