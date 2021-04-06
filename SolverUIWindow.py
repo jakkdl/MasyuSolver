@@ -1,6 +1,8 @@
 import tkinter as tk
 from PuzzleBoard import *
 from CanvasManager import *
+from MasyuExceptions import *
+from Solver import *
 
 class SolverUIWindow():
 
@@ -88,14 +90,10 @@ class SolverUIWindow():
 
         item = event.widget
         self.__setActiveItem(item)
-        if (item == self.whiteItem):
-            self.puzzleBoardObject.setCellDisabled(0, 0)
-        else:
-            self.puzzleBoardObject.setCellEnabled(0, 0)
 
-        # Make clone of puzzleboard
-        clonedPB = self.puzzleBoardObject.cloneAll()
-        # todo Make call to solver
+        # Determine which cells to disable
+        self.__determineCellsToDisable()
+
         self.puzzleBoardCanvasManager.refreshCanvas()
 
 
@@ -158,6 +156,49 @@ class SolverUIWindow():
 
     def __showDisabledCellsCallback(self):
         self.puzzleBoardCanvasManager.setShowDisabledCells(self.showDisabledCellsVar.get())
+
+    def __determineCellsToDisable(self):
+        if (self.selectedItem == self.dotItem):
+            for rowNum in range (0, self.numRows):
+                for colNum in range (0, self.numCols):
+                    self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
+
+        else:
+            clonedPuzzleBoard = self.puzzleBoardObject.cloneBoardOnly()
+
+            for rowNum in range (0, self.numRows):
+                for colNum in range (0, self.numCols):
+                    # Save the current cell type
+                    if (clonedPuzzleBoard.isBlackCircleAt(rowNum, colNum)):
+                        currentCell = Cell.TYPE_BLACK_CIRCLE
+                    elif (clonedPuzzleBoard.isWhiteCircleAt(rowNum, colNum)):
+                        currentCell = Cell.TYPE_WHITE_CIRCLE
+                    else:
+                        currentCell = Cell.TYPE_DOT
+
+                    # Set cell to active item
+                    if (self.selectedItem == self.blackItem):
+                        clonedPuzzleBoard.setBlackCircleAt(rowNum, colNum)
+                    elif (self.selectedItem == self.whiteItem):
+                        clonedPuzzleBoard.setWhiteCircleAt(rowNum, colNum)
+                    else:
+                        clonedPuzzleBoard.setDotAt(rowNum, colNum)
+
+                    try:
+                        self.solver.solve(clonedPuzzleBoard)
+                    except MasyuSolverException as e:
+                        self.puzzleBoardObject.setCellDisabled(rowNum, colNum)
+                    else:
+                        self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
+                    finally:
+                        if (currentCell == Cell.TYPE_BLACK_CIRCLE):
+                            clonedPuzzleBoard.setBlackCircleAt(rowNum, colNum)
+                        elif (currentCell == Cell.TYPE_WHITE_CIRCLE):
+                            clonedPuzzleBoard.setWhiteCircleAt(rowNum, colNum)
+                        else:
+                            clonedPuzzleBoard.setDotAt(rowNum, colNum)
+
+
 
     ###############################################
     # ------ End of private helper functions ------
@@ -287,6 +328,8 @@ class SolverUIWindow():
                                                       self.showBlockedPathsVar.get(), self.showDisabledCellsVar.get())
         self.puzzleBoardCanvasManager.registerCellSelectionCallback(self.__buttonCallBack)
 
+        self.solver = Solver()
+
 
     # Method for displaying the solver UI window
     def showWindow(self):
@@ -306,48 +349,50 @@ class SolverUIWindow():
 if __name__ == '__main__':
     uiWindow = SolverUIWindow()
     pb = PuzzleBoard(size=(5,5))
-    pb.setBlackCircleAt(1, 1)
-    pb.setWhiteCircleAt(4, 2)
-    pb.markBlockedUp(1, 1)
-    pb.markBlockedLeft(1, 1)
-    pb.markBlockedUp(4, 2)
-    pb.drawLineRight(1, 1)
-    pb.drawLineRight(1, 2)
-    pb.drawLineDown(1, 1)
-    pb.drawLineDown(2, 1)
-    pb.drawLineLeft(4, 2)
-    pb.drawLineRight(4, 2)
-    pb.print()
-    print(pb.getLines(1, 1))
-    print(pb.getBlockedPaths(1, 1))
-    print(pb.getOpenPaths(1, 1))
-    print("is solved =", pb.isSolved())
-    print("is unsolved =", pb.isUnsolved())
-    print("is invalid =",pb.isInvalid())
-    pb.setSolved()
-    print("is solved =", pb.isSolved())
-    print("is unsolved =", pb.isUnsolved())
-    print("is invalid =", pb.isInvalid())
-    pb.setInvalid()
-    print("is solved =", pb.isSolved())
-    print("is unsolved =", pb.isUnsolved())
-    print("is invalid =", pb.isInvalid())
-    pb.setUnsolved()
-    print("is solved =", pb.isSolved())
-    print("is unsolved =", pb.isUnsolved())
-    print("is invalid =", pb.isInvalid())
+    runTests = False
+    if (runTests):
+        pb.setBlackCircleAt(1, 1)
+        pb.setWhiteCircleAt(4, 2)
+        pb.markBlockedUp(1, 1)
+        pb.markBlockedLeft(1, 1)
+        pb.markBlockedUp(4, 2)
+        pb.drawLineRight(1, 1)
+        pb.drawLineRight(1, 2)
+        pb.drawLineDown(1, 1)
+        pb.drawLineDown(2, 1)
+        pb.drawLineLeft(4, 2)
+        pb.drawLineRight(4, 2)
+        pb.print()
+        print(pb.getLines(1, 1))
+        print(pb.getBlockedPaths(1, 1))
+        print(pb.getOpenPaths(1, 1))
+        print("is solved =", pb.isSolved())
+        print("is unsolved =", pb.isUnsolved())
+        print("is invalid =",pb.isInvalid())
+        pb.setSolved()
+        print("is solved =", pb.isSolved())
+        print("is unsolved =", pb.isUnsolved())
+        print("is invalid =", pb.isInvalid())
+        pb.setInvalid()
+        print("is solved =", pb.isSolved())
+        print("is unsolved =", pb.isUnsolved())
+        print("is invalid =", pb.isInvalid())
+        pb.setUnsolved()
+        print("is solved =", pb.isSolved())
+        print("is unsolved =", pb.isUnsolved())
+        print("is invalid =", pb.isInvalid())
 
-    print("is Enabled =", pb.isCellEnabled(0, 0))
-    print("is Valid =", pb.isCellValid(1, 1))
-    pb.setCellDisabled(0, 0)
-    pb.setCellInvalid(1, 1)
-    print("is Enabled =", pb.isCellEnabled(0, 0))
-    print("is Valid =", pb.isCellValid(1, 1))
-    pb.setCellEnabled(0, 0)
-    pb.setCellValid(1, 1)
-    print("is Enabled =", pb.isCellEnabled(0, 0))
-    print("is Valid =", pb.isCellValid(1, 1))
-    # pb.setCellInvalid(0, 0)
+        print("is Enabled =", pb.isCellEnabled(0, 0))
+        print("is Valid =", pb.isCellValid(1, 1))
+        pb.setCellDisabled(0, 0)
+        pb.setCellInvalid(1, 1)
+        print("is Enabled =", pb.isCellEnabled(0, 0))
+        print("is Valid =", pb.isCellValid(1, 1))
+        pb.setCellEnabled(0, 0)
+        pb.setCellValid(1, 1)
+        print("is Enabled =", pb.isCellEnabled(0, 0))
+        print("is Valid =", pb.isCellValid(1, 1))
+        # pb.setCellInvalid(0, 0)
 
     uiWindow.registerPuzzleBoard(pb)
     uiWindow.showWindow()
