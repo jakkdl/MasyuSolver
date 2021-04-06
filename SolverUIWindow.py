@@ -211,7 +211,56 @@ class SolverUIWindow():
     #############################################
 
     def __cellSelectionCallBack(self, rowNum, colNum):
-        print("in UI window's CallBack", rowNum, colNum)
+        if not (self.puzzleBoardObject.isCellEnabled(rowNum, colNum)):
+            self.mainWindow.bell()
+        else:
+            if ((self.selectedItem == self.blackItem) and
+                    (self.puzzleBoardObject.isBlackCircleAt(rowNum, colNum))):
+                return
+
+            if ((self.selectedItem == self.whiteItem) and
+                    (self.puzzleBoardObject.isWhiteCircleAt(rowNum, colNum))):
+                return
+
+            if ((self.selectedItem == self.dotItem) and
+                    (self.puzzleBoardObject.isDotAt(rowNum, colNum))):
+                return
+
+            self.puzzleBoardObject.clearSolution()
+            for r in range(0, self.numRows):
+                for c in range(0, self.numCols):
+                    self.puzzleBoardObject.setCellEnabled(r, c)
+                    self.puzzleBoardObject.setCellValid(r, c)
+
+            # Set cell to active item
+            if (self.selectedItem == self.blackItem):
+                self.puzzleBoardObject.setBlackCircleAt(rowNum, colNum)
+            elif (self.selectedItem == self.whiteItem):
+                self.puzzleBoardObject.setWhiteCircleAt(rowNum, colNum)
+            else:
+                self.puzzleBoardObject.setDotAt(rowNum, colNum)
+
+            # Set puzzleBoard state to unsolved
+            self.puzzleBoardObject.setUnsolved()
+
+            # TODO: need to update the solver state (see state diagram)
+            # TODO: enable file-> save menu item
+
+            # Determine which cells to disable
+            self.__determineCellsToDisable()
+
+            #call the solver
+            try:
+                self.solver.solve(self.puzzleBoardObject)
+            except MasyuSolverException as e:
+                # puzzle is invalid
+                self.puzzleBoardObject.setCellInvalid(rowNum, colNum)
+                self.puzzleBoardObject.setInvalid()
+
+            self.puzzleBoardCanvasManager.refreshCanvas()
+
+            # TODO: check for solved puzzle
+
 
     # Constructor method
     def __init__(self):

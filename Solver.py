@@ -4,14 +4,14 @@ class Solver():
             changed = True
             while (changed):
                 changed = False
-                changed |= self.__processSpecialCases(puzzleBoard)
-                changed |= self.__findPathwaysToBlock(puzzleBoard)
-                changed |= self.__processDeadendPaths(puzzleBoard)
-                changed |= self.__processBlackCircles(puzzleBoard)
-                changed |= self.__processWhiteCircles(puzzleBoard)
-                changed |= self.__addLines(puzzleBoard)
-                changed |= self.__processSubPaths(puzzleBoard)
-                changed |= self.__identifyProblems(puzzleBoard)
+                changed = changed or self.__processSpecialCases(puzzleBoard)
+                changed = changed or self.__findPathwaysToBlock(puzzleBoard)
+                changed = changed or self.__processDeadendPaths(puzzleBoard)
+                changed = changed or self.__processBlackCircles(puzzleBoard)
+                changed = changed or self.__processWhiteCircles(puzzleBoard)
+                changed = changed or self.__addLines(puzzleBoard)
+                changed = changed or self.__processSubPaths(puzzleBoard)
+                changed = changed or self.__identifyProblems(puzzleBoard)
 
     def __processSpecialCases(self, puzzleBoard):
         print("processSpecialCases")
@@ -29,9 +29,9 @@ class Solver():
         print("__processBlackCircles")
         # todo __processBlackCircles
 
-    def __processBlackCircles(self, puzzleBoard):
-        print("__processBlackCircles")
-        # todo __processBlackCircles
+    def __processWhiteCircles(self, puzzleBoard):
+        print("__processWhiteCircles")
+        # todo __processWhiteCircles
 
     def __addLines(self, puzzleBoard):
         print("__addLines")
