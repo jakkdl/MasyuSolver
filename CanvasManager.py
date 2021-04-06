@@ -106,7 +106,7 @@ class CanvasManager():
             # print(canvasWidth, "x", canvasHeight)
 
             # color = 'AntiqueWhite1'
-            color = 'Snow2'
+            self.color = 'Snow2'
             for row in range(0, numRows):
                 for col in range(0, numCols):
                     x1 = col * self.ITEM_WIDTH
@@ -121,7 +121,7 @@ class CanvasManager():
                     # We must set "width=0", to turn off the spacing reserved for a highlight border!
                     backgroundTag = itemTagBase + self.CELL_BACKGROUND_TAG
                     tags = (itemTagBase, backgroundTag)
-                    item = self.puzzleBoardCanvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=color,
+                    item = self.puzzleBoardCanvas.create_rectangle(x1, y1, x2, y2, fill=self.color, outline=self.color,
                                                                    tags=tags, width=0)
                     # print("BG: ", self.puzzleBoardCanvas.gettags(item))
 
@@ -454,6 +454,12 @@ class CanvasManager():
                     self.puzzleBoardCanvas.itemconfigure(baseItemTag, stipple="")
                 else:
                     self.puzzleBoardCanvas.itemconfigure(baseItemTag, stipple="gray25")
+
+                backgroundItemTag = baseItemTag + self.CELL_BACKGROUND_TAG
+                if (self.puzzleBoard.isCellValid(rowNum, colNum)):
+                    self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, fill=self.color)
+                else:
+                    self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, fill="red")
 
     ######################################################################
     # Helper methods used during the construction of the Game Board canvas

@@ -347,6 +347,7 @@ if __name__ == '__main__':
     pb.setCellValid(1, 1)
     print("is Enabled =", pb.isCellEnabled(0, 0))
     print("is Valid =", pb.isCellValid(1, 1))
+    # pb.setCellInvalid(0, 0)
 
     uiWindow.registerPuzzleBoard(pb)
     uiWindow.showWindow()
