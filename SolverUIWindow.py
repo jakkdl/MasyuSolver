@@ -89,12 +89,14 @@ class SolverUIWindow():
     def __itemSelectionHandler(self, event):
 
         item = event.widget
-        self.__setActiveItem(item)
 
-        # Determine which cells to disable
-        self.__determineCellsToDisable()
+        if (item != self.selectedItem):
+            self.__setActiveItem(item)
 
-        self.puzzleBoardCanvasManager.refreshCanvas()
+            # Determine which cells to disable
+            self.__determineCellsToDisable()
+
+            self.puzzleBoardCanvasManager.refreshCanvas()
 
 
     # Draw the highlight around the indicated item.
