@@ -210,7 +210,7 @@ class SolverUIWindow():
     # ------ Start of public class methods ------
     #############################################
 
-    def __buttonCallBack(self, rowNum, colNum):
+    def __cellSelectionCallBack(self, rowNum, colNum):
         print("in UI window's CallBack", rowNum, colNum)
 
     # Constructor method
@@ -328,7 +328,7 @@ class SolverUIWindow():
         # Create the puzzle board canvas manager, and register our puzzle board canvas
         self.puzzleBoardCanvasManager = CanvasManager(self.puzzleBoardCanvas, self.showProgressVar.get(),
                                                       self.showBlockedPathsVar.get(), self.showDisabledCellsVar.get())
-        self.puzzleBoardCanvasManager.registerCellSelectionCallback(self.__buttonCallBack)
+        self.puzzleBoardCanvasManager.registerCellSelectionCallback(self.__cellSelectionCallBack)
 
         self.solver = Solver()
 
