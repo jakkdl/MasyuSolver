@@ -449,11 +449,13 @@ class CanvasManager():
                     self.__drawBlocks(rowNum, colNum)
                 else:
                     self.__hideBlocks(rowNum, colNum)
+
                 baseItemTag = self.__createBaseItemTag(rowNum, colNum)
+                backgroundItemTag = baseItemTag + self.CELL_BACKGROUND_TAG
                 if (self.puzzleBoard.isCellEnabled(rowNum, colNum) or not self.showDisabledCells):
-                    self.puzzleBoardCanvas.itemconfigure(baseItemTag, stipple="")
+                    self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, stipple="")
                 else:
-                    self.puzzleBoardCanvas.itemconfigure(baseItemTag, stipple="gray25")
+                    self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, stipple="gray25")
 
                 backgroundItemTag = baseItemTag + self.CELL_BACKGROUND_TAG
                 if (self.puzzleBoard.isCellValid(rowNum, colNum)):

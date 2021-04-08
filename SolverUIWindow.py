@@ -200,6 +200,8 @@ class SolverUIWindow():
                         else:
                             clonedPuzzleBoard.setDotAt(rowNum, colNum)
 
+                        clonedPuzzleBoard.clearSolution()
+
 
 
     ###############################################
@@ -393,6 +395,7 @@ class SolverUIWindow():
     def registerPuzzleBoard(self, puzzleBoard):
         self.puzzleBoardCanvasManager.registerPuzzleBoard(puzzleBoard)
         self.puzzleBoardObject = puzzleBoard
+        self.numRows, self.numCols = puzzleBoard.getDimensions()
 
     # ------ End of public class methods ------
 
