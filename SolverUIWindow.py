@@ -402,7 +402,7 @@ class SolverUIWindow():
 # ------ Begin test code ------
 if __name__ == '__main__':
     uiWindow = SolverUIWindow()
-    pb = PuzzleBoard(size=(5,5))
+    pb = PuzzleBoard()
     runTests = False
     if (runTests):
         pb.setBlackCircleAt(1, 1)
