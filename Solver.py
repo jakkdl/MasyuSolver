@@ -117,15 +117,19 @@ class Solver():
                                 if not (l):
                                     deadEndFound = True
                                     puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                    changesMade = True
                                 elif not (r):
                                     deadEndFound = True
                                     puzzleBoard.markBlockedRight(rowNum, colNum)
+                                    changesMade = True
                                 elif not (u):
                                     deadEndFound = True
                                     puzzleBoard.markBlockedUp(rowNum, colNum)
+                                    changesMade = True
                                 elif not (d):
                                     deadEndFound = True
                                     puzzleBoard.markBlockedDown(rowNum, colNum)
+                                    changesMade = True
 
             changesMade = changesMade | deadEndFound
 
@@ -219,7 +223,9 @@ class Solver():
                         if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
                             changesMade = True
                             puzzleBoard.markBlockedLeft(rowNum, colNum)
-
+                        if (colNum == (numCols - 1)):
+                            puzzleBoard.print()
+                            print ("bad stuff")
                         if not (puzzleBoard.isBlockedUp(rowNum, (colNum + 1))):
                             changesMade = True
                             puzzleBoard.markBlockedUp(rowNum, (colNum + 1))
@@ -262,6 +268,22 @@ class Solver():
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):
                 if (puzzleBoard.isWhiteCircleAt(rowNum,colNum)):
+                    if (True):
+                        count, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+                        if (count == 1):
+                            if (l):
+                                puzzleBoard.drawLineRight(rowNum,colNum)
+                                changesMade = True
+                            elif (r):
+                                puzzleBoard.drawLineLeft(rowNum,colNum)
+                                changesMade = True
+                            elif (u):
+                                puzzleBoard.drawLineDown(rowNum,colNum)
+                                changesMade = True
+                            elif (d):
+                                puzzleBoard.drawLineUp(rowNum,colNum)
+                                changesMade = True
+
                     if (puzzleBoard.isBlockedUp(rowNum,colNum) or puzzleBoard.isBlockedDown(rowNum,colNum)):
                         if ((colNum == 0) or (colNum == (numCols-1))):
                             print("White circle cannot be in first or last column", (rowNum, colNum))
