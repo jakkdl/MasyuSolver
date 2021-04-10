@@ -2,18 +2,17 @@ from MasyuExceptions import *
 
 class Solver():
     def solve(self,puzzleBoard):
-        if (puzzleBoard.isUnsolved()):
-            changed = True
-            while (changed):
-                changed = False
-                changed = changed or self.__processSpecialCases(puzzleBoard)
-                changed = changed or self.__findPathwaysToBlock(puzzleBoard)
-                changed = changed or self.__processDeadendPaths(puzzleBoard)
-                changed = changed or self.__processBlackCircles(puzzleBoard)
-                changed = changed or self.__processWhiteCircles(puzzleBoard)
-                changed = changed or self.__addLines(puzzleBoard)
-                changed = changed or self.__processSubPaths(puzzleBoard)
-                changed = changed or self.__identifyProblems(puzzleBoard)
+        changed = True
+        while (changed and puzzleBoard.isUnsolved()):
+            changed = False
+            changed = changed or self.__processSpecialCases(puzzleBoard)
+            changed = changed or self.__findPathwaysToBlock(puzzleBoard)
+            changed = changed or self.__processDeadendPaths(puzzleBoard)
+            changed = changed or self.__processBlackCircles(puzzleBoard)
+            changed = changed or self.__processWhiteCircles(puzzleBoard)
+            changed = changed or self.__addLines(puzzleBoard)
+            changed = changed or self.__processSubPaths(puzzleBoard)
+            changed = changed or self.__identifyProblems(puzzleBoard)
 
     def __processSpecialCases(self, puzzleBoard):
         print("processSpecialCases")
@@ -117,6 +116,67 @@ class Solver():
                                 changesMade = True
                                 puzzleBoard.drawLineUp((rowNum - 1), colNum)
 
+                    # After drawing lines, we need to see if anything can be blocked for the
+                    # cell being processed, or for the adjacent cell (since the line for a black
+                    # circle extends for 2 cells!
+                    count, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+
+                    # If line to the left from c[r,c], then block to the right of c[r,c] and also block up
+                    # and down for c[r, c-1] (the cell to the left, where the first line segment goes)
+                    if (l):
+                        if not (puzzleBoard.isBlockedRight(rowNum, colNum)):
+                            changesMade = True
+                            puzzleBoard.markBlockedRight(rowNum, colNum)
+
+                        if not (puzzleBoard.isBlockedUp(rowNum, (colNum - 1))):
+                            changesMade = True
+                            puzzleBoard.markBlockedUp(rowNum, (colNum - 1))
+
+                        if not (puzzleBoard.isBlockedDown(rowNum, (colNum - 1))):
+                            changesMade = True
+                            puzzleBoard.markBlockedDown(rowNum, (colNum - 1))
+
+                    # If line to the right from c[r,c], then block to the left of c[r,c] and also block up
+                    # and down for c[r, c+1] (the cell to the right, where the first line segment goes)
+                    if (r):
+                        if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                            changesMade = True
+                            puzzleBoard.markBlockedLeft(rowNum, colNum)
+
+                        if not (puzzleBoard.isBlockedUp(rowNum, (colNum + 1))):
+                            changesMade = True
+                            puzzleBoard.markBlockedUp(rowNum, (colNum + 1))
+
+                        if not (puzzleBoard.isBlockedDown(rowNum, (colNum + 1))):
+                            changesMade = True
+                            puzzleBoard.markBlockedDown(rowNum, (colNum + 1))
+
+                    # If line up from c[r,c], then block down from c[r,c] and also block left
+                    # and right for c[r-1, c] (the cell above, where the first line segment goes)
+                    if (u):
+                        if not (puzzleBoard.isBlockedDown(rowNum, colNum)):
+                            changesMade = True
+                            puzzleBoard.markBlockedDown(rowNum, colNum)
+                        if not (puzzleBoard.isBlockedLeft((rowNum - 1), colNum)):
+                            changesMade = True
+                            puzzleBoard.markBlockedLeft((rowNum - 1), colNum)
+                        if not (puzzleBoard.isBlockedRight((rowNum - 1), colNum)):
+                            changesMade = True
+                            puzzleBoard.markBlockedRight((rowNum - 1), colNum)
+
+                    # If line down from c[r,c], then block up from c[r,c] and also block left
+                    # and right for c[r+1, c] (the cell below, where the first line segment goes)
+                    if (d):
+                        if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                            changesMade = True
+                            puzzleBoard.markBlockedUp(rowNum, colNum)
+                        if not (puzzleBoard.isBlockedLeft((rowNum + 1), colNum)):
+                            changesMade = True
+                            puzzleBoard.markBlockedLeft((rowNum + 1), colNum)
+                        if not (puzzleBoard.isBlockedRight((rowNum + 1), colNum)):
+                            changesMade = True
+                            puzzleBoard.markBlockedRight((rowNum + 1), colNum)
+
         return (changesMade)
 
     def __processWhiteCircles(self, puzzleBoard):
@@ -172,8 +232,36 @@ class Solver():
         return (changesMade)
 
     def __addLines(self, puzzleBoard):
-        print("__addLines")
-        # todo __addLines
+        # We are looking for cells which have a single line entering in, but doesn't yet have a
+        # second line exiting the cell. In this case, if 2 of the paths are blocked, then we know
+        # that the remaining line must continue out through the only unblocked path.
+
+        # Most of this work is already handled (I think) by the code dealing with black
+        # and white circles! What isn't handled is dealing with “dots”. So that is what
+        # we need to process here!
+        numRows, numCols = puzzleBoard.getDimensions()
+        changesMade = False
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if (puzzleBoard.isDotAt(rowNum, colNum)):
+                    numLines, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+                    numOpenPaths, openL, openR, openU, openD = puzzleBoard.getOpenPaths(rowNum, colNum)
+
+                    # If there is only 1 line into the cell and only 1 open path, then we know
+                    # that the line must extend out through the open path .. it is the only
+                    # available option!
+                    if ((numLines == 1) and (numOpenPaths == 1)):
+                        changesMade = True
+                        if (openL):
+                            puzzleBoard.drawLineLeft(rowNum, colNum)
+                        elif (openR):
+                            puzzleBoard.drawLineRight(rowNum, colNum)
+                        elif (openU):
+                            puzzleBoard.drawLineUp(rowNum, colNum)
+                        else:
+                            puzzleBoard.drawLineDown(rowNum, colNum)
+
+        return (changesMade)
 
     def __processSubPaths(self, puzzleBoard):
         print("__processSubPaths")
