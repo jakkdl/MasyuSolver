@@ -19,8 +19,85 @@ class Solver():
         # todo processSpecialCases
 
     def __findPathwaysToBlock(self, puzzleBoard):
-        print("findPathwaysToBlock")
-        # todo findPathwaysToBlock
+        numRows, numCols = puzzleBoard.getDimensions()
+        changesMade = False
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                # Any cell which has two lines can have the other two pathways blocked.
+                numLines, lineLeft, lineRight, lineUp, lineDown = puzzleBoard.getLines(rowNum, colNum)
+                if (puzzleBoard.isDotAt(rowNum, colNum)):
+                    if (numLines == 2):
+                        if not (lineLeft):
+                            if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                changesMade = True
+                        if not (lineUp):
+                            if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                puzzleBoard.markBlockedUp(rowNum, colNum)
+                                changesMade = True
+                        if not (lineRight):
+                            if not (puzzleBoard.isBlockedRight(rowNum, colNum)):
+                                puzzleBoard.markBlockedRight(rowNum, colNum)
+                                changesMade = True
+                        if not (lineDown):
+                            if not (puzzleBoard.isBlockedDown(rowNum, colNum)):
+                                puzzleBoard.markBlockedDown(rowNum, colNum)
+                                changesMade = True
+
+                elif (puzzleBoard.isWhiteCircleAt(rowNum, colNum)):
+                    if (numLines == 2):
+                        if (lineLeft and lineRight):
+                            if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                puzzleBoard.markBlockedUp(rowNum, colNum)
+                                changesMade = True
+                            if not (puzzleBoard.isBlockedDown(rowNum, colNum)):
+                                puzzleBoard.markBlockedDown(rowNum, colNum)
+                                changesMade = True
+                        elif (lineUp and lineDown):
+                            if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                changesMade = True
+                            if not (puzzleBoard.isBlockedRight(rowNum, colNum)):
+                                puzzleBoard.markBlockedRight(rowNum, colNum)
+                                changesMade = True
+                        else:
+                            raise MasyuSolverException("Invalid turn in white circle", (rowNum, colNum))
+
+                elif (puzzleBoard.isBlackCircleAt(rowNum, colNum)):
+                    if (numLines == 2):
+                        if (lineLeft and lineUp):
+                            if not (puzzleBoard.isBlockedRight(rowNum, colNum)):
+                                puzzleBoard.markBlockedRight(rowNum, colNum)
+                                changesMade = True
+                            if not (puzzleBoard.isBlockedDown(rowNum, colNum)):
+                                puzzleBoard.markBlockedDown(rowNum, colNum)
+                                changesMade = True
+                        elif (lineUp and lineRight):
+                            if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                changesMade = True
+                            if not (puzzleBoard.isBlockedDown(rowNum, colNum)):
+                                puzzleBoard.markBlockedDown(rowNum, colNum)
+                                changesMade = True
+                        elif (lineRight and lineDown):
+                            if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                changesMade = True
+                            if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                puzzleBoard.markBlockedUp(rowNum, colNum)
+                                changesMade = True
+                        elif (lineLeft and lineDown):
+                            if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                puzzleBoard.markBlockedUp(rowNum, colNum)
+                                changesMade = True
+                            if not (puzzleBoard.isBlockedRight(rowNum, colNum)):
+                                puzzleBoard.markBlockedRight(rowNum, colNum)
+                                changesMade = True
+                        else:
+                            raise MasyuSolverException("Missing turn in black circle", (rowNum, colNum))
+
+        return (changesMade)
+
 
     def __processDeadendPaths(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
