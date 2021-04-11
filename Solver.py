@@ -6,11 +6,23 @@ class Solver():
         while (changed and puzzleBoard.isUnsolved()):
             changed = False
             changed = changed or self.__processSpecialCases(puzzleBoard)
+            #print("before findPathwaysToBlock")
+            #puzzleBoard.print()
             changed = changed or self.__findPathwaysToBlock(puzzleBoard)
+            #print("after findPathwaysToBlock")
+            #puzzleBoard.print()
             changed = changed or self.__processDeadendPaths(puzzleBoard)
+            #print("after processDeadendPaths")
+            #puzzleBoard.print()
             changed = changed or self.__processBlackCircles(puzzleBoard)
+            #print("after processBlackCircles")
+            #puzzleBoard.print()
             changed = changed or self.__processWhiteCircles(puzzleBoard)
+            #print("after processWhiteCircles")
+            #puzzleBoard.print()
             changed = changed or self.__addLines(puzzleBoard)
+            #print("after addLines")
+            #puzzleBoard.print()
             changed = changed or self.__processSubPaths(puzzleBoard)
             changed = changed or self.__identifyProblems(puzzleBoard)
 
@@ -223,9 +235,9 @@ class Solver():
                         if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
                             changesMade = True
                             puzzleBoard.markBlockedLeft(rowNum, colNum)
-                        if (colNum == (numCols - 1)):
-                            puzzleBoard.print()
-                            print ("bad stuff")
+                        #if (colNum == (numCols - 1)):
+                        #    puzzleBoard.print()
+                        #    print ("bad stuff")
                         if not (puzzleBoard.isBlockedUp(rowNum, (colNum + 1))):
                             changesMade = True
                             puzzleBoard.markBlockedUp(rowNum, (colNum + 1))
@@ -268,21 +280,6 @@ class Solver():
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):
                 if (puzzleBoard.isWhiteCircleAt(rowNum,colNum)):
-                    if (True):
-                        count, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
-                        if (count == 1):
-                            if (l):
-                                puzzleBoard.drawLineRight(rowNum,colNum)
-                                changesMade = True
-                            elif (r):
-                                puzzleBoard.drawLineLeft(rowNum,colNum)
-                                changesMade = True
-                            elif (u):
-                                puzzleBoard.drawLineDown(rowNum,colNum)
-                                changesMade = True
-                            elif (d):
-                                puzzleBoard.drawLineUp(rowNum,colNum)
-                                changesMade = True
 
                     if (puzzleBoard.isBlockedUp(rowNum,colNum) or puzzleBoard.isBlockedDown(rowNum,colNum)):
                         if ((colNum == 0) or (colNum == (numCols-1))):
@@ -328,6 +325,22 @@ class Solver():
                             if not (puzzleBoard.isBlockedRight(rowNum, colNum)):
                                 changesMade = True
                                 puzzleBoard.markBlockedRight(rowNum, colNum)
+
+                    count, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+                    if (count == 1):
+                        if (l):
+                            puzzleBoard.drawLineRight(rowNum, colNum)
+                            changesMade = True
+                        elif (r):
+                            puzzleBoard.drawLineLeft(rowNum, colNum)
+                            changesMade = True
+                        elif (u):
+                            puzzleBoard.drawLineDown(rowNum, colNum)
+                            changesMade = True
+                        elif (d):
+                            puzzleBoard.drawLineUp(rowNum, colNum)
+                            changesMade = True
+
         return (changesMade)
 
     def __addLines(self, puzzleBoard):
