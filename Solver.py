@@ -26,9 +26,129 @@ class Solver():
             changed = changed or self.__processSubPaths(puzzleBoard)
             changed = changed or self.__identifyProblems(puzzleBoard)
 
+    def __numConsecutiveWhiteCirclesInCol(self, puzzleBoard, rowNum, colNum):
+        # This function starts at the specified cell, and determines the number of consecutive white
+        # circle cells which are in the specified column. If there is a white circle in the cell above
+        # this one, then iAmFirst will be set to 'false', and count will be set to -1; that is because
+        # this cell is not the first in the line of white circle cells. Otherwise, if this is the first
+        # white circle cell in the vertical line, then iAmFirst will be set to 'true', and count will be
+        # set to the number of consecutive white circle cells in the line.
+
+        if ((rowNum == 0) or (rowNum > 0) and not (puzzleBoard.isWhiteCircleAt((rowNum - 1), colNum))):
+            # The starting cell is the first one
+            count = 0
+            numRows, numCols = puzzleBoard.getDimensions()
+            for i in range(rowNum, numRows):
+                if (puzzleBoard.isWhiteCircleAt(i, colNum)):
+                    count += 1
+                else:
+                    return (True, count)
+
+            return (True, count)
+        else:
+            return (False, -1)
+
+    def __numConsecutiveWhiteCirclesInRow(self, puzzleBoard, rowNum, colNum):
+        # This function starts at the specified cell, and determines the number of consecutive white
+        # circle cells which are in the specified row. If there is a white circle in the cell to the left
+        # of this one, then iAmFirst will be set to 'false', and count will be set to -1; that is because
+        # this cell is not the first in the line of white circle cells. Otherwise, if this is the first
+        # white circle cell in the horizontal line, then iAmFirst will be set to 'true', and count will
+        # be set to the number of consecutive white circle cells in the line.
+
+        if ((colNum == 0) or (colNum > 0) and not (puzzleBoard.isWhiteCircleAt(rowNum, (colNum - 1)))):
+            # The starting cell is the first one
+            count = 0
+            numRows, numCols = puzzleBoard.getDimensions()
+            for i in range(colNum, numCols):
+                if (puzzleBoard.isWhiteCircleAt(rowNum, i)):
+                    count += 1
+                else:
+                    return (True, count)
+
+            return (True, count)
+        else:
+            return (False, -1)
+
     def __processSpecialCases(self, puzzleBoard):
-        print("processSpecialCases")
-        # todo processSpecialCases
+        # Case 9
+        # Look for 3 or more consecutive white circles.
+        # If found: block the pathway between each white circle, and at both ends.
+        # Algorithm assumes we process the Puzzle Board going L->R, T->B order.
+        # Because of this, if a white circle is found which isn't the first in line of a
+        # group of white circles, then it is skipped because it was already processed
+        # when the first white circle was encountered.
+
+        numRows, numCols = puzzleBoard.getDimensions()
+        changesMade = False
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if(puzzleBoard.isWhiteCircleAt(rowNum, colNum)):
+                    # Check for vertical line of white circles
+                    iAmFirst, count = self.__numConsecutiveWhiteCirclesInCol(puzzleBoard, rowNum, colNum)
+
+                    # Skip if not the first in the series
+                    if (iAmFirst and (count > 2)):
+                        if ((colNum > 0) and (colNum < (numCols - 1))):
+                            # Block paths between and at ends of white circle cells
+                            # If any place we plan to “block” already has a line, then
+                            # the puzzle is invalid (or our code has a bug!)
+
+                            # Block above starting cell
+                            if (puzzleBoard.hasLineUp(rowNum, colNum)):
+                                raise MasyuSolverException("Unexpected line up in special case 9", (rowNum, colNum))
+                            elif not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                    puzzleBoard.markBlockedUp(rowNum, colNum)
+                                    changesMade = True
+
+
+                            # Now block the bottom pathway of each of the consecutive cells
+                            for i in range(rowNum, (rowNum + count)):
+                                if (puzzleBoard.hasLineDown(i, colNum)):
+                                    raise MasyuSolverException("Unexpected line down in special case 9", (i, colNum))
+                                elif not (puzzleBoard.isBlockedDown(i, colNum)):
+                                    puzzleBoard.markBlockedDown(i, colNum)
+                                    changesMade = True
+
+                        else:
+                            raise MasyuSolverException("Invalid white circle location in special case 9-1", (rowNum, colNum))
+
+                    # else:
+                        # Not first, or less than 3 in a row
+                        # Do Nothing
+
+                    # Check for horizontal line of white circles
+                    iAmFirst, count = self.__numConsecutiveWhiteCirclesInRow(puzzleBoard, rowNum, colNum)
+
+                    # Skip if not the first in the series
+                    if (iAmFirst and (count > 2)):
+                        if ((rowNum > 0) and (rowNum < (numRows - 1))):
+                            # Block paths between and at ends of white circle cells
+                            # If any place we plan to “block” already has a line, then
+                            # the puzzle is invalid (or our code has a bug!)
+
+                            # Block to the left of the starting cell
+                            if (puzzleBoard.hasLineLeft(rowNum, colNum)):
+                                raise MasyuSolverException("Unexpected line left in special case 9", (rowNum, colNum))
+                            elif not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                changesMade = True
+
+                            # Now block the right pathway of each of the consecutive cells
+                            for i in range(colNum, (colNum + count)):
+                                if (puzzleBoard.hasLineRight(rowNum, i)):
+                                    raise MasyuSolverException("Unexpected line right in special case 9", (rowNum, i))
+                                elif not (puzzleBoard.isBlockedRight(rowNum, i)):
+                                    puzzleBoard.markBlockedRight(rowNum, i)
+                                    changesMade = True
+
+                        else:
+                            raise MasyuSolverException("Invalid white circle location in special case 9-2", (rowNum, colNum))
+
+                    # else:
+                    # Not first, or less than 3 in a row
+                    # Do Nothing
+
 
     def __findPathwaysToBlock(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
