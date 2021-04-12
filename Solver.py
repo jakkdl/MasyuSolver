@@ -151,7 +151,7 @@ class Solver():
 
                 elif (puzzleBoard.isBlackCircleAt(rowNum, colNum)):
 
-                    # Case 1: both white circles are below the black circle
+                    # Case 10-1: both white circles are below the black circle
                     if ((colNum > 0) and (colNum < (numCols - 1)) and (rowNum < (numRows - 1))):
                        if (puzzleBoard.isWhiteCircleAt((rowNum + 1), (colNum - 1)) and
                                puzzleBoard.isWhiteCircleAt((rowNum + 1), (colNum + 1))):
@@ -162,9 +162,9 @@ class Solver():
                                     puzzleBoard.markBlockedDown(rowNum, colNum)
                                     changesMade = True
                             else:
-                                raise MasyuSolverException("Illegal black cell location in case 10-1", (rowNum, colNum))
+                                raise MasyuSolverException("Illegal black circle location in case 10-1", (rowNum, colNum))
 
-                    # Case 2: Both white circles are to the left of the black circle
+                    # Case 10-2: Both white circles are to the left of the black circle
                     if ((rowNum > 0) and (rowNum < (numRows - 1)) and (colNum > 0)):
                        if (puzzleBoard.isWhiteCircleAt((rowNum - 1), (colNum - 1)) and
                                puzzleBoard.isWhiteCircleAt((rowNum + 1), (colNum - 1))):
@@ -175,9 +175,9 @@ class Solver():
                                     puzzleBoard.markBlockedLeft(rowNum, colNum)
                                     changesMade = True
                             else:
-                                raise MasyuSolverException("Illegal black cell location in case 10-2", (rowNum, colNum))
+                                raise MasyuSolverException("Illegal black circle location in case 10-2", (rowNum, colNum))
 
-                    # Case 3: Both white circles are above the black circle
+                    # Case 10-3: Both white circles are above the black circle
                     if ((colNum > 0) and (colNum < (numCols - 1)) and (rowNum > 0)):
                        if (puzzleBoard.isWhiteCircleAt((rowNum - 1), (colNum - 1)) and
                                puzzleBoard.isWhiteCircleAt((rowNum - 1), (colNum + 1))):
@@ -188,9 +188,9 @@ class Solver():
                                     puzzleBoard.markBlockedUp(rowNum, colNum)
                                     changesMade = True
                             else:
-                                raise MasyuSolverException("Illegal black cell location in case 10-3", (rowNum, colNum))
+                                raise MasyuSolverException("Illegal black circle location in case 10-3", (rowNum, colNum))
 
-                    # Case 4: Both white circles are to the right of the black circle
+                    # Case 10-4: Both white circles are to the right of the black circle
                     if ((rowNum > 0) and (rowNum < (numRows - 1)) and (colNum < (numCols - 1))):
                         if (puzzleBoard.isWhiteCircleAt((rowNum - 1), (colNum + 1)) and
                                 puzzleBoard.isWhiteCircleAt((rowNum + 1), (colNum + 1))):
@@ -201,7 +201,59 @@ class Solver():
                                     puzzleBoard.markBlockedRight(rowNum, colNum)
                                     changesMade = True
                             else:
-                                raise MasyuSolverException("Illegal black cell location in case 10-4", (rowNum, colNum))
+                                raise MasyuSolverException("Illegal black circle location in case 10-4", (rowNum, colNum))
+
+                    # Case 12-1: Both white circles are below the black circle
+                    if (rowNum < (numRows - 3)):
+                        if ((puzzleBoard.isDotAt((rowNum + 1), colNum)) and
+                                puzzleBoard.isWhiteCircleAt((rowNum + 2), colNum) and
+                                puzzleBoard.isWhiteCircleAt((rowNum + 3), colNum)):
+                            if (rowNum > 1):
+                                if (puzzleBoard.hasLineDown(rowNum, colNum)):
+                                    raise MasyuSolverException("Unexpected line down in case 12-1", (rowNum, colNum))
+                                elif not (puzzleBoard.isBlockedDown(rowNum, colNum)):
+                                    puzzleBoard.markBlockedDown(rowNum, colNum)
+                            else:
+                                raise MasyuSolverException("Illegal black circle location in case 12-1", (rowNum, colNum))
+
+                    # Case 12-2: Both white circles are to the left of the black circle
+                    if (colNum > 2):
+                        if ((puzzleBoard.isDotAt(rowNum, (colNum - 1)) and
+                                puzzleBoard.isWhiteCircleAt(rowNum, (colNum - 2)) and
+                                puzzleBoard.isWhiteCircleAt(rowNum, (colNum - 3)))):
+                            if (colNum < (numCols - 2)):
+                                if (puzzleBoard.hasLineLeft(rowNum, colNum)):
+                                    raise MasyuSolverException("Unexpected line left in case 12-2", (rowNum, colNum))
+                                elif not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                    puzzleBoard.markBlockedLeft(rowNum, colNum)
+                            else:
+                                raise MasyuSolverException("Illegal black circle location in case 12-2", (rowNum, colNum))
+
+                    # Case 12-3: Both white circles are above the black circle
+                    if (rowNum > 2):
+                        if ((puzzleBoard.isDotAt((rowNum - 1), colNum)) and
+                                puzzleBoard.isWhiteCircleAt((rowNum - 2), colNum) and
+                                puzzleBoard.isWhiteCircleAt((rowNum - 3), colNum)):
+                            if (rowNum < (numRows - 2)):
+                                if (puzzleBoard.hasLineUp(rowNum, colNum)):
+                                    raise MasyuSolverException("Unexpected line up in case 12-3", (rowNum, colNum))
+                                elif not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                    puzzleBoard.markBlockedUp(rowNum, colNum)
+                            else:
+                                raise MasyuSolverException("Illegal black circle location in case 12-3", (rowNum, colNum))
+
+                    # Case 12-4: Both white circles are to the right of the black circle
+                    if (colNum < (numCols - 3)):
+                        if ((puzzleBoard.isDotAt(rowNum, (colNum + 1)) and
+                             puzzleBoard.isWhiteCircleAt(rowNum, (colNum + 2)) and
+                             puzzleBoard.isWhiteCircleAt(rowNum, (colNum + 3)))):
+                            if (colNum > 1):
+                                if (puzzleBoard.hasLineRight(rowNum, colNum)):
+                                    raise MasyuSolverException("Unexpected line right in case 12-4", (rowNum, colNum))
+                                elif not (puzzleBoard.isBlockedRight(rowNum, colNum)):
+                                    puzzleBoard.markBlockedRight(rowNum, colNum)
+                            else:
+                                raise MasyuSolverException("Illegal black circle location in case 12-4", (rowNum, colNum))
 
     def __findPathwaysToBlock(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
