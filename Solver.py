@@ -66,6 +66,31 @@ class Solver():
                                 puzzleBoard.markBlockedUp((rowNum - 1), colNum)
                                 changesMade = True
 
+        # Case 2
+        for rowNum in range(0, numRows):
+             for colNum in range(0, numCols):
+                if (puzzleBoard.isWhiteCircleAt(rowNum, colNum)):
+                    numLines, lineLeft, lineRight, lineUp, lineDown = puzzleBoard.getLines(rowNum, colNum)
+                    # Case 2a
+                    if (lineUp or lineDown):
+                        if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                            puzzleBoard.markBlockedLeft(rowNum, colNum)
+                            changesMade = True
+
+                        if not (puzzleBoard.isBlockedRight(rowNum, colNum)):
+                            puzzleBoard.markBlockedRight(rowNum, colNum)
+                            changesMade = True
+
+                    # Case 2b
+                    if (lineLeft or lineRight):
+                        if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                            puzzleBoard.markBlockedUp(rowNum, colNum)
+                            changesMade = True
+
+                        if not (puzzleBoard.isBlockedDown(rowNum, colNum)):
+                            puzzleBoard.markBlockedDown(rowNum, colNum)
+                            changesMade = True
+
         # Case 3
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):
