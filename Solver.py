@@ -33,6 +33,40 @@ class Solver():
     def __findPathwaysToBlock(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
         changesMade = False
+        # Case 1
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if (puzzleBoard.isWhiteCircleAt(rowNum, colNum)):
+                    numLines, lineLeft, lineRight, lineUp, lineDown = puzzleBoard.getLines(rowNum, colNum)
+                    # Case 1a
+                    if (lineLeft and lineRight and (colNum > 1)):
+                        if (puzzleBoard.hasLineLeft(rowNum, (colNum - 1))):
+                            if not (puzzleBoard.isBlockedRight(rowNum, (colNum + 1))):
+                                puzzleBoard.markBlockedRight(rowNum, (colNum + 1))
+                                changesMade = True
+
+                    # Case 1b
+                    if (lineLeft and lineRight and (colNum < (numCols - 2))):
+                        if (puzzleBoard.hasLineRight(rowNum, (colNum + 1))):
+                             if not (puzzleBoard.isBlockedLeft(rowNum, (colNum - 1))):
+                                 puzzleBoard.markBlockedLeft(rowNum, (colNum - 1))
+                                 changesMade = True
+
+                    # Case 1c
+                    if (lineUp and lineDown and (rowNum > 1)):
+                        if (puzzleBoard.hasLineUp((rowNum - 1), colNum)):
+                            if not (puzzleBoard.isBlockedDown((rowNum + 1), colNum)):
+                                puzzleBoard.markBlockedDown((rowNum + 1), colNum)
+                                changesMade = True
+
+                    # Case 1d
+                    if (lineUp and lineDown and (rowNum < (numRows - 2))):
+                        if (puzzleBoard.hasLineDown((rowNum + 1), colNum)):
+                            if not (puzzleBoard.isBlockedUp((rowNum - 1), colNum)):
+                                puzzleBoard.markBlockedUp((rowNum - 1), colNum)
+                                changesMade = True
+
+        # Case 3
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):
                 # Any cell which has two lines can have the other two pathways blocked.
