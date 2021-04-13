@@ -24,6 +24,7 @@ class Solver():
             #print("after addLines")
             #puzzleBoard.print()
             changed = changed or self.__processSubPaths(puzzleBoard)
+            print("Changed is = ", changed)
             changed = changed or self.__identifyProblems(puzzleBoard)
 
     # The following is a helper function, which will be called recursively. Each time it is called,
@@ -158,6 +159,7 @@ class Solver():
         if ((r2 == r1) and (c2 == (c1 - 1))):
             if not (puzzleBoard.isBlockedLeft(r1, c1)):
                 # Block the path
+                print("Blocking Left ", r1, c1, r2, c2)
                 puzzleBoard.markBlockedLeft(r1, c1)
                 return (True)
             else:
@@ -168,6 +170,7 @@ class Solver():
         if ((r2 == r1) and (c2 == (c1 + 1))):
             if not (puzzleBoard.isBlockedRight(r1, c1)):
                 # Block the path
+                print("Blocking Right ", r1, c1, r2, c2)
                 puzzleBoard.markBlockedRight(r1, c1)
                 return (True)
             else:
@@ -178,6 +181,7 @@ class Solver():
         if ((r2 == (r1 - 1)) and (c2 == c1)):
             if not (puzzleBoard.isBlockedUp(r1, c1)):
                 # Block the path
+                print("Blocking Up ", r1, c1, r2, c2)
                 puzzleBoard.markBlockedUp(r1, c1)
                 return (True)
             else:
@@ -188,6 +192,7 @@ class Solver():
         if ((r2 == (r1 + 1)) and (c2 == c1)):
             if not (puzzleBoard.isBlockedDown(r1, c1)):
                 # Block the path
+                print("Blocking Down ", r1, c1, r2, c2)
                 puzzleBoard.markBlockedDown(r1, c1)
                 return (True)
             else:
@@ -845,6 +850,21 @@ class Solver():
                 if (puzzleBoard.isDotAt(rowNum, colNum)):
                     numLines, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
                     numOpenPaths, openL, openR, openU, openD = puzzleBoard.getOpenPaths(rowNum, colNum)
+                    if ((rowNum == 3) and (colNum == 4)):
+                        print("NumLines = ", numLines, l, r, u, d)
+                        print("OpenPaths= ", numOpenPaths, openL, openR, openU, openD)
+                        print("Up = ", puzzleBoard.isOpenUp(rowNum, colNum))
+                        print("Down = ", puzzleBoard.isOpenDown(rowNum, colNum))
+                        print("Left = ", puzzleBoard.isOpenLeft(rowNum, colNum))
+                        print("Right = ", puzzleBoard.isOpenRight(rowNum, colNum))
+                        numOpenPathsX, openLX, openRX, openUX, openDX = puzzleBoard.getOpenPaths((rowNum - 1), colNum)
+                        print("OpenPaths= ", numOpenPathsX, openLX, openRX, openUX, openDX)
+                        print("Up = ", puzzleBoard.isOpenUp((rowNum - 1), colNum))
+                        print("Down = ", puzzleBoard.isOpenDown((rowNum - 1), colNum))
+                        print("Left = ", puzzleBoard.isOpenLeft((rowNum - 1), colNum))
+                        print("Right = ", puzzleBoard.isOpenRight((rowNum - 1), colNum))
+                        puzzleBoard.print()
+
 
                     # If there is only 1 line into the cell and only 1 open path, then we know
                     # that the line must extend out through the open path .. it is the only
@@ -931,11 +951,12 @@ class Solver():
                             # puzzleBoard.setSolved()
 
                             # Draw the line connecting the two cells
-                            changesMade = self.__drawLineBetweenCells(puzzleBoard, startingRow, startingCol, endingRow, endingCol)
+                            changesMade = changesMade | self.__drawLineBetweenCells(puzzleBoard, startingRow, startingCol, endingRow, endingCol)
 
                         else:
                             # Path must be blocked!
-                            changesMade = self.__blockPathBetweenCells(puzzleBoard, startingRow, startingCol, endingRow, endingCol)
+                            changesMade = changesMade | self.__blockPathBetweenCells(puzzleBoard, startingRow, startingCol, endingRow, endingCol)
+                            print("Changes made 2 = ", changesMade)
 
                     # else:
                         # The starting and ending cells did not abut, so there is
