@@ -26,6 +26,177 @@ class Solver():
             changed = changed or self.__processSubPaths(puzzleBoard)
             changed = changed or self.__identifyProblems(puzzleBoard)
 
+    # The following is a helper function, which will be called recursively. Each time it is called,
+    # it is passed the row and column number for the cell to be looked at, along with the row
+    # and column of the previous cell in the line we are following. The count of the number
+    # of circles passed through so far is also passed in.
+    #
+    # Each time this method is called, it will check the next cell to see if the line continues to
+    # another cell. If it does, then it recursively calls this function, specifying the next cell.
+    # But if it has reached the end of the line, then it returns a tuple, specifying the row and
+    # column numbers for the last cell in the line, along with a total of the number of circles
+    # the line passed through.
+    def __moveToNextCell(self, puzzleBoard, row, col, prevRow, prevCol, numCirclesVisited):
+        # If the cell we are in is a circle, then increment numCirclesVisited
+        if not (puzzleBoard.isDotAt(row, col)):
+            numCirclesVisited += 1
+
+        # If the cell only has 1 line, then we've reached the end of the line
+        lineCount, l, r, u, d = puzzleBoard.getLines(row, col)
+        if (lineCount == 1):
+            # We're done! Return where we stopped and the # of circles visited
+            return ((row, col, numCirclesVisited))
+        else:
+            # We need to figure out which cell to travel to next; we must be careful to
+            # not backtrack out the way we came into the cell!
+
+            # If there is a line to the left, we can go there next, unless the previous cell
+            # was the one to the left!
+            if ((l) and ((prevRow != row) or (prevCol != (col - 1)))):
+                return (self.__moveToNextCell(puzzleBoard, row, (col - 1), row, col, numCirclesVisited))
+
+            # If there is a line to the right, we can go there next, unless the previous cell
+            # was the one to the right!
+            if (r) and ((prevRow != row) or (prevCol != (col + 1))):
+                return (self.__moveToNextCell(puzzleBoard, row, (col + 1), row, col, numCirclesVisited))
+
+            # If there is a line up, we can go there next, unless the previous cell
+            # was the one above us!
+            if (u) and ((prevCol != col) or (prevRow != (row - 1))):
+                return (self.__moveToNextCell(puzzleBoard, (row - 1), col, row, col, numCirclesVisited))
+
+            # If there is a line down, we can go there next, unless the previous cell
+            # was the one below us!
+            if (d) and ((prevCol != col) or (prevRow != (row + 1))):
+                return (self.__moveToNextCell(puzzleBoard, (row + 1), col, row, col, numCirclesVisited))
+
+            # We should never drop through to here!!
+
+    # Returns number of circles in the puzzle
+    def __getNumberOfCircles(self, puzzleBoard):
+        numCircles = 0
+        numRows, numCols = puzzleBoard.getDimensions()
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if not (puzzleBoard.isDotAt(rowNum, colNum)):
+                    numCircles += 1
+
+        return (numCircles)
+
+    # Checks if the two cells are next to each other (abut). Returns 'True' if they do; else 'False'.
+    def __cellsAbut(self, r1, c1, r2, c2):
+
+        # Is cell 2 to the left of cell 1?
+        if ((r2 == r1) and (c2 == (c1 - 1))):
+            return (True)
+
+        # Is cell 2 to the right of cell 1?
+        if ((r2 == r1) and (c2 == (c1 + 1))):
+            return (True)
+
+        # Is cell 2 above cell 1?
+        if ((r2 == (r1 - 1)) and (c2 == c1)):
+            return (True)
+
+        # Is cell 2 below cell 1?
+        if ((r2 == (r1 + 1)) and (c2 == c1)):
+            return (True)
+
+        # Cells do not abut
+        return (False)
+
+    # Draw a line between the two cells, if it isn't already there. Return 'True' if the line
+    # was drawn (a change was made), and 'False' if not.
+    def __drawLineBetweenCells(self, puzzleBoard, r1, c1, r2, c2):
+        # Is cell 2 to the left of cell 1?
+        if ((r2 == r1) and (c2 == (c1 - 1))):
+            if not (puzzleBoard.hasLineLeft(r1, c1)):
+                # Draw the line
+                puzzleBoard.drawLineLeft(r1, c1)
+                return (True)
+            else:
+                 # Line is already there!
+                return (False)
+
+        # Is cell 2 to the right of cell 1?
+        if ((r2 == r1) and (c2 == (c1 + 1))):
+            if not (puzzleBoard.hasLineRight(r1, c1)):
+                # Draw the line
+                puzzleBoard.drawLineRight(r1, c1)
+                return (True)
+            else:
+                # Line is already there!
+                return (False)
+
+        # Is cell 2 above cell 1?
+        if ((r2 == (r1 - 1)) and (c2 == c1)):
+            if not (puzzleBoard.hasLineUp(r1, c1)):
+                # Draw the line
+                puzzleBoard.drawLineUp(r1, c1)
+                return (True)
+            else:
+                # Line is already there!
+                return (False)
+
+        # Is cell 2 below cell 1?
+        if ((r2 == (r1 + 1)) and (c2 == c1)):
+            if not (puzzleBoard.hasLineDown(r1, c1)):
+                # Draw the line
+                puzzleBoard.drawLineDown(r1, c1)
+                return (True)
+            else:
+                # Line is already there!
+                return (False)
+
+        # No line was drawn
+        return (False)
+
+    # Block the path between the two cells, if it isn't already blocked. Return 'True' if the block
+    # was added (a change was made), and 'False' if not.
+    def __blockPathBetweenCells(self, puzzleBoard, r1, c1, r2, c2):
+        # Is cell 2 to the left of cell 1?
+        if ((r2 == r1) and (c2 == (c1 - 1))):
+            if not (puzzleBoard.isBlockedLeft(r1, c1)):
+                # Block the path
+                puzzleBoard.markBlockedLeft(r1, c1)
+                return (True)
+            else:
+                # Path is already blocked
+                return (False)
+
+        # Is cell 2 to the right of cell 1?
+        if ((r2 == r1) and (c2 == (c1 + 1))):
+            if not (puzzleBoard.isBlockedRight(r1, c1)):
+                # Block the path
+                puzzleBoard.markBlockedRight(r1, c1)
+                return (True)
+            else:
+                # Path is already blocked
+                return (False)
+
+        # Is cell 2 above cell 1?
+        if ((r2 == (r1 - 1)) and (c2 == c1)):
+            if not (puzzleBoard.isBlockedUp(r1, c1)):
+                # Block the path
+                puzzleBoard.markBlockedUp(r1, c1)
+                return (True)
+            else:
+                # Path is already blocked
+                return (False)
+
+        # Is cell 2 below cell 1?
+        if ((r2 == (r1 + 1)) and (c2 == c1)):
+            if not (puzzleBoard.isBlockedDown(r1, c1)):
+                # Block the path
+                puzzleBoard.markBlockedDown(r1, c1)
+                return (True)
+            else:
+                # Path is already blocked
+                return (False)
+
+        # Path was already blocked
+        return (False)
+
     def __numConsecutiveWhiteCirclesInCol(self, puzzleBoard, rowNum, colNum):
         # This function starts at the specified cell, and determines the number of consecutive white
         # circle cells which are in the specified column. If there is a white circle in the cell above
@@ -691,9 +862,87 @@ class Solver():
 
         return (changesMade)
 
+    # Identify paths which must be blocked, because otherwise they would allow
+    # a closed sub-path to be created, which is not allowed. The code also detects
+    # if the path being checked actually causes the puzzle to be
+    # completed (in which case we draw the line instead of blocking the path)!
+    # These 2 cases are distinguished by tracking the number or “circle cells”
+    # the path travels through; if it travels through all of the “circle cells”,
+    # then the puzzle is complete, so the line segment between the two abutting cells
+    # can be drawn and the puzzle marked as 'solved'; otherwise, the path between the
+    # abutting cells must be blocked! If the line doesn't start and end in abutting cells,
+    # then we don't have to do anything.
+    #
+    # This method returns a boolean value, indicating whether any changes were made to
+    # the puzzle board.
+    # We will scan the puzzle board, looking for cells which only have one line (the starting
+    # cell). Then we will follow that line, until we come to another cell with only one line
+    # (the ending cell).
     def __processSubPaths(self, puzzleBoard):
-        print("__processSubPaths")
-        # todo __processSubPaths
+        changesMade = False
+        numRows, numCols = puzzleBoard.getDimensions()
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                # Follow the path only if the cell has one line
+                numLines, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+                if (numLines == 1):
+                    numCirclesVisited = 0
+                    startingRow = rowNum
+                    startingCol = colNum
+
+                    if not (puzzleBoard.isDotAt(rowNum, colNum)):
+                        # Started in a circle; so increment our circle count
+                        numCirclesVisited += 1
+
+                    # Follow the line to the next cell
+                    if (l):
+                        # Proceed to the cell to the left (cell(rowNum, colNum-1))
+                        result = self.__moveToNextCell(puzzleBoard, rowNum, colNum - 1, rowNum, colNum, numCirclesVisited)
+
+                    elif (r):
+                        # Proceed to the cell to the right (cell(rowNum, colNum+1))
+                        result = self.__moveToNextCell(puzzleBoard, rowNum, colNum + 1, rowNum, colNum, numCirclesVisited)
+
+                    elif (u):
+                        # Proceed to the cell above (cell(rowNum-1, colNum))
+                        result = self.__moveToNextCell(puzzleBoard, rowNum - 1, colNum, rowNum, colNum, numCirclesVisited)
+
+                    else:
+                        # Proceed to the cell below (cell(rowNum+1, colNum))
+                        result = self.__moveToNextCell(puzzleBoard, rowNum + 1, colNum, rowNum, colNum, numCirclesVisited)
+
+                    # Once the recursion has completed (because we reached the end
+                    # of the line), the return 'result' is a tuple, telling us the row and column
+                    # where the line stopped, along with the total count of circles the line
+                    # passed through.
+
+                    # Check if the starting and ending cells abutted
+                    endingRow, endingCol, numCirclesVisited = result
+                    if (self.__cellsAbut(startingRow, startingCol, endingRow, endingCol)):
+                        # Yes .. they abutted. Now .. if we visited all of the circles,
+                        # then we can complete the puzzle by drawing the line between
+                        # the 2 cells; otherwise, we need to block the path between
+                        # the 2 cells.
+                        numCirclesInPuzzle = self.__getNumberOfCircles(puzzleBoard)
+
+                        if (numCirclesInPuzzle == numCirclesVisited):
+                            # Puzzle is solved!
+                            # Mark the puzzle as solved
+                            # puzzleBoard.setSolved()
+
+                            # Draw the line connecting the two cells
+                            changesMade = self.__drawLineBetweenCells(puzzleBoard, startingRow, startingCol, endingRow, endingCol)
+
+                        else:
+                            # Path must be blocked!
+                            changesMade = self.__blockPathBetweenCells(puzzleBoard, startingRow, startingCol, endingRow, endingCol)
+
+                    # else:
+                        # The starting and ending cells did not abut, so there is
+                        # nothing to do .. no changes need to be made.
+                        # return (False)
+
+        return (changesMade)
 
     def __identifyProblems(self, puzzleBoard):
         print("__identifyProblems")
