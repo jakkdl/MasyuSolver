@@ -392,6 +392,38 @@ class Solver():
                         else:
                             raise MasyuSolverException("Missing turn in black circle", (rowNum, colNum))
 
+        # Case 4
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if (puzzleBoard.isBlackCircleAt(rowNum, colNum)):
+                    # Checking cell to the left
+                    if (colNum > 0):
+                        if (puzzleBoard.hasLineUp(rowNum, (colNum - 1)) or puzzleBoard.hasLineDown(rowNum, (colNum - 1))):
+                            if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                changesMade = True
+
+                    # Checking cell to the right
+                    if (colNum < (numCols - 1)):
+                        if (puzzleBoard.hasLineUp(rowNum, (colNum + 1)) or puzzleBoard.hasLineDown(rowNum, (colNum + 1))):
+                            if not (puzzleBoard.isBlockedRight(rowNum, colNum)):
+                                puzzleBoard.markBlockedRight(rowNum, colNum)
+                                changesMade = True
+
+                    # Checking cell above
+                    if (rowNum > 0):
+                        if (puzzleBoard.hasLineLeft((rowNum - 1), colNum) or puzzleBoard.hasLineRight((rowNum - 1), colNum)):
+                            if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                puzzleBoard.markBlockedUp(rowNum, colNum)
+                                changesMade = True
+
+                    # Checking cell below
+                    if (rowNum < (numRows - 1)):
+                        if (puzzleBoard.hasLineLeft((rowNum + 1), colNum) or puzzleBoard.hasLineRight((rowNum + 1), colNum)):
+                            if not (puzzleBoard.isBlockedDown(rowNum, colNum)):
+                                puzzleBoard.markBlockedDown(rowNum, colNum)
+                                changesMade = True
+
         return (changesMade)
 
 
