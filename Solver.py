@@ -27,6 +27,60 @@ class Solver():
             # print("Changed is = ", changed)
             changed = changed or self.__identifyProblems(puzzleBoard)
 
+    def __updateBlockedPathways(self, puzzleBoard, rowNum, colNum):
+        lineCount, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+
+        if (lineCount == 2):
+            if not(l):
+                puzzleBoard.markBlockedLeft(rowNum, colNum)
+
+            if not(r):
+                puzzleBoard.markBlockedRight(rowNum, colNum)
+
+            if not(u):
+                puzzleBoard.markBlockedUp(rowNum, colNum)
+
+            if not(d):
+                puzzleBoard.markBlockedDown(rowNum, colNum)
+        elif (lineCount > 2):
+            raise MasyuSolverException("Cell has more than 2 lines", (rowNum, colNum))
+
+
+    # The following methods are "wrappers" for the four "drawLine" methods of the PuzzleBoard
+    # class.  They not only draw the line, but they then immediately call the method which
+    # blocks paths affected by the line we just drew
+    def __drawLineLeftWrapper(self, puzzleBoard, rowNum, colNum):
+        # Call the PuzzleBoard drawLine method
+        puzzleBoard.drawLineLeft(rowNum, colNum)
+
+        # Now make sure that any paths needing to be blocked get blocked
+        self.__updateBlockedPathways(puzzleBoard, rowNum, colNum)
+        self.__updateBlockedPathways(puzzleBoard, rowNum, (colNum - 1))
+
+    def __drawLineRightWrapper(self, puzzleBoard, rowNum, colNum):
+        # Call the PuzzleBoard drawLine method
+        puzzleBoard.drawLineRight(rowNum, colNum)
+
+        # Now make sure that any paths needing to be blocked get blocked
+        self.__updateBlockedPathways(puzzleBoard, rowNum, colNum)
+        self.__updateBlockedPathways(puzzleBoard, rowNum, (colNum + 1))
+
+    def __drawLineUpWrapper(self, puzzleBoard, rowNum, colNum):
+        # Call the PuzzleBoard drawLine method
+        puzzleBoard.drawLineUp(rowNum, colNum)
+
+        # Now make sure that any paths needing to be blocked get blocked
+        self.__updateBlockedPathways(puzzleBoard, rowNum, colNum)
+        self.__updateBlockedPathways(puzzleBoard, (rowNum - 1), colNum)
+
+    def __drawLineDownWrapper(self, puzzleBoard, rowNum, colNum):
+        # Call the PuzzleBoard drawLine method
+        puzzleBoard.drawLineDown(rowNum, colNum)
+
+        # Now make sure that any paths needing to be blocked get blocked
+        self.__updateBlockedPathways(puzzleBoard, rowNum, colNum)
+        self.__updateBlockedPathways(puzzleBoard, (rowNum + 1), colNum)
+
     # The following is a helper function, which will be called recursively. Each time it is called,
     # it is passed the row and column number for the cell to be looked at, along with the row
     # and column of the previous cell in the line we are following. The count of the number
@@ -44,6 +98,7 @@ class Solver():
 
         # If the cell only has 1 line, then we've reached the end of the line
         lineCount, l, r, u, d = puzzleBoard.getLines(row, col)
+        # print("processing: ", row, "x", col, "linecount =", lineCount, l, r, u, d)
         if (lineCount == 1):
             # We're done! Return where we stopped and the # of circles visited
             return ((row, col, numCirclesVisited))
@@ -113,7 +168,8 @@ class Solver():
         if ((r2 == r1) and (c2 == (c1 - 1))):
             if not (puzzleBoard.hasLineLeft(r1, c1)):
                 # Draw the line
-                puzzleBoard.drawLineLeft(r1, c1)
+                # puzzleBoard.drawLineLeft(r1, c1)
+                self.__drawLineLeftWrapper(puzzleBoard, r1, c1)
                 return (True)
             else:
                  # Line is already there!
@@ -123,7 +179,8 @@ class Solver():
         if ((r2 == r1) and (c2 == (c1 + 1))):
             if not (puzzleBoard.hasLineRight(r1, c1)):
                 # Draw the line
-                puzzleBoard.drawLineRight(r1, c1)
+                # puzzleBoard.drawLineRight(r1, c1)
+                self.__drawLineRightWrapper(puzzleBoard, r1, c1)
                 return (True)
             else:
                 # Line is already there!
@@ -133,7 +190,8 @@ class Solver():
         if ((r2 == (r1 - 1)) and (c2 == c1)):
             if not (puzzleBoard.hasLineUp(r1, c1)):
                 # Draw the line
-                puzzleBoard.drawLineUp(r1, c1)
+                # puzzleBoard.drawLineUp(r1, c1)
+                self.__drawLineUpWrapper(puzzleBoard, r1, c1)
                 return (True)
             else:
                 # Line is already there!
@@ -143,7 +201,8 @@ class Solver():
         if ((r2 == (r1 + 1)) and (c2 == c1)):
             if not (puzzleBoard.hasLineDown(r1, c1)):
                 # Draw the line
-                puzzleBoard.drawLineDown(r1, c1)
+                # puzzleBoard.drawLineDown(r1, c1)
+                self.__drawLineDownWrapper(puzzleBoard, r1, c1)
                 return (True)
             else:
                 # Line is already there!
@@ -654,10 +713,12 @@ class Solver():
                         else:
                             if not (puzzleBoard.hasLineRight(rowNum, colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineRight(rowNum, colNum)
+                                # puzzleBoard.drawLineRight(rowNum, colNum)
+                                self.__drawLineRightWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.hasLineRight(rowNum, (colNum + 1))):
                                 changesMade = True
-                                puzzleBoard.drawLineRight(rowNum, (colNum + 1))
+                                # puzzleBoard.drawLineRight(rowNum, (colNum + 1))
+                                self.__drawLineRightWrapper(puzzleBoard, rowNum, (colNum + 1))
 
                     if (puzzleBoard.isBlockedRight(rowNum, colNum) or
                         ((colNum < (numCols - 1) and puzzleBoard.isBlockedRight(rowNum, (colNum + 1))))):
@@ -668,10 +729,12 @@ class Solver():
                         else:
                             if not (puzzleBoard.hasLineLeft(rowNum, colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineLeft(rowNum, colNum)
+                                # puzzleBoard.drawLineLeft(rowNum, colNum)
+                                self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.hasLineLeft(rowNum, (colNum - 1))):
                                 changesMade = True
-                                puzzleBoard.drawLineLeft(rowNum, (colNum - 1))
+                                # puzzleBoard.drawLineLeft(rowNum, (colNum - 1))
+                                self.__drawLineLeftWrapper(puzzleBoard, rowNum, (colNum - 1))
 
                     if (puzzleBoard.isBlockedUp(rowNum, colNum) or
                         ((rowNum > 0) and puzzleBoard.isBlockedUp((rowNum - 1), colNum))):
@@ -682,10 +745,12 @@ class Solver():
                         else:
                             if not (puzzleBoard.hasLineDown(rowNum, colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineDown(rowNum, colNum)
+                                # puzzleBoard.drawLineDown(rowNum, colNum)
+                                self.__drawLineDownWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.hasLineDown((rowNum + 1), colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineDown((rowNum + 1), colNum)
+                                # puzzleBoard.drawLineDown((rowNum + 1), colNum)
+                                self.__drawLineDownWrapper(puzzleBoard, (rowNum + 1), colNum)
 
                     if (puzzleBoard.isBlockedDown(rowNum, colNum) or
                         ((rowNum < (numRows - 1)) and puzzleBoard.isBlockedDown((rowNum + 1), colNum))):
@@ -696,10 +761,12 @@ class Solver():
                         else:
                             if not (puzzleBoard.hasLineUp(rowNum, colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineUp(rowNum, colNum)
+                                # puzzleBoard.drawLineUp(rowNum, colNum)
+                                self.__drawLineUpWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.hasLineUp((rowNum - 1), colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineUp((rowNum - 1), colNum)
+                                # puzzleBoard.drawLineUp((rowNum - 1), colNum)
+                                self.__drawLineUpWrapper(puzzleBoard, (rowNum - 1), colNum)
 
                     # After drawing lines, we need to see if anything can be blocked for the
                     # cell being processed, or for the adjacent cell (since the line for a black
@@ -785,10 +852,12 @@ class Solver():
                         else:
                             if not (puzzleBoard.hasLineLeft(rowNum, colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineLeft(rowNum, colNum)
+                                # puzzleBoard.drawLineLeft(rowNum, colNum)
+                                self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.hasLineRight(rowNum, colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineRight(rowNum, colNum)
+                                # puzzleBoard.drawLineRight(rowNum, colNum)
+                                self.__drawLineRightWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
                                 changesMade = True
                                 puzzleBoard.markBlockedUp(rowNum, colNum)
@@ -807,10 +876,12 @@ class Solver():
                         else:
                             if not (puzzleBoard.hasLineUp(rowNum, colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineUp(rowNum, colNum)
+                                # puzzleBoard.drawLineUp(rowNum, colNum)
+                                self.__drawLineUpWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.hasLineDown(rowNum, colNum)):
                                 changesMade = True
-                                puzzleBoard.drawLineDown(rowNum, colNum)
+                                # puzzleBoard.drawLineDown(rowNum, colNum)
+                                self.__drawLineDownWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
                                 changesMade = True
                                 puzzleBoard.markBlockedLeft(rowNum, colNum)
@@ -821,16 +892,20 @@ class Solver():
                     count, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
                     if (count == 1):
                         if (l):
-                            puzzleBoard.drawLineRight(rowNum, colNum)
+                            # puzzleBoard.drawLineRight(rowNum, colNum)
+                            self.__drawLineRightWrapper(puzzleBoard, rowNum, colNum)
                             changesMade = True
                         elif (r):
-                            puzzleBoard.drawLineLeft(rowNum, colNum)
+                            # puzzleBoard.drawLineLeft(rowNum, colNum)
+                            self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
                             changesMade = True
                         elif (u):
-                            puzzleBoard.drawLineDown(rowNum, colNum)
+                            # puzzleBoard.drawLineDown(rowNum, colNum)
+                            self.__drawLineDownWrapper(puzzleBoard, rowNum, colNum)
                             changesMade = True
                         elif (d):
-                            puzzleBoard.drawLineUp(rowNum, colNum)
+                            # puzzleBoard.drawLineUp(rowNum, colNum)
+                            self.__drawLineUpWrapper(puzzleBoard, rowNum, colNum)
                             changesMade = True
 
         return (changesMade)
@@ -872,13 +947,17 @@ class Solver():
                     if ((numLines == 1) and (numOpenPaths == 1)):
                         changesMade = True
                         if (openL):
-                            puzzleBoard.drawLineLeft(rowNum, colNum)
+                            # puzzleBoard.drawLineLeft(rowNum, colNum)
+                            self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
                         elif (openR):
-                            puzzleBoard.drawLineRight(rowNum, colNum)
+                            # puzzleBoard.drawLineRight(rowNum, colNum)
+                            self.__drawLineRightWrapper(puzzleBoard, rowNum, colNum)
                         elif (openU):
-                            puzzleBoard.drawLineUp(rowNum, colNum)
+                            # puzzleBoard.drawLineUp(rowNum, colNum)
+                            self.__drawLineUpWrapper(puzzleBoard, rowNum, colNum)
                         else:
-                            puzzleBoard.drawLineDown(rowNum, colNum)
+                            # puzzleBoard.drawLineDown(rowNum, colNum)
+                            self.__drawLineDownWrapper(puzzleBoard, rowNum, colNum)
 
         return (changesMade)
 
@@ -917,18 +996,22 @@ class Solver():
                     # Follow the line to the next cell
                     if (l):
                         # Proceed to the cell to the left (cell(rowNum, colNum-1))
+                        # print("starting:", rowNum, "x", colNum)
                         result = self.__moveToNextCell(puzzleBoard, rowNum, colNum - 1, rowNum, colNum, numCirclesVisited)
 
                     elif (r):
                         # Proceed to the cell to the right (cell(rowNum, colNum+1))
+                        # print("starting:", rowNum, "x", colNum)
                         result = self.__moveToNextCell(puzzleBoard, rowNum, colNum + 1, rowNum, colNum, numCirclesVisited)
 
                     elif (u):
                         # Proceed to the cell above (cell(rowNum-1, colNum))
+                        # print("starting:", rowNum, "x", colNum)
                         result = self.__moveToNextCell(puzzleBoard, rowNum - 1, colNum, rowNum, colNum, numCirclesVisited)
 
                     else:
                         # Proceed to the cell below (cell(rowNum+1, colNum))
+                        # print("starting:", rowNum, "x", colNum)
                         result = self.__moveToNextCell(puzzleBoard, rowNum + 1, colNum, rowNum, colNum, numCirclesVisited)
 
                     # Once the recursion has completed (because we reached the end

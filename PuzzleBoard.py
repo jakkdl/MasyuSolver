@@ -119,21 +119,31 @@ class PuzzleBoard():
                 for colNum in range(2, len(row)-2, 2):
                     row[colNum].setAsOpen()
 
+    def lookForBug(self, rowNum, colNum):
+        numLines, u, d, l, r = self.getLines(4, 2)
+        if (numLines > 2):
+            print("BUG!! Cell", 4, "x", 2, "has", numLines, "lines!")
+            print("\tThe line was drawn from cell:", rowNum, "x", colNum)
+
     def drawLineUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum - 1][intColNum].setAsLine()
+        self.lookForBug(rowNum, colNum)
 
     def drawLineDown(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum + 1][intColNum].setAsLine()
+        self.lookForBug(rowNum, colNum)
 
     def drawLineLeft(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum][intColNum - 1].setAsLine()
+        self.lookForBug(rowNum, colNum)
 
     def drawLineRight(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum][intColNum + 1].setAsLine()
+        self.lookForBug(rowNum, colNum)
 
     def markBlockedUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
