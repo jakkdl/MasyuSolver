@@ -50,6 +50,20 @@ class Solver():
     # class.  They not only draw the line, but they then immediately call the method which
     # blocks paths affected by the line we just drew
     def __drawLineLeftWrapper(self, puzzleBoard, rowNum, colNum):
+        lineCount, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+        if (lineCount >= 2):
+            raise MasyuSolverException("lineLeftWrapper: too many lines in cell", (rowNum, colNum))
+
+        elif (lineCount == 1):
+            endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
+            # Check if the subpath ended in the cell to our left
+            if ((endingCol == (colNum - 1)) and (endingRow == rowNum)):
+                totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                if not (numCirclesVisited == totalNumCircles):
+                    raise MasyuSolverException ("lineLeftWrapper: detected potential closed subloop", (rowNum, colNum))
+                else:
+                    puzzleBoard.setSolved()
+
         # Call the PuzzleBoard drawLine method
         puzzleBoard.drawLineLeft(rowNum, colNum)
 
@@ -58,6 +72,20 @@ class Solver():
         self.__updateBlockedPathways(puzzleBoard, rowNum, (colNum - 1))
 
     def __drawLineRightWrapper(self, puzzleBoard, rowNum, colNum):
+        lineCount, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+        if (lineCount >= 2):
+            raise MasyuSolverException("lineRightWrapper: too many lines in cell", (rowNum, colNum))
+
+        elif (lineCount == 1):
+            endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
+            # Check if the subpath ended in the cell to our right
+            if ((endingCol == (colNum + 1)) and (endingRow == rowNum)):
+                totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                if not (numCirclesVisited == totalNumCircles):
+                    raise MasyuSolverException("lineRightWrapper: detected potential closed subloop", (rowNum, colNum))
+                else:
+                    puzzleBoard.setSolved()
+
         # Call the PuzzleBoard drawLine method
         puzzleBoard.drawLineRight(rowNum, colNum)
 
@@ -66,6 +94,20 @@ class Solver():
         self.__updateBlockedPathways(puzzleBoard, rowNum, (colNum + 1))
 
     def __drawLineUpWrapper(self, puzzleBoard, rowNum, colNum):
+        lineCount, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+        if (lineCount >= 2):
+            raise MasyuSolverException("lineUpWrapper: too many lines in cell", (rowNum, colNum))
+
+        elif (lineCount == 1):
+            endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
+            # Check if the subpath ended in the cell above
+            if ((endingCol == colNum) and (endingRow == (rowNum - 1))):
+                totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                if not (numCirclesVisited == totalNumCircles):
+                    raise MasyuSolverException("lineUpWrapper: detected potential closed subloop", (rowNum, colNum))
+                else:
+                    puzzleBoard.setSolved()
+
         # Call the PuzzleBoard drawLine method
         puzzleBoard.drawLineUp(rowNum, colNum)
 
@@ -74,6 +116,20 @@ class Solver():
         self.__updateBlockedPathways(puzzleBoard, (rowNum - 1), colNum)
 
     def __drawLineDownWrapper(self, puzzleBoard, rowNum, colNum):
+        lineCount, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
+        if (lineCount >= 2):
+            raise MasyuSolverException("lineDownWrapper: too many lines in cell", (rowNum, colNum))
+
+        elif (lineCount == 1):
+            endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
+            # Check if the subpath ended in the cell below
+            if ((endingCol == colNum) and (endingRow == (rowNum + 1))):
+                totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                if not (numCirclesVisited == totalNumCircles):
+                    raise MasyuSolverException("lineDownWrapper: detected potential closed subloop", (rowNum, colNum))
+                else:
+                    puzzleBoard.setSolved()
+
         # Call the PuzzleBoard drawLine method
         puzzleBoard.drawLineDown(rowNum, colNum)
 
