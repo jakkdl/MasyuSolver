@@ -1,5 +1,6 @@
 import tkinter as tk
 from PuzzleBoard import *
+from GetPuzzleBoardSizeDialog import *
 from CanvasManager import *
 from MasyuExceptions import *
 from Solver import *
@@ -35,6 +36,16 @@ class SolverUIWindow():
     # Placeholder callback for menu items
     def __donothing(self):
         print("do nothing")
+
+    def __fileNewMenuHandler(self):
+        # TODO: ask user to save changes
+        # TODO: reset state machine
+        resizeResults = GetPuzzleBoardSizeDialog()
+        rowVal, colVal = resizeResults.showDialog(self.numRows, self.numCols)
+        print ("new puzzle size:", rowVal, colVal)
+
+        pb = PuzzleBoard(size=(rowVal, colVal))
+        self.registerPuzzleBoard(pb)
 
     # Test modifying the size of the puzzle board
     def __increaseMainCanvasSize(self, canvas):
@@ -359,7 +370,7 @@ class SolverUIWindow():
 
         # Create the 'File' menu
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="New", command=self.__donothing)
+        filemenu.add_command(label="New", command=self.__fileNewMenuHandler)
         filemenu.add_command(label="Open", command=lambda: self.__increaseMainCanvasSize(self))
         filemenu.add_command(label="Save", command=lambda: self.__decreaseMainCanvasSize(self))
         filemenu.add_command(label="Save As ..", command=self.__donothing)

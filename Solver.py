@@ -1107,8 +1107,7 @@ class Solver():
                         if (numCirclesInPuzzle == numCirclesVisited):
                             # Puzzle is solved!
                             # Mark the puzzle as solved
-                            # TODO -add this back in!
-                            # puzzleBoard.setSolved()
+                            puzzleBoard.setSolved()
 
                             # Draw the line connecting the two cells
                             changesMade = changesMade | self.__drawLineBetweenCells(puzzleBoard, startingRow, startingCol, endingRow, endingCol)
