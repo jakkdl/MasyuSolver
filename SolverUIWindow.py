@@ -2,6 +2,7 @@ import tkinter as tk
 from PuzzleBoard import *
 from GetPuzzleBoardSizeDialog import *
 from CanvasManager import *
+from PuzzleStateMachine import *
 from MasyuExceptions import *
 from Solver import *
 
@@ -39,7 +40,9 @@ class SolverUIWindow():
 
     def __fileNewMenuHandler(self):
         # TODO: ask user to save changes
-        # TODO: reset state machine
+        # Reset the State Machine
+        PuzzleStateMachine.reset()
+
         resizeResults = GetPuzzleBoardSizeDialog()
         rowVal, colVal = resizeResults.showDialog(self.numRows, self.numCols)
         print ("new puzzle size:", rowVal, colVal)
@@ -256,7 +259,9 @@ class SolverUIWindow():
             # Set puzzleBoard state to unsolved
             self.puzzleBoardObject.setUnsolved()
 
-            # TODO: need to update the solver state (see state diagram)
+            # Need to update the solver state (see state diagram)
+            PuzzleStateMachine.puzzleChanged()
+
             # TODO: enable file-> save menu item
 
             # Determine which cells to disable
