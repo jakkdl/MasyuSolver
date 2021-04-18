@@ -16,3 +16,10 @@ class MasyuSolverException(MasyuException):
 
     def __str__(self):
         return(self.msg + " : " + repr(self.location))
+
+class MasyuFileSaveException(MasyuException):
+    '''Exception encounted during saving of a file'''
+
+    def __init__(self, msg):
+        super().__init__(msg)
+

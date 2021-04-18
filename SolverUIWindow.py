@@ -5,6 +5,7 @@ from CanvasManager import *
 from PuzzleStateMachine import *
 from MasyuExceptions import *
 from Solver import *
+from FileIO import *
 
 class SolverUIWindow():
 
@@ -37,6 +38,18 @@ class SolverUIWindow():
     # Placeholder callback for menu items
     def __donothing(self):
         print("do nothing")
+
+    def __fileSaveAsMenuHandler(self):
+        # Call FileIO class to save existing puzzle board but allow the user to specify a new filename
+        try:
+            status, unusedReturnValue = FileIO.fileSaveAs(self.puzzleBoardObject)
+            if(status):
+                # TODO: Show dialog confirming that the puzzle was successfully saved
+                print("File Save As succeeded")
+            # Else the request was cancelled during the save request
+        except MasyuFileSaveException as mfse:
+            # TODO: Display error dialog
+            print("Exception during File -> Save As")
 
     def __fileNewMenuHandler(self):
         # TODO: ask user to save changes
@@ -378,7 +391,7 @@ class SolverUIWindow():
         filemenu.add_command(label="New", command=self.__fileNewMenuHandler)
         filemenu.add_command(label="Open", command=lambda: self.__increaseMainCanvasSize(self))
         filemenu.add_command(label="Save", command=lambda: self.__decreaseMainCanvasSize(self))
-        filemenu.add_command(label="Save As ..", command=self.__donothing)
+        filemenu.add_command(label="Save As ..", command=self.__fileSaveAsMenuHandler)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=self.mainWindow.quit)
         menubar.add_cascade(label="File", menu=filemenu)
@@ -417,6 +430,10 @@ class SolverUIWindow():
 
 # ------ Begin test code ------
 if __name__ == '__main__':
+    basePath = os.path.expandvars('$APPDATA')
+    appBasePath = os.path.join(basePath, 'MasyuSolver')
+    settingsFileName = 'masyuSolverConfig.ini'
+    ConfigMgr.loadSettings(appBasePath, settingsFileName)
     uiWindow = SolverUIWindow()
     pb = PuzzleBoard()
     runTests = False
