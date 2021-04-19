@@ -5,6 +5,12 @@ class PuzzleBoard():
     STATE_UNSOLVED = 0
     STATE_SOLVED = 1
     STATE_INVALID = -1
+
+    MIN_NUM_ROWS = 5
+    MIN_NUM_COLS = 5
+    MAX_NUM_ROWS = 15
+    MAX_NUM_COLS = 15
+
     __DEFAULT_NUM_ROWS = 8
     __DEFAULT_NUM_COLS = 8
 

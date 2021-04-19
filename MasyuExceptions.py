@@ -18,8 +18,19 @@ class MasyuSolverException(MasyuException):
         return(self.msg + " : " + repr(self.location))
 
 class MasyuFileSaveException(MasyuException):
-    '''Exception encounted during saving of a file'''
+    '''Exception encountered during saving of a file'''
 
     def __init__(self, msg):
         super().__init__(msg)
 
+class MasyuFileOpenException(MasyuException):
+    '''Exception encountered during opening of a file'''
+
+    def __init__(self, msg):
+        super().__init__(msg)
+
+class MasyuInvalidPuzzleFileException(MasyuException):
+    '''Exception encountered during the processing of a puzzle board file'''
+
+    def __init__(self, msg):
+        super().__init__(msg)

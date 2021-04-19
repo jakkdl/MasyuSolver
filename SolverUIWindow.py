@@ -39,17 +39,51 @@ class SolverUIWindow():
     def __donothing(self):
         print("do nothing")
 
+    def __fileOpenHandler(self):
+        # Call FileIO class to save existing puzzle board and then load a new one
+        try:
+            status, newPuzzleBoard = FileIO.fileOpen(self.puzzleBoardObject)
+            if (status):
+                # TODO: Disable File -> Save menu item
+                self.registerPuzzleBoard(newPuzzleBoard)
+                self.solver.solve(newPuzzleBoard)
+                self.puzzleBoardCanvasManager.refreshCanvas()
+                print("File -> Open successful")
+            # Else the request was cancelled during the save request
+        except MasyuFileSaveException as mfse:
+            # TODO: Display error dialog
+            print("Exception during File -> Save As")
+        except MasyuFileOpenException as mfoe:
+            # TODO: Display error dialog
+            print("Exception during File -> Open")
+        except MasyuInvalidPuzzleFileException as mipfe:
+            # TODO: Display error dialog
+            print("Attempted to load invalid puzzle file")
+
     def __fileSaveAsMenuHandler(self):
         # Call FileIO class to save existing puzzle board but allow the user to specify a new filename
         try:
             status, unusedReturnValue = FileIO.fileSaveAs(self.puzzleBoardObject)
             if(status):
-                # TODO: Show dialog confirming that the puzzle was successfully saved
-                print("File Save As succeeded")
+                # TODO: Disable File -> Save menu item
+                print("File -> Save As successful")
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
             # TODO: Display error dialog
             print("Exception during File -> Save As")
+
+    def __fileSaveMenuHandler(self):
+        # Call FileIO class to save existing puzzle board using the name already associated
+        # with this puzzle board
+        try:
+            status, unusedReturnValue = FileIO.fileSave(self.puzzleBoardObject)
+            if(status):
+                # TODO: Disable File -> Save menu item
+                print("File -> Save successful")
+            # Else the request was cancelled during the save request
+        except MasyuFileSaveException as mfse:
+            # TODO: Display error dialog
+            print("Exception during File -> Save")
 
     def __fileNewMenuHandler(self):
         # TODO: ask user to save changes
@@ -389,8 +423,8 @@ class SolverUIWindow():
         # Create the 'File' menu
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="New", command=self.__fileNewMenuHandler)
-        filemenu.add_command(label="Open", command=lambda: self.__increaseMainCanvasSize(self))
-        filemenu.add_command(label="Save", command=lambda: self.__decreaseMainCanvasSize(self))
+        filemenu.add_command(label="Open", command=self.__fileOpenHandler)
+        filemenu.add_command(label="Save", command=self.__fileSaveMenuHandler)
         filemenu.add_command(label="Save As ..", command=self.__fileSaveAsMenuHandler)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=self.mainWindow.quit)

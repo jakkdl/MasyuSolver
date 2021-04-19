@@ -121,12 +121,39 @@ class FileIO():
 
                 # If this was a File -> Save or File -> Save As request, then we are done!
                 # If it was a File -> Exit request, then we can now exit the application.
-                if((mode == cls.__MODE_SAVE) or (mode == cls.__MODE_SAVE_AS)):
+                if ((mode == cls.__MODE_SAVE) or (mode == cls.__MODE_SAVE_AS)):
                     return((True, None))
 
                 elif (mode == cls.__MODE_EXIT):
                     return((True, None))
 
         # Now it is time to move onto loading the new puzzle file
-        # TODO: implement File -> Open
-        print("File open not implemented")
+
+        # Get the last directory used (from the Config mgr)
+        lastDirectoryUsed = ConfigMgr.getSettingValue(cls.__FILE_SECTION, cls.__FILE_DIRECTORY)
+
+        # Display a 'file open' dialog, to find out which file to open
+        supportedFileTypes = [(PuzzleBoardFile.FILE_EXTENSION, "*." + PuzzleBoardFile.FILE_EXTENSION)]
+        fileToOpen = fd.askopenfilename(initialdir=lastDirectoryUsed, filetypes=supportedFileTypes, defaultextension=supportedFileTypes)
+        if (fileToOpen == ""):
+            return ((False, None))
+
+        lastDirectoryUsed, currentFilename = os.path.split(fileToOpen)
+
+        # Read the puzzle board data from the file
+        try:
+            newPuzzleBoard = PuzzleBoardFile.loadFile(fileToOpen)
+        except MasyuInvalidPuzzleFileException as mipfe:
+            # Puzzle in the file was invalid
+            raise
+        except Exception as e:
+            raise MasyuFileOpenException ("Error during open file") from e
+        else:
+            # Successful load!
+            # Update the directory stored in the Config Mgr, and update the
+            # State Mgr state (and filename)
+            PuzzleStateMachine.fileOpened(currentFilename)
+            ConfigMgr.setSettingValue(cls.__FILE_SECTION, cls.__FILE_DIRECTORY, lastDirectoryUsed)
+
+            # Return the new puzzle board
+            return((True, newPuzzleBoard))
