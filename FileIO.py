@@ -72,8 +72,17 @@ class FileIO():
         # if the current puzzle has unsaved changes.  If it does, then we need to ask the user
         # if they want to save them or discard them
         if ((mode == cls.__MODE_OPEN) or (mode == cls.__MODE_NEW) or (mode == cls.__MODE_EXIT)):
-            # TODO: Not implemented
-            print("Not implemented")
+            if PuzzleStateMachine.hasPuzzleChanged():
+                response = mb.askyesnocancel("Save Changes?", "There are unsaved changes.\nWould you like to save before continuing?")
+                if (response == None):
+                    return ((False, None))
+                elif (response == False):
+                    if (mode == cls.__MODE_EXIT):
+                        return ((True, None))
+                    elif (mode == cls.__MODE_NEW):
+                        return ((True, None))
+                elif (response == True):
+                    saveCurrentPuzzle = True
 
         elif ((mode == cls.__MODE_SAVE) or (mode == cls.__MODE_SAVE_AS)):
             # Make sure that we save the current puzzle!
@@ -123,13 +132,13 @@ class FileIO():
                 # Update the Config Mgr
                 ConfigMgr.setSettingValue(cls.__FILE_SECTION, cls.__FILE_DIRECTORY, lastDirectoryUsed)
 
-                # If this was a File -> Save or File -> Save As request, then we are done!
-                # If it was a File -> Exit request, then we can now exit the application.
-                if ((mode == cls.__MODE_SAVE) or (mode == cls.__MODE_SAVE_AS)):
-                    return((True, None))
+        # If this was a File -> Save or File -> Save As request, then we are done!
+        # If it was a File -> Exit or File -> New request, then we are done.
+        if ((mode == cls.__MODE_SAVE) or (mode == cls.__MODE_SAVE_AS)):
+            return((True, None))
 
-                elif (mode == cls.__MODE_EXIT):
-                    return((True, None))
+        elif ((mode == cls.__MODE_EXIT) or (mode == cls.__MODE_NEW)):
+            return((True, None))
 
         # Now it is time to move onto loading the new puzzle file
 

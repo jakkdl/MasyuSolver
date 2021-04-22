@@ -44,7 +44,6 @@ class SolverUIWindow():
         try:
             status, newPuzzleBoard = FileIO.fileOpen(self.puzzleBoardObject)
             if (status):
-                # TODO: Disable File -> Save menu item
                 self.registerPuzzleBoard(newPuzzleBoard)
                 self.solver.solve(newPuzzleBoard)
                 self.puzzleBoardCanvasManager.refreshCanvas()
@@ -65,7 +64,6 @@ class SolverUIWindow():
         try:
             status, unusedReturnValue = FileIO.fileSaveAs(self.puzzleBoardObject)
             if(status):
-                # TODO: Disable File -> Save menu item
                 print("File -> Save As successful")
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
@@ -78,7 +76,6 @@ class SolverUIWindow():
         try:
             status, unusedReturnValue = FileIO.fileSave(self.puzzleBoardObject)
             if(status):
-                # TODO: Disable File -> Save menu item
                 print("File -> Save successful")
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
@@ -86,16 +83,25 @@ class SolverUIWindow():
             print("Exception during File -> Save")
 
     def __fileNewMenuHandler(self):
-        # TODO: ask user to save changes
-        # Reset the State Machine
-        PuzzleStateMachine.reset()
+        try:
+            status, unusedReturnValue = FileIO.fileNew(self.puzzleBoardObject)
+            if not (status):
+                return
+
+        except MasyuFileSaveException as mfse:
+            # TODO: Display error dialog
+            print("Exception during File -> Save")
+            return
 
         resizeResults = GetPuzzleBoardSizeDialog()
         rowVal, colVal = resizeResults.showDialog(self.numRows, self.numCols)
         print ("new puzzle size:", rowVal, colVal)
+        if ((rowVal != -1) and (colVal != -1)):
+            # Reset the State Machine
+            PuzzleStateMachine.reset()
 
-        pb = PuzzleBoard(size=(rowVal, colVal))
-        self.registerPuzzleBoard(pb)
+            pb = PuzzleBoard(size=(rowVal, colVal))
+            self.registerPuzzleBoard(pb)
 
     # Test modifying the size of the puzzle board
     def __increaseMainCanvasSize(self, canvas):
@@ -308,8 +314,6 @@ class SolverUIWindow():
 
             # Need to update the solver state (see state diagram)
             PuzzleStateMachine.puzzleChanged()
-
-            # TODO: enable file-> save menu item
 
             # Determine which cells to disable
             self.__determineCellsToDisable()

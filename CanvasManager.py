@@ -298,10 +298,6 @@ class CanvasManager():
 
         self.__refreshCanvas()
 
-        # TODO: debug only
-        #self.__drawLineRight(2,3)
-        #self.__blockRight(1,3)
-
     def refreshCanvas(self):
         self.__refreshCanvas()
         # print("canvas being refreshed")
@@ -469,7 +465,6 @@ class CanvasManager():
 
     # Event handler for when the cursor enters a cell in the game board
     def __cellEnterHandler(self, event, tag):
-        # Todo: change cursor based on cell state (disabled, invalid, valid)
         rowNum, colNum = self.__mapTagIdToRowColNums(tag)
         # print("Entered cell:", tag, "row =", rowNum, "col =", colNum)
         if (self.puzzleBoard.isCellEnabled(rowNum, colNum)):
@@ -567,18 +562,6 @@ class CanvasManager():
         baseTag = self.__createBaseItemTag(rowNum, colNum)
         bottomBlockTag = baseTag + self.CELL_BOTTOM_BLOCK_TAG
         self.puzzleBoardCanvas.itemconfigure(bottomBlockTag, state='normal')
-
-    # TODO - must be implemented
-    def __setToWhiteCircle(self, rowNum, colNum):
-        print("not done")
-
-    # TODO - must be implemented
-    def __setToBlackCircle(self, rowNum, colNum):
-        print("not done")
-
-    # TODO - must be implemented
-    def __setToDot(self, rowNum, colNum):
-        print("not done")
 
     ###############################################
     # ------ End of private helper functions ------
