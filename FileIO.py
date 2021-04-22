@@ -63,6 +63,8 @@ class FileIO():
     # The 'mode' parameter can be set to one of the above values, and indicates which menu operation
     # is being requested. The 'puzzleBoard' parameter is the current puzzleboard.
     def __processIO(cls, mode, puzzleBoard):
+        supportedFileTypes = [(PuzzleBoardFile.FILE_EXTENSION, "*." + PuzzleBoardFile.FILE_EXTENSION)]
+
         # Start out assuming that the current puzzle won't be saved
         saveCurrentPuzzle = False
 
@@ -80,16 +82,18 @@ class FileIO():
         # If there were changes needing to be saved, and the user said they wanted to
         # save the changes (or if this was a File -> Save or File -> Save As request)
         # then the saving happens now.
+
+        currentFilename = PuzzleStateMachine.getFileName()
+
         if (saveCurrentPuzzle):
             # If there isn't a filename already associated with the current puzzle
             # (or if this is a File -> Save As request), then we need to ask the
             # user to select the folder and filename into which the puzzle will be saved
-            currentFilename = PuzzleStateMachine.getFileName()
             lastDirectoryUsed = ConfigMgr.getSettingValue(cls.__FILE_SECTION, cls.__FILE_DIRECTORY)
 
             if ((mode == cls.__MODE_SAVE_AS) or (currentFilename == None)):
                 # User needs to choose directory and filename
-                saveFilePath = fd.asksaveasfilename(initialdir = lastDirectoryUsed)
+                saveFilePath = fd.asksaveasfilename(initialfile=currentFilename, initialdir=lastDirectoryUsed, filetypes=supportedFileTypes, defaultextension=supportedFileTypes)
 
                 if (saveFilePath == ''):
                     return ((False, None))
@@ -133,8 +137,7 @@ class FileIO():
         lastDirectoryUsed = ConfigMgr.getSettingValue(cls.__FILE_SECTION, cls.__FILE_DIRECTORY)
 
         # Display a 'file open' dialog, to find out which file to open
-        supportedFileTypes = [(PuzzleBoardFile.FILE_EXTENSION, "*." + PuzzleBoardFile.FILE_EXTENSION)]
-        fileToOpen = fd.askopenfilename(initialdir=lastDirectoryUsed, filetypes=supportedFileTypes, defaultextension=supportedFileTypes)
+        fileToOpen = fd.askopenfilename(initialfile=currentFilename, initialdir=lastDirectoryUsed, filetypes=supportedFileTypes, defaultextension=supportedFileTypes)
         if (fileToOpen == ""):
             return ((False, None))
 
