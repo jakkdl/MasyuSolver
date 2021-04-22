@@ -440,6 +440,76 @@ class Solver():
                     # Not first, or less than 3 in a row
                     # Do Nothing
 
+                    # Handle case 14
+                    # Check for 2 vertically adjacent white circles
+                    iAmFirst, count = self.__numConsecutiveWhiteCirclesInCol(puzzleBoard, rowNum, colNum)
+
+                    # Skip if not the first in the series
+                    if (iAmFirst and (count == 2)):
+                        # Case 14-1
+                        if (rowNum > 1):
+                            if (puzzleBoard.hasLineUp((rowNum - 1), colNum)):
+                                if (puzzleBoard.hasLineUp(rowNum, colNum)):
+                                    raise MasyuSolverException("Unexpected line up in Case 14-1", (rowNum, colNum))
+                                elif (puzzleBoard.hasLineDown((rowNum + 1), colNum)):
+                                    raise MasyuSolverException("Unexpected line down in Case 14-1", ((rowNum + 1), colNum))
+                                else:
+                                    if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                        puzzleBoard.markBlockedUp(rowNum, colNum)
+                                        changesMade = True
+                                    if not (puzzleBoard.isBlockedDown((rowNum + 1), colNum)):
+                                        puzzleBoard.markBlockedDown((rowNum + 1), colNum)
+                                        changesMade = True
+
+                        # Case 14-3
+                        if (rowNum < (numRows - 3)):
+                            if (puzzleBoard.hasLineDown((rowNum + 2), colNum)):
+                                if (puzzleBoard.hasLineDown((rowNum + 1), colNum)):
+                                    raise MasyuSolverException("Unexpected line down in Case 14-3", ((rowNum + 1), colNum))
+                                elif (puzzleBoard.hasLineUp(rowNum, colNum)):
+                                    raise MasyuSolverException("Unexpected line up in Case 14-3",(rowNum, colNum))
+                                else:
+                                    if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                        puzzleBoard.markBlockedUp(rowNum, colNum)
+                                        changesMade = True
+                                    if not (puzzleBoard.isBlockedDown((rowNum + 1), colNum)):
+                                        puzzleBoard.markBlockedDown((rowNum + 1), colNum)
+                                        changesMade = True
+
+                    # Check for horizontal line of white circles
+                    iAmFirst, count = self.__numConsecutiveWhiteCirclesInRow(puzzleBoard, rowNum, colNum)
+                    # Skip if not the first in the series
+                    if (iAmFirst and (count == 2)):
+                        # Case 14-2
+                        if (colNum > 1):
+                            if (puzzleBoard.hasLineLeft(rowNum, (colNum - 1))):
+                                if (puzzleBoard.hasLineLeft(rowNum, colNum)):
+                                    raise MasyuSolverException("Unexpected line left in Case 14-2",(rowNum, colNum))
+                                elif (puzzleBoard.hasLineRight(rowNum, (colNum + 1))):
+                                    raise MasyuSolverException("Unexpected line right in Case 14-2",(rowNum, (colNum + 1)))
+                                else:
+                                    if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                        puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                        changesMade = True
+                                    if not (puzzleBoard.isBlockedRight(rowNum, (colNum + 1))):
+                                        puzzleBoard.markBlockedRight(rowNum, (colNum + 1))
+                                        changesMade = True
+
+                        # Case 14-4
+                        if (colNum < (numCols - 3)):
+                            if (puzzleBoard.hasLineRight(rowNum, (colNum + 2))):
+                                if (puzzleBoard.hasLineRight(rowNum, (colNum + 1))):
+                                    raise MasyuSolverException("Unexpected line right in Case 14-4",(rowNum, (colNum + 1)))
+                                elif (puzzleBoard.hasLineLeft(rowNum, colNum)):
+                                    raise MasyuSolverException("Unexpected line left in Case 14-4",(rowNum, colNum))
+                                else:
+                                    if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                        puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                        changesMade = True
+                                    if not (puzzleBoard.isBlockedRight(rowNum, (colNum + 1))):
+                                        puzzleBoard.markBlockedRight(rowNum, (colNum + 1))
+                                        changesMade = True
+
                 elif (puzzleBoard.isBlackCircleAt(rowNum, colNum)):
 
                     # Case 10-1: both white circles are below the black circle
