@@ -510,6 +510,34 @@ class Solver():
                                         puzzleBoard.markBlockedRight(rowNum, (colNum + 1))
                                         changesMade = True
 
+                    # Handle case 15-1
+                    if (1 < rowNum < (numRows - 2)):
+                        if ((puzzleBoard.hasLineUp((rowNum - 1), colNum)) and (puzzleBoard.hasLineDown((rowNum + 1), colNum))):
+                            if (puzzleBoard.hasLineUp(rowNum, colNum)):
+                                raise MasyuSolverException("Unexpected line up in Case 15-1", (rowNum, colNum))
+                            if (puzzleBoard.hasLineDown(rowNum, colNum)):
+                                raise MasyuSolverException("Unexpected line down in Case 15-1", (rowNum, colNum))
+                            if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
+                                puzzleBoard.markBlockedUp(rowNum, colNum)
+                                changesMade = True
+                            if not (puzzleBoard.isBlockedDown(rowNum, colNum)):
+                                puzzleBoard.markBlockedDown(rowNum, colNum)
+                                changesMade = True
+
+                    # Handle case 15-2
+                    if (1 < colNum < (numRows - 2)):
+                        if ((puzzleBoard.hasLineLeft(rowNum, (colNum - 1)) and (puzzleBoard.hasLineRight(rowNum, (colNum + 1))))):
+                            if (puzzleBoard.hasLineLeft(rowNum, colNum)):
+                                raise MasyuSolverException("Unexpected line left in Case 15-2",(rowNum, colNum))
+                            if (puzzleBoard.hasLineRight(rowNum, colNum)):
+                                raise MasyuSolverException("Unexpected line right in Case 15-2",(rowNum, colNum))
+                            if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
+                                puzzleBoard.markBlockedLeft(rowNum, colNum)
+                                changesMade = True
+                            if not (puzzleBoard.isBlockedRight(rowNum, colNum)):
+                                puzzleBoard.markBlockedRight(rowNum, colNum)
+                                changesMade = True
+
                 elif (puzzleBoard.isBlackCircleAt(rowNum, colNum)):
 
                     # Case 10-1: both white circles are below the black circle
