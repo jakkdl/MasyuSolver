@@ -3,7 +3,13 @@ from MasyuExceptions import *
 class Solver():
     def solve(self,puzzleBoard):
         changed = True
-        while (changed and puzzleBoard.isUnsolved()):
+        # You can't terminate the solving loop when the puzzle becomes solved, because this ends up
+        # leaving cells enabled which should have been disabled .. but they aren't, because the
+        # solving loop prematurely exited because it thought the puzzle was solved .. even though
+        # the "solving" happened in the clone board, while trying to determine which cells needed to
+        # be disabled!
+        #while (changed and puzzleBoard.isUnsolved()):
+        while (changed):
             changed = False
             changed = changed or self.__processSpecialCases(puzzleBoard)
             #print("before findPathwaysToBlock")

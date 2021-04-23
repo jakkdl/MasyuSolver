@@ -45,6 +45,10 @@ class SolverUIWindow():
             status, newPuzzleBoard = FileIO.fileOpen(self.puzzleBoardObject)
             if (status):
                 self.registerPuzzleBoard(newPuzzleBoard)
+
+                # Determine which cells to disable
+                self.__determineCellsToDisable()
+
                 self.solver.solve(newPuzzleBoard)
                 self.puzzleBoardCanvasManager.refreshCanvas()
                 print("File -> Open successful")
@@ -102,6 +106,12 @@ class SolverUIWindow():
 
             pb = PuzzleBoard(size=(rowVal, colVal))
             self.registerPuzzleBoard(pb)
+
+            # Determine which cells to disable
+            self.__determineCellsToDisable()
+
+            # Force a refresh
+            self.puzzleBoardCanvasManager.refreshCanvas()
 
     # Test modifying the size of the puzzle board
     def __increaseMainCanvasSize(self, canvas):
