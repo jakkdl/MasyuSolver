@@ -69,13 +69,13 @@ class SolverUIWindow():
 
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            # TODO: Display error dialog
+            mb.showerror("Error Saving Puzzle File", message=mfse)
             print("Exception during File -> Save As")
         except MasyuFileOpenException as mfoe:
-            # TODO: Display error dialog
+            mb.showerror("Error Opening Puzzle File", message=mfoe)
             print("Exception during File -> Open")
         except MasyuInvalidPuzzleFileException as mipfe:
-            # TODO: Display error dialog
+            mb.showerror("Invalid Puzzle File", message=mipfe)
             print("Attempted to load invalid puzzle file")
 
     def __fileSaveAsMenuHandler(self):
@@ -87,7 +87,7 @@ class SolverUIWindow():
                 self.__setWindowTitle(PuzzleStateMachine.getFileName())
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            # TODO: Display error dialog
+            mb.showerror("Error Saving Puzzle File", message=mfse)
             print("Exception during File -> Save As")
 
     def __fileSaveMenuHandler(self):
@@ -100,7 +100,7 @@ class SolverUIWindow():
                 self.__setWindowTitle(PuzzleStateMachine.getFileName())
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            # TODO: Display error dialog
+            mb.showerror("Error Saving Puzzle File", message=mfse)
             print("Exception during File -> Save")
 
     def __fileNewMenuHandler(self):
@@ -110,7 +110,7 @@ class SolverUIWindow():
                 return
 
         except MasyuFileSaveException as mfse:
-            # TODO: Display error dialog
+            mb.showerror("Error Saving Puzzle File", message=mfse)
             print("Exception during File -> Save")
             return
 

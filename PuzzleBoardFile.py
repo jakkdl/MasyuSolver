@@ -78,7 +78,7 @@ class PuzzleBoardFile():
             if (numCols == -1):
                 numCols = length
             elif (numCols != length):
-                raise MasyuInvalidPuzzleFileException("Mismatched row lengths in Puzzle File")
+                raise MasyuInvalidPuzzleFileException("Mismatched row and/or column lengths in Puzzle File")
 
             # Validate characters in the line
             for char in line:
@@ -89,10 +89,10 @@ class PuzzleBoardFile():
 
         # Validate puzzle board size
         if not (PuzzleBoard.MIN_NUM_COLS <= numCols <= PuzzleBoard.MAX_NUM_COLS):
-            raise MasyuInvalidPuzzleFileException("Invalid Puzzle Size")
+            raise MasyuInvalidPuzzleFileException("Invalid Puzzle Column Size")
 
         if not (PuzzleBoard.MIN_NUM_ROWS <= len(rowData) <= PuzzleBoard.MAX_NUM_ROWS):
-            raise MasyuInvalidPuzzleFileException("Invalid Puzzle Size")
+            raise MasyuInvalidPuzzleFileException("Invalid Puzzle Row Size")
 
         # Create a new PuzzleBoard object of the needed size
         newPuzzleBoard = PuzzleBoard(size=(len(rowData), numCols))
