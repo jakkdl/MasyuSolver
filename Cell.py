@@ -11,6 +11,7 @@ class Cell():
         self.type = type
         self.isCellEnabled = True
         self.isCellValid = True
+        self.wasProcessed = False
 
     # Returns an exact copy of the cell
     #
@@ -19,6 +20,12 @@ class Cell():
         c.isCellEnabled = self.isCellEnabled
         c.isCellValid = self.isCellValid
         return(c)
+
+    def setProcessedFlag(self):
+        self.wasProcessed = True
+
+    def clearProcessedFlag(self):
+        self.wasProcessed = False
 
     # Resets the cell to: DOT, Valid, and Enabled
     #

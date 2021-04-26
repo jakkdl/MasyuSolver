@@ -63,6 +63,19 @@ class PuzzleBoard():
         for colNum in range(1, len(row) - 1, 2):
             row[colNum].setAsBlocked()
 
+    def setCellProcessedFlag(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].setProcessedFlag()
+
+    def clearCellProcessedFlag(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].clearProcessedFlag()
+
+    def clearAllCellProcessedFlags(self):
+        for rowNum in range(0, self.numRows):
+            for colNum in range(0, self.numCols):
+                self.clearCellProcessedFlag(rowNum, colNum)
+
     def isCellEnabled(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum].isEnabled())
