@@ -531,7 +531,7 @@ class Solver():
                                 changesMade = True
 
                     # Handle case 15-2
-                    if (1 < colNum < (numRows - 2)):
+                    if (1 < colNum < (numCols - 2)):
                         if ((puzzleBoard.hasLineLeft(rowNum, (colNum - 1)) and (puzzleBoard.hasLineRight(rowNum, (colNum + 1))))):
                             if (puzzleBoard.hasLineLeft(rowNum, colNum)):
                                 raise MasyuSolverException("Unexpected line left in Case 15-2",(rowNum, colNum))
