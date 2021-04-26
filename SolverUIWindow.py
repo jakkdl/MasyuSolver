@@ -56,7 +56,6 @@ class SolverUIWindow():
                     print("File -> Open successful")
                 except Exception as e:
                     # The Loaded Puzzle Board generated an exception
-                    mb.showerror("Invalid Puzzle File", message=e)
                     numRows, numCols = newPuzzleBoard.getDimensions()
                     newPuzzleBoard = PuzzleBoard(size=(numRows, numCols))
                     PuzzleStateMachine.reset()
@@ -64,6 +63,7 @@ class SolverUIWindow():
                     self.__setWindowTitle(None)
                     # Determine which cells to disable
                     self.__determineCellsToDisable()
+                    mb.showerror("Invalid Puzzle File", message=e)
 
                 self.puzzleBoardCanvasManager.refreshCanvas()
 
