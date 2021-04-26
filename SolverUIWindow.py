@@ -51,9 +51,22 @@ class SolverUIWindow():
                 # Determine which cells to disable
                 self.__determineCellsToDisable()
 
-                self.solver.solve(newPuzzleBoard)
+                try:
+                    self.solver.solve(newPuzzleBoard)
+                    print("File -> Open successful")
+                except Exception as e:
+                    # The Loaded Puzzle Board generated an exception
+                    mb.showerror("Invalid Puzzle File", message=e)
+                    numRows, numCols = newPuzzleBoard.getDimensions()
+                    newPuzzleBoard = PuzzleBoard(size=(numRows, numCols))
+                    PuzzleStateMachine.reset()
+                    self.registerPuzzleBoard(newPuzzleBoard)
+                    self.__setWindowTitle(None)
+                    # Determine which cells to disable
+                    self.__determineCellsToDisable()
+
                 self.puzzleBoardCanvasManager.refreshCanvas()
-                print("File -> Open successful")
+
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
             # TODO: Display error dialog
