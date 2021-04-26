@@ -46,6 +46,8 @@ class SolverUIWindow():
             if (status):
                 self.registerPuzzleBoard(newPuzzleBoard)
 
+                self.__setWindowTitle(PuzzleStateMachine.getFileName())
+
                 # Determine which cells to disable
                 self.__determineCellsToDisable()
 
@@ -69,6 +71,7 @@ class SolverUIWindow():
             status, unusedReturnValue = FileIO.fileSaveAs(self.puzzleBoardObject)
             if(status):
                 print("File -> Save As successful")
+                self.__setWindowTitle(PuzzleStateMachine.getFileName())
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
             # TODO: Display error dialog
@@ -81,6 +84,7 @@ class SolverUIWindow():
             status, unusedReturnValue = FileIO.fileSave(self.puzzleBoardObject)
             if(status):
                 print("File -> Save successful")
+                self.__setWindowTitle(PuzzleStateMachine.getFileName())
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
             # TODO: Display error dialog
@@ -103,6 +107,7 @@ class SolverUIWindow():
         if ((rowVal != -1) and (colVal != -1)):
             # Reset the State Machine
             PuzzleStateMachine.reset()
+            self.__setWindowTitle(None)
 
             pb = PuzzleBoard(size=(rowVal, colVal))
             self.registerPuzzleBoard(pb)
@@ -160,6 +165,12 @@ class SolverUIWindow():
         x2 = (self.ITEM_WIDTH + (self.ITEM_HIGHLIGHT_THICKNESS * 2)) - 1
         y2 = (self.ITEM_HEIGHT + (self.ITEM_HIGHLIGHT_THICKNESS * 2)) - 1
         return(x1, y1, x2, y2)
+
+    def __setWindowTitle(self, puzzleName):
+        if (puzzleName == None):
+            puzzleName = "<unnamed>"
+
+        self.mainWindow.title("Maysu: " + puzzleName)
 
     # Event handler for processing <button-1> events in one of the items;
     # causes the selected item to becoome the active item.
@@ -372,7 +383,7 @@ class SolverUIWindow():
 
         # Create the top-level application window
         self.mainWindow = tk.Tk()
-        self.mainWindow.title("Maysu Puzzle Solver")
+        self.__setWindowTitle(None)
 
         # Create the primary window frame, into which all other UI widgets will be placed
         mainFrame = tk.Frame(master=self.mainWindow)
