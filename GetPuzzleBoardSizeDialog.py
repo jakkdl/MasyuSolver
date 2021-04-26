@@ -88,20 +88,22 @@ class GetPuzzleBoardSizeDialog():
         # values specified by the code which invoked us.
         rowFrame = tk.Frame(master=inputFrame)
         rowFrame.pack(fill=tk.X, side=tk.TOP, padx=15)
-        rowLabel = tk.Label(master=rowFrame, text="Number of rows:")
+        rowLabelString = "Number of rows (min=" + str(self.rowMin) + ", max=" + str(self.rowMax) + "):   "
+        rowLabel = tk.Label(master=rowFrame, text=rowLabelString)
         rowLabel.pack(side=tk.LEFT, pady=10)
         self.rowVar = tk.IntVar()               # Variable for setting/getting spinner value
         self.rowVar.set(initialRow)
-        numRowsSpinbox = tk.Spinbox(master=rowFrame, state='readonly', from_=self.rowMin, to=self.rowMax, textvariable=self.rowVar)
+        numRowsSpinbox = tk.Spinbox(master=rowFrame, state='readonly', width=5, from_=self.rowMin, to=self.rowMax, textvariable=self.rowVar)
         numRowsSpinbox.pack(side=tk.RIGHT, pady=10)
 
         colFrame = tk.Frame(master=inputFrame)
         colFrame.pack(fill=tk.X, side=tk.TOP, padx=15)
-        colLabel = tk.Label(master=colFrame, text="Number of columns:")
+        colLabelString = "Number of columns (min=" + str(self.colMin) + ", max=" + str(self.colMax) + "):   "
+        colLabel = tk.Label(master=colFrame, text=colLabelString)
         colLabel.pack(side=tk.LEFT, pady=10, anchor=tk.SW)
         self.colVar = tk.IntVar()  # Variable for setting/getting spinner value
         self.colVar.set(initialCol)
-        self.numColsSpinbox = tk.Spinbox(master=colFrame, state='readonly', from_=self.colMin, to=self.colMax, textvariable=self.colVar)
+        self.numColsSpinbox = tk.Spinbox(master=colFrame, state='readonly', width=5, from_=self.colMin, to=self.colMax, textvariable=self.colVar)
         self.numColsSpinbox.pack(side=tk.RIGHT, pady=10)
 
         # Create another frame (inside the mainFrame, but anchored below the
