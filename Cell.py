@@ -27,6 +27,9 @@ class Cell():
     def clearProcessedFlag(self):
         self.wasProcessed = False
 
+    def wasCellProcessed(self):
+        return (self.wasProcessed)
+
     # Resets the cell to: DOT, Valid, and Enabled
     #
     def reset(self):
