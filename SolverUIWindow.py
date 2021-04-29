@@ -81,6 +81,18 @@ class SolverUIWindow():
             mb.showerror("Invalid Puzzle File", message=mipfe)
             print("Attempted to load invalid puzzle file")
 
+    def __fileExitMenuHandler(self):
+        # Call FileIO class to save existing puzzle board then exit
+        try:
+            status, unusedReturnValue = FileIO.fileExit(self.puzzleBoardObject)
+            if(status):
+                print("File -> Exit was successful")
+                self.mainWindow.destroy()
+            # Else the request was cancelled during the save request
+        except MasyuFileSaveException as mfse:
+            mb.showerror("Error Saving Puzzle File", message=mfse)
+            print("Exception during File -> Exit")
+
     def __fileSaveAsMenuHandler(self):
         # Call FileIO class to save existing puzzle board but allow the user to specify a new filename
         try:
@@ -480,7 +492,7 @@ class SolverUIWindow():
         filemenu.add_command(label="Save", command=self.__fileSaveMenuHandler)
         filemenu.add_command(label="Save As ..", command=self.__fileSaveAsMenuHandler)
         filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=self.mainWindow.quit)
+        filemenu.add_command(label="Exit", command=self.__fileExitMenuHandler)
         menubar.add_cascade(label="File", menu=filemenu)
 
         # Create the 'Help' menu
