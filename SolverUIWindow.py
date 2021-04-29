@@ -425,6 +425,8 @@ class SolverUIWindow():
         self.mainWindow = tk.Tk()
         self.__setWindowTitle(None)
 
+        self.mainWindow.protocol("WM_DELETE_WINDOW", self.__fileExitMenuHandler)
+
         # Create the primary window frame, into which all other UI widgets will be placed
         mainFrame = tk.Frame(master=self.mainWindow)
         mainFrame.pack(expand=True, fill=tk.BOTH)
