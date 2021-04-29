@@ -48,6 +48,9 @@ class SolverUIWindow():
 
                 self.__setWindowTitle(PuzzleStateMachine.getFileName())
 
+                # Force active item to dot
+                self.__setActiveItem(self.dotItem)
+
                 # Determine which cells to disable
                 self.__determineCellsToDisable()
 
