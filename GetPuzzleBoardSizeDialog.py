@@ -57,7 +57,7 @@ class GetPuzzleBoardSizeDialog():
 
         # Create a new window, which will represent our modal dialog
         self.dialogWindow = tk.Toplevel()
-        self.dialogWindow.title("Entire Puzzle Board Size")
+        self.dialogWindow.title("Enter Puzzle Board Size")
 
         # Remove the maximize window frame options; can't seem to remove
         # the minimize option, which is nuts!
