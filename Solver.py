@@ -1129,6 +1129,8 @@ class Solver():
 
         numLines, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
 
+        puzzleBoard.setCellProcessedFlag(rowNum, colNum)
+
         if not (puzzleBoard.isDotAt(rowNum, colNum)):
             # Started in a circle; so increment our circle count
             numCirclesVisited += 1
@@ -1153,6 +1155,9 @@ class Solver():
             # Proceed to the cell below (cell(rowNum+1, colNum))
             # print("starting:", rowNum, "x", colNum)
             result = self.__moveToNextCell(puzzleBoard, rowNum + 1, colNum, rowNum, colNum, numCirclesVisited)
+
+        endRowNum, endColNum, na = result
+        puzzleBoard.setCellProcessedFlag(endRowNum, endColNum)
 
         # Once the recursion has completed (because we reached the end
         # of the line), the return 'result' is a tuple, telling us the row and column
@@ -1179,11 +1184,15 @@ class Solver():
     def __processSubPaths(self, puzzleBoard):
         changesMade = False
         numRows, numCols = puzzleBoard.getDimensions()
+        puzzleBoard.clearAllCellProcessedFlags()
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):
                 # Follow the path only if the cell has one line
                 numLines, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
                 if (numLines == 1):
+                    if (puzzleBoard.wasCellProcessed(rowNum, colNum)):
+                        # print("skipping path at ", (rowNum, colNum))
+                        continue
                     numCirclesVisited = 0
                     startingRow = rowNum
                     startingCol = colNum
