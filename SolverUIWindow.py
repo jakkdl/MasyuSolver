@@ -261,9 +261,21 @@ class SolverUIWindow():
         self.puzzleBoardCanvasManager.setShowBlockedPaths(self.showBlockedPathsVar.get())
 
     def __showDisabledCellsCallback(self):
+        if not (self.showDisabledCellsVar.get()):
+            for rowNum in range(0, self.numRows):
+                for colNum in range(0, self.numCols):
+                    self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
+
         self.puzzleBoardCanvasManager.setShowDisabledCells(self.showDisabledCellsVar.get())
 
+
     def __determineCellsToDisable(self):
+        if not (self.showDisabledCellsVar.get()):
+            for rowNum in range(0, self.numRows):
+                for colNum in range(0, self.numCols):
+                    self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
+            return
+
         if (self.selectedItem == self.dotItem):
             for rowNum in range (0, self.numRows):
                 for colNum in range (0, self.numCols):
@@ -454,7 +466,7 @@ class SolverUIWindow():
 
         self.showDisabledCellsVar = tk.BooleanVar()
         self.showDisabledCellsVar.set(True)
-        showDisabledCells = tk.Checkbutton(checkboxFrame, text="Show disabled cells", variable=self.showDisabledCellsVar,
+        showDisabledCells = tk.Checkbutton(checkboxFrame, text="Smart placement mode", variable=self.showDisabledCellsVar,
                                            bg=checkboxColor, command=self.__showDisabledCellsCallback)
         showDisabledCells.pack(side=tk.BOTTOM, anchor=tk.W)
 
