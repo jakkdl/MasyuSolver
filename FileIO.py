@@ -1,10 +1,9 @@
 import tkinter as tk
 from tkinter import filedialog as fd
-from tkinter import messagebox as mb
 from PuzzleStateMachine import *
 from ConfigMgr import *
 from PuzzleBoardFile import *
-
+from UnsavedChangesDialog import *
 
 class FileIO():
     # Class variables
@@ -32,28 +31,28 @@ class FileIO():
 
     @classmethod
     # File -> New
-    def fileNew(cls, puzzleBoard):
-        return (cls.__processIO(cls.__MODE_NEW, puzzleBoard))
+    def fileNew(cls, parentWindow, puzzleBoard):
+        return (cls.__processIO(parentWindow, cls.__MODE_NEW, puzzleBoard))
 
     @classmethod
     # File -> Open
-    def fileOpen(cls, puzzleBoard):
-        return (cls.__processIO(cls.__MODE_OPEN, puzzleBoard))
+    def fileOpen(cls, parentWindow, puzzleBoard):
+        return (cls.__processIO(parentWindow, cls.__MODE_OPEN, puzzleBoard))
 
     @classmethod
     # File -> Save
-    def fileSave(cls, puzzleBoard):
-        return (cls.__processIO(cls.__MODE_SAVE, puzzleBoard))
+    def fileSave(cls, parentWindow, puzzleBoard):
+        return (cls.__processIO(parentWindow, cls.__MODE_SAVE, puzzleBoard))
 
     @classmethod
     # File -> Save As
-    def fileSaveAs(cls, puzzleBoard):
-        return (cls.__processIO(cls.__MODE_SAVE_AS, puzzleBoard))
+    def fileSaveAs(cls, parentWindow, puzzleBoard):
+        return (cls.__processIO(parentWindow, cls.__MODE_SAVE_AS, puzzleBoard))
 
     @classmethod
     # File -> Exit
-    def fileExit(cls, puzzleBoard):
-        return (cls.__processIO(cls.__MODE_EXIT, puzzleBoard))
+    def fileExit(cls, parentWindow, puzzleBoard):
+        return (cls.__processIO(parentWindow, cls.__MODE_EXIT, puzzleBoard))
 
     ###########################################################################################################
     # The following is a private "work" method, which does all of the common work
@@ -62,7 +61,7 @@ class FileIO():
     @classmethod
     # The 'mode' parameter can be set to one of the above values, and indicates which menu operation
     # is being requested. The 'puzzleBoard' parameter is the current puzzleboard.
-    def __processIO(cls, mode, puzzleBoard):
+    def __processIO(cls, parentWindow, mode, puzzleBoard):
         supportedFileTypes = [(PuzzleBoardFile.FILE_EXTENSION, "*." + PuzzleBoardFile.FILE_EXTENSION)]
 
         # Start out assuming that the current puzzle won't be saved
@@ -73,7 +72,8 @@ class FileIO():
         # if they want to save them or discard them
         if ((mode == cls.__MODE_OPEN) or (mode == cls.__MODE_NEW) or (mode == cls.__MODE_EXIT)):
             if PuzzleStateMachine.hasPuzzleChanged():
-                response = mb.askyesnocancel("Save Changes?", "There are unsaved changes.\nWould you like to save before continuing?")
+                saveChangesDialog = UnsavedChangesDialog(parentWindow)
+                response = saveChangesDialog.showDialog()
                 if (response == None):
                     return ((False, None))
                 elif (response == False):

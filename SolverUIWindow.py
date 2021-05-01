@@ -42,7 +42,7 @@ class SolverUIWindow():
     def __fileOpenHandler(self):
         # Call FileIO class to save existing puzzle board and then load a new one
         try:
-            status, newPuzzleBoard = FileIO.fileOpen(self.puzzleBoardObject)
+            status, newPuzzleBoard = FileIO.fileOpen(self.mainWindow, self.puzzleBoardObject)
             if (status):
                 self.registerPuzzleBoard(newPuzzleBoard)
 
@@ -84,7 +84,7 @@ class SolverUIWindow():
     def __fileExitMenuHandler(self):
         # Call FileIO class to save existing puzzle board then exit
         try:
-            status, unusedReturnValue = FileIO.fileExit(self.puzzleBoardObject)
+            status, unusedReturnValue = FileIO.fileExit(self.mainWindow, self.puzzleBoardObject)
             if(status):
                 print("File -> Exit was successful")
                 self.mainWindow.destroy()
@@ -96,7 +96,7 @@ class SolverUIWindow():
     def __fileSaveAsMenuHandler(self):
         # Call FileIO class to save existing puzzle board but allow the user to specify a new filename
         try:
-            status, unusedReturnValue = FileIO.fileSaveAs(self.puzzleBoardObject)
+            status, unusedReturnValue = FileIO.fileSaveAs(self.mainWindow, self.puzzleBoardObject)
             if(status):
                 print("File -> Save As successful")
                 self.__setWindowTitle(PuzzleStateMachine.getFileName())
@@ -109,7 +109,7 @@ class SolverUIWindow():
         # Call FileIO class to save existing puzzle board using the name already associated
         # with this puzzle board
         try:
-            status, unusedReturnValue = FileIO.fileSave(self.puzzleBoardObject)
+            status, unusedReturnValue = FileIO.fileSave(self.mainWindow, self.puzzleBoardObject)
             if(status):
                 print("File -> Save successful")
                 self.__setWindowTitle(PuzzleStateMachine.getFileName())
@@ -120,7 +120,7 @@ class SolverUIWindow():
 
     def __fileNewMenuHandler(self):
         try:
-            status, unusedReturnValue = FileIO.fileNew(self.puzzleBoardObject)
+            status, unusedReturnValue = FileIO.fileNew(self.mainWindow, self.puzzleBoardObject)
             if not (status):
                 return
 
