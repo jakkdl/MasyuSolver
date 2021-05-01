@@ -1,6 +1,7 @@
 import tkinter as tk
+from MasyuDialog import *
 
-class GetPuzzleBoardSizeDialog():
+class GetPuzzleBoardSizeDialog(MasyuDialog):
 
     # This is the callback handler for the "OK" button.
     # It will save off the values from the Spinbox widgets,
@@ -13,7 +14,7 @@ class GetPuzzleBoardSizeDialog():
 
         # We must destroy our dialog window, in order to allow other windows to
         # again receive input
-        self.dialogWindow.destroy()
+        self.__dialogWindow.destroy()
 
     # This is the callback handler for the "Cancel" button.
     # It destroy the dialog window, causing input to once
@@ -25,12 +26,13 @@ class GetPuzzleBoardSizeDialog():
 
         # We must destroy our dialog window, in order to allow other windows to
         # again receive input
-        self.dialogWindow.destroy()
+        self.__dialogWindow.destroy()
 
     # Class constructor.  The only parameters are the max/min values (constraints)
     # for the row and column Spinbox widgets (as tuples).  If the constraints aren't
     # provided, then they will default to: (5, 15)
-    def __init__(self, rowConstraints=(5, 15), colConstraints=(5, 15)):
+    def __init__(self, parentWindow, rowConstraints=(5, 15), colConstraints=(5, 15)):
+        super().__init__(parentWindow)
         # Initialize the return values
         self.numRows = -1
         self.numCols = -1
@@ -56,12 +58,13 @@ class GetPuzzleBoardSizeDialog():
             initialCol = self.colMin
 
         # Create a new window, which will represent our modal dialog
-        self.dialogWindow = tk.Toplevel()
-        self.dialogWindow.title("Enter Puzzle Board Size")
+        self.__dialogWindow = tk.Toplevel()
+        #self.__registerDialogWindow(self.__dialogWindow)
+        self.__dialogWindow.title("Enter Puzzle Board Size")
 
         # Remove the maximize window frame options; can't seem to remove
         # the minimize option, which is nuts!
-        self.dialogWindow.resizable(False, False)
+        self.__dialogWindow.resizable(False, False)
 
         # NOTE: after each widget is created, a call is made to the pack()
         # method.  The "Pack" object is a layout manager, and the parameters
@@ -71,7 +74,7 @@ class GetPuzzleBoardSizeDialog():
         # Create a frame for holding all of the other dialog widgets; the parent
         #  of the frame will be the dialogWindow object we just created.
         # Configure the frame to fill the width and height of the dialog window
-        mainFrame = tk.Frame(master=self.dialogWindow)
+        mainFrame = tk.Frame(master=self.__dialogWindow)
         mainFrame.pack(expand=True, fill=tk.BOTH)
 
         # Create another frame (inside the mainFrame), where we will place the
@@ -119,9 +122,7 @@ class GetPuzzleBoardSizeDialog():
         # Now display the dialog as an application modal dialog; which means all of the
         # other application windows will not respond to user input, until the user closes
         # this dialog!
-        self.dialogWindow.focus_set()       # take over input focus for this application
-        self.dialogWindow.grab_set()        # disable other windows while this dialog is open
-        self.dialogWindow.wait_window()     # and wait here until the dialog window is destroyed
+        super().showDialog(self.__dialogWindow)
 
         # Return the values from the dialog as a tuple (or (-1, -1) if cancelled)
         return((self.numRows, self.numCols))

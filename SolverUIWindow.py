@@ -129,7 +129,7 @@ class SolverUIWindow():
             print("Exception during File -> Save")
             return
 
-        resizeResults = GetPuzzleBoardSizeDialog()
+        resizeResults = GetPuzzleBoardSizeDialog(self.mainWindow)
         rowVal, colVal = resizeResults.showDialog(self.numRows, self.numCols)
         print ("new puzzle size:", rowVal, colVal)
         if ((rowVal != -1) and (colVal != -1)):
