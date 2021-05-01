@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox as mb
+# from tkinter import messagebox as mb
 from PuzzleBoard import *
 from GetPuzzleBoardSizeDialog import *
 from CanvasManager import *
@@ -7,6 +7,7 @@ from PuzzleStateMachine import *
 from MasyuExceptions import *
 from Solver import *
 from FileIO import *
+from ErrorDialog import *
 
 class SolverUIWindow():
 
@@ -67,19 +68,27 @@ class SolverUIWindow():
                     self.__setWindowTitle(None)
                     # Determine which cells to disable
                     self.__determineCellsToDisable()
-                    mb.showerror("Invalid Puzzle File", message=e)
+                    # mb.showerror("Invalid Puzzle File", message=e)
+                    errorDialog = ErrorDialog(self.mainWindow)
+                    errorDialog.showDialog("Invalid Puzzle File", str(e))
 
                 self.puzzleBoardCanvasManager.refreshCanvas()
 
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            mb.showerror("Error Saving Puzzle File", message=mfse)
+            # mb.showerror("Error Saving Puzzle File", message=mfse)
+            errorDialog = ErrorDialog(self.mainWindow)
+            errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save As")
         except MasyuFileOpenException as mfoe:
-            mb.showerror("Error Opening Puzzle File", message=mfoe)
+            # mb.showerror("Error Opening Puzzle File", message=mfoe)
+            errorDialog = ErrorDialog(self.mainWindow)
+            errorDialog.showDialog("Error Opening Puzzle File", str(mfoe))
             print("Exception during File -> Open")
         except MasyuInvalidPuzzleFileException as mipfe:
-            mb.showerror("Invalid Puzzle File", message=mipfe)
+            # mb.showerror("Invalid Puzzle File", message=mipfe)
+            errorDialog = ErrorDialog(self.mainWindow)
+            errorDialog.showDialog("Invalid Puzzle File", str(mipfe))
             print("Attempted to load invalid puzzle file")
 
     def __fileExitMenuHandler(self):
@@ -91,7 +100,9 @@ class SolverUIWindow():
                 self.mainWindow.destroy()
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            mb.showerror("Error Saving Puzzle File", message=mfse)
+            # mb.showerror("Error Saving Puzzle File", message=mfse)
+            errorDialog = ErrorDialog(self.mainWindow)
+            errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Exit")
 
     def __fileSaveAsMenuHandler(self):
@@ -103,7 +114,9 @@ class SolverUIWindow():
                 self.__setWindowTitle(PuzzleStateMachine.getFileName())
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            mb.showerror("Error Saving Puzzle File", message=mfse)
+            # mb.showerror("Error Saving Puzzle File", message=mfse)
+            errorDialog = ErrorDialog(self.mainWindow)
+            errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save As")
 
     def __fileSaveMenuHandler(self):
@@ -116,7 +129,9 @@ class SolverUIWindow():
                 self.__setWindowTitle(PuzzleStateMachine.getFileName())
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            mb.showerror("Error Saving Puzzle File", message=mfse)
+            # mb.showerror("Error Saving Puzzle File", message=mfse)
+            errorDialog = ErrorDialog(self.mainWindow)
+            errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save")
 
     def __fileNewMenuHandler(self):
@@ -126,7 +141,9 @@ class SolverUIWindow():
                 return
 
         except MasyuFileSaveException as mfse:
-            mb.showerror("Error Saving Puzzle File", message=mfse)
+            # mb.showerror("Error Saving Puzzle File", message=mfse)
+            errorDialog = ErrorDialog(self.mainWindow)
+            errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save")
             return
 
