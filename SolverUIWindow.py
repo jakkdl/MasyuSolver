@@ -359,12 +359,6 @@ class SolverUIWindow():
                     (self.puzzleBoardObject.isDotAt(rowNum, colNum))):
                 return
 
-            self.puzzleBoardObject.clearSolution()
-            for r in range(0, self.numRows):
-                for c in range(0, self.numCols):
-                    self.puzzleBoardObject.setCellEnabled(r, c)
-                    self.puzzleBoardObject.setCellValid(r, c)
-
             # Set cell to active item
             if (self.selectedItem == self.blackItem):
                 self.puzzleBoardObject.setBlackCircleAt(rowNum, colNum)
@@ -372,6 +366,16 @@ class SolverUIWindow():
                 self.puzzleBoardObject.setWhiteCircleAt(rowNum, colNum)
             else:
                 self.puzzleBoardObject.setDotAt(rowNum, colNum)
+
+            # Force a refresh of the canvas, so the user sees the item
+            # placed where they selected
+            self.puzzleBoardCanvasManager.refreshCanvas()
+
+            self.puzzleBoardObject.clearSolution()
+            for r in range(0, self.numRows):
+                for c in range(0, self.numCols):
+                    self.puzzleBoardObject.setCellEnabled(r, c)
+                    self.puzzleBoardObject.setCellValid(r, c)
 
             # Set puzzleBoard state to unsolved
             self.puzzleBoardObject.setUnsolved()
