@@ -8,6 +8,7 @@ from MasyuExceptions import *
 from Solver import *
 from FileIO import *
 from ErrorDialog import *
+from WorkingWindow import *
 
 class SolverUIWindow():
 
@@ -54,7 +55,8 @@ class SolverUIWindow():
                 self.__setActiveItem(self.dotItem)
 
                 # Determine which cells to disable
-                self.__determineCellsToDisable()
+                #self.__determineCellsToDisable()
+                self.__determineCellsToDisableInThread()
 
                 try:
                     self.solver.solve(newPuzzleBoard)
@@ -67,8 +69,10 @@ class SolverUIWindow():
                     self.registerPuzzleBoard(newPuzzleBoard)
                     self.__setWindowTitle(None)
                     # Determine which cells to disable
+                    # Since the board is empty, this should be fast,
+                    # so it doesn't need to be run in a thread
                     self.__determineCellsToDisable()
-                    # mb.showerror("Invalid Puzzle File", message=e)
+
                     errorDialog = ErrorDialog(self.mainWindow)
                     errorDialog.showDialog("Invalid Puzzle File", str(e))
 
@@ -76,17 +80,14 @@ class SolverUIWindow():
 
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            # mb.showerror("Error Saving Puzzle File", message=mfse)
             errorDialog = ErrorDialog(self.mainWindow)
             errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save As")
         except MasyuFileOpenException as mfoe:
-            # mb.showerror("Error Opening Puzzle File", message=mfoe)
             errorDialog = ErrorDialog(self.mainWindow)
             errorDialog.showDialog("Error Opening Puzzle File", str(mfoe))
             print("Exception during File -> Open")
         except MasyuInvalidPuzzleFileException as mipfe:
-            # mb.showerror("Invalid Puzzle File", message=mipfe)
             errorDialog = ErrorDialog(self.mainWindow)
             errorDialog.showDialog("Invalid Puzzle File", str(mipfe))
             print("Attempted to load invalid puzzle file")
@@ -100,7 +101,6 @@ class SolverUIWindow():
                 self.mainWindow.destroy()
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            # mb.showerror("Error Saving Puzzle File", message=mfse)
             errorDialog = ErrorDialog(self.mainWindow)
             errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Exit")
@@ -114,7 +114,6 @@ class SolverUIWindow():
                 self.__setWindowTitle(PuzzleStateMachine.getFileName())
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            # mb.showerror("Error Saving Puzzle File", message=mfse)
             errorDialog = ErrorDialog(self.mainWindow)
             errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save As")
@@ -129,7 +128,6 @@ class SolverUIWindow():
                 self.__setWindowTitle(PuzzleStateMachine.getFileName())
             # Else the request was cancelled during the save request
         except MasyuFileSaveException as mfse:
-            # mb.showerror("Error Saving Puzzle File", message=mfse)
             errorDialog = ErrorDialog(self.mainWindow)
             errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save")
@@ -141,7 +139,6 @@ class SolverUIWindow():
                 return
 
         except MasyuFileSaveException as mfse:
-            # mb.showerror("Error Saving Puzzle File", message=mfse)
             errorDialog = ErrorDialog(self.mainWindow)
             errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save")
@@ -158,41 +155,13 @@ class SolverUIWindow():
             pb = PuzzleBoard(size=(rowVal, colVal))
             self.registerPuzzleBoard(pb)
 
-            # Determine which cells to disable
+            # Determine which cells to disable; since this is an
+            # empty puzzle board, it should be fast, so we don't
+            # need to run it in a thread
             self.__determineCellsToDisable()
 
             # Force a refresh
             self.puzzleBoardCanvasManager.refreshCanvas()
-
-    # Test modifying the size of the puzzle board
-    def __increaseMainCanvasSize(self, canvas):
-        numRows = canvas.numRows
-        numCols = canvas.numCols
-
-        if (numRows > 7):
-            numRows -= 2
-
-        if (numCols < 14):
-            numCols += 2
-
-        pb = PuzzleBoard(size=(numRows, numCols))
-        pb.print()
-        self.registerPuzzleBoard(pb)
-
-    # Test modifying the size of the Puzzle Board
-    def __decreaseMainCanvasSize(self, canvas):
-        numRows = canvas.numRows
-        numCols = canvas.numCols
-
-        if (numRows < 14):
-            numRows += 2
-
-        if (numCols > 7):
-            numCols -= 2
-
-        pb = PuzzleBoard(size=(numRows, numCols))
-        pb.print()
-        self.registerPuzzleBoard(pb)
 
     ############################################
     # -------- End of menu bar handlers --------
@@ -228,7 +197,8 @@ class SolverUIWindow():
             self.__setActiveItem(item)
 
             # Determine which cells to disable
-            self.__determineCellsToDisable()
+            # self.__determineCellsToDisable()
+            self.__determineCellsToDisableInThread()
 
             self.puzzleBoardCanvasManager.refreshCanvas()
 
@@ -295,6 +265,8 @@ class SolverUIWindow():
             for rowNum in range(0, self.numRows):
                 for colNum in range(0, self.numCols):
                     self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
+        else:
+            self.__determineCellsToDisableInThread()
 
         self.puzzleBoardCanvasManager.setShowDisabledCells(self.showDisabledCellsVar.get())
 
@@ -348,7 +320,20 @@ class SolverUIWindow():
 
                         clonedPuzzleBoard.clearSolution()
 
+    # This is the time-intensive "work" which is run in a
+    # separate thread, so the UI doesn't become unresponsive
+    def analyzePuzzle(self):
+        self.__determineCellsToDisable()
 
+    def __determineCellsToDisableInThread(self):
+
+        # Create a thread for doing the time-intensive work; otherwise,
+        # the main UI will appear frozen and unresponsive
+        threadHandle = Thread(target=self.analyzePuzzle, args=(), daemon=True)
+        workingWindow = WorkingWindow(self.mainWindow, threadHandle)
+
+        threadHandle.start()
+        workingWindow.showWindow()
 
     ###############################################
     # ------ End of private helper functions ------
@@ -395,9 +380,10 @@ class SolverUIWindow():
             PuzzleStateMachine.puzzleChanged()
 
             # Determine which cells to disable
-            self.__determineCellsToDisable()
 
-            #call the solver
+            self.__determineCellsToDisableInThread()
+
+            # call the solver
             try:
                 self.solver.solve(self.puzzleBoardObject)
             except MasyuSolverException as e:
