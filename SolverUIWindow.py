@@ -268,19 +268,19 @@ class SolverUIWindow():
     def __showBlockedPathsCallback(self):
         self.puzzleBoardCanvasManager.setShowBlockedPaths(self.showBlockedPathsVar.get())
 
-    def __showDisabledCellsCallback(self):
-        if not (self.showDisabledCellsVar.get()):
+    def __smartPlacementModeCallback(self):
+        if not (self.smartPlacementModeVar.get()):
             for rowNum in range(0, self.numRows):
                 for colNum in range(0, self.numCols):
                     self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
         else:
             self.__determineCellsToDisableInThread()
 
-        self.puzzleBoardCanvasManager.setShowDisabledCells(self.showDisabledCellsVar.get())
+        self.puzzleBoardCanvasManager.setShowDisabledCells(self.smartPlacementModeVar.get())
 
 
     def __determineCellsToDisable(self):
-        if not (self.showDisabledCellsVar.get()):
+        if not (self.smartPlacementModeVar.get()):
             for rowNum in range(0, self.numRows):
                 for colNum in range(0, self.numCols):
                     self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
@@ -419,24 +419,13 @@ class SolverUIWindow():
         self.numRows = 0
         self.numCols = 0
 
-        useRealColors = True
-
-        if (useRealColors):
-            frame1Color = "light grey"
-            self.itemCanvasColor = "grey"
-            frame2Color = "light grey"
-            puzzleBoardFrameColor = "light grey"
-            puzzleBoardCanvasColor = "light grey"
-            checkboxFrameColor = "light grey"
-            checkboxColor = "light grey"
-        else:
-            frame1Color = "red"
-            self.itemCanvasColor = "grey"
-            frame2Color = "green"
-            puzzleBoardFrameColor = "dark grey"
-            puzzleBoardCanvasColor = "white"
-            checkboxFrameColor = "blue"
-            checkboxColor = "blue"
+        frame1Color = "light grey"
+        self.itemCanvasColor = "grey"
+        frame2Color = "light grey"
+        puzzleBoardFrameColor = "light grey"
+        puzzleBoardCanvasColor = "light grey"
+        checkboxFrameColor = "light grey"
+        checkboxColor = "light grey"
 
         # Initialize some instance variables
         self.state = SolverUIWindow.STATE_1
@@ -465,7 +454,7 @@ class SolverUIWindow():
         self.__createItems(itemFrame)
         self.__setActiveItem(self.dotItem)
 
-        itemFrame.pack(fill=tk.X, side=tk.TOP, padx=15, pady=75)
+        itemFrame.pack(fill=tk.X, side=tk.TOP, padx=15, pady=(75, 0))
 
         # Create a frame for holding the Puzzle Board and the checkboxes
         frame2 = tk.Frame(master=mainFrame, height=50, bg=frame2Color)
@@ -476,7 +465,7 @@ class SolverUIWindow():
         # otherwise, the canvas size is wrong, because it factors in border widths
         # and highlight thicknesses.
         puzzleBoardFrame = tk.Frame(master=frame2, relief=tk.RAISED, borderwidth=5, bg=puzzleBoardFrameColor)
-        puzzleBoardFrame.pack(side=tk.TOP, pady=15)
+        puzzleBoardFrame.pack(side=tk.TOP, pady=(15, 0))
 
         # Create the Canvas in which the Puzzle Board will be drawn
         puzzleBoardCanvas = tk.Canvas(master=puzzleBoardFrame, bg=puzzleBoardCanvasColor, height=300, width=300,
@@ -486,7 +475,14 @@ class SolverUIWindow():
 
         # Create a frame for holding the checkboxes
         checkboxFrame = tk.Frame(master=frame2, bg=checkboxFrameColor, relief=tk.GROOVE, borderwidth=5)
-        checkboxFrame.pack(pady=10)
+        checkboxFrame.pack(pady=(15, 0))
+
+        self.smartPlacementModeVar = tk.BooleanVar()
+        self.smartPlacementModeVar.set(True)
+        enableSmartPlacement = tk.Checkbutton(checkboxFrame, text="Smart placement mode",
+                                              variable=self.smartPlacementModeVar,
+                                              bg=checkboxColor, command=self.__smartPlacementModeCallback)
+        enableSmartPlacement.pack(side=tk.BOTTOM, anchor=tk.W)
 
         self.showProgressVar = tk.BooleanVar()
         self.showProgressVar.set(True)
@@ -500,11 +496,12 @@ class SolverUIWindow():
                                           bg=checkboxColor, command=self.__showBlockedPathsCallback)
         showBlockedPaths.pack(side=tk.BOTTOM, anchor=tk.W)
 
-        self.showDisabledCellsVar = tk.BooleanVar()
-        self.showDisabledCellsVar.set(True)
-        showDisabledCells = tk.Checkbutton(checkboxFrame, text="Smart placement mode", variable=self.showDisabledCellsVar,
-                                           bg=checkboxColor, command=self.__showDisabledCellsCallback)
-        showDisabledCells.pack(side=tk.BOTTOM, anchor=tk.W)
+        # Create a frame for holding the push buttons
+        buttonFrame = tk.Frame(master=frame2, bg=checkboxFrameColor, relief=tk.FLAT, borderwidth=0)
+        buttonFrame.pack(pady=(15, 0))
+
+        self.bruteForceBtn = tk.Button(master=buttonFrame, state=tk.DISABLED, text="Solve", padx=30)
+        self.bruteForceBtn.pack()
 
         # Create the menubar components
         menubar = tk.Menu(self.mainWindow)
@@ -530,7 +527,7 @@ class SolverUIWindow():
 
         # Create the puzzle board canvas manager, and register our puzzle board canvas
         self.puzzleBoardCanvasManager = CanvasManager(self.puzzleBoardCanvas, self.showProgressVar.get(),
-                                                      self.showBlockedPathsVar.get(), self.showDisabledCellsVar.get())
+                                                      self.showBlockedPathsVar.get(), self.smartPlacementModeVar.get())
         self.puzzleBoardCanvasManager.registerCellSelectionCallback(self.__cellSelectionCallBack)
 
         self.solver = Solver()
