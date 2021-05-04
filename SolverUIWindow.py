@@ -61,6 +61,14 @@ class SolverUIWindow():
                 try:
                     self.solver.solve(newPuzzleBoard)
                     print("File -> Open successful")
+
+                    # Check to see if the puzzle was solved
+                    if (Utilities.checkIfPuzzleIsSolved(newPuzzleBoard)):
+                        print("puzzle solved")
+                        newPuzzleBoard.setSolved()
+                    else:
+                        print("puzzle not solved")
+                        newPuzzleBoard.setUnsolved()
                 except Exception as e:
                     # The Loaded Puzzle Board generated an exception
                     numRows, numCols = newPuzzleBoard.getDimensions()
@@ -378,7 +386,7 @@ class SolverUIWindow():
                     self.puzzleBoardObject.setCellValid(r, c)
 
             # Set puzzleBoard state to unsolved
-            self.puzzleBoardObject.setUnsolved()
+            # self.puzzleBoardObject.setUnsolved()
 
             # Need to update the solver state (see state diagram)
             PuzzleStateMachine.puzzleChanged()
@@ -390,14 +398,20 @@ class SolverUIWindow():
             # call the solver
             try:
                 self.solver.solve(self.puzzleBoardObject)
+
+                # Check to see if the puzzle was solved
+                if (Utilities.checkIfPuzzleIsSolved(self.puzzleBoardObject)):
+                    print("puzzle solved")
+                    self.puzzleBoardObject.setSolved()
+                else:
+                    print("puzzle not solved")
+                    self.puzzleBoardObject.setUnsolved()
             except MasyuSolverException as e:
                 # puzzle is invalid
                 self.puzzleBoardObject.setCellInvalid(rowNum, colNum)
                 self.puzzleBoardObject.setInvalid()
 
             self.puzzleBoardCanvasManager.refreshCanvas()
-
-            # TODO: check for solved puzzle
 
 
     # Constructor method

@@ -1,4 +1,5 @@
 from MasyuExceptions import *
+from Utilities import *
 
 class Solver():
     def solve(self,puzzleBoard):
@@ -64,7 +65,8 @@ class Solver():
             endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
             # Check if the subpath ended in the cell to our left
             if ((endingCol == (colNum - 1)) and (endingRow == rowNum)):
-                totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                # totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                totalNumCircles = Utilities.getNumberOfCircles(puzzleBoard)
                 if not (numCirclesVisited == totalNumCircles):
                     raise MasyuSolverException ("lineLeftWrapper: detected potential closed subloop", (rowNum, colNum))
                 else:
@@ -86,7 +88,8 @@ class Solver():
             endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
             # Check if the subpath ended in the cell to our right
             if ((endingCol == (colNum + 1)) and (endingRow == rowNum)):
-                totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                # totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                totalNumCircles = Utilities.getNumberOfCircles(puzzleBoard)
                 if not (numCirclesVisited == totalNumCircles):
                     raise MasyuSolverException("lineRightWrapper: detected potential closed subloop", (rowNum, colNum))
                 else:
@@ -108,7 +111,8 @@ class Solver():
             endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
             # Check if the subpath ended in the cell above
             if ((endingCol == colNum) and (endingRow == (rowNum - 1))):
-                totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                # totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                totalNumCircles = Utilities.getNumberOfCircles(puzzleBoard)
                 if not (numCirclesVisited == totalNumCircles):
                     raise MasyuSolverException("lineUpWrapper: detected potential closed subloop", (rowNum, colNum))
                 else:
@@ -130,7 +134,8 @@ class Solver():
             endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
             # Check if the subpath ended in the cell below
             if ((endingCol == colNum) and (endingRow == (rowNum + 1))):
-                totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                # totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
+                totalNumCircles = Utilities.getNumberOfCircles(puzzleBoard)
                 if not (numCirclesVisited == totalNumCircles):
                     raise MasyuSolverException("lineDownWrapper: detected potential closed subloop", (rowNum, colNum))
                 else:
@@ -191,15 +196,15 @@ class Solver():
             # We should never drop through to here!!
 
     # Returns number of circles in the puzzle
-    def __getNumberOfCircles(self, puzzleBoard):
-        numCircles = 0
-        numRows, numCols = puzzleBoard.getDimensions()
-        for rowNum in range(0, numRows):
-            for colNum in range(0, numCols):
-                if not (puzzleBoard.isDotAt(rowNum, colNum)):
-                    numCircles += 1
-
-        return (numCircles)
+    # def __getNumberOfCircles(self, puzzleBoard):
+    #     numCircles = 0
+    #     numRows, numCols = puzzleBoard.getDimensions()
+    #     for rowNum in range(0, numRows):
+    #         for colNum in range(0, numCols):
+    #             if not (puzzleBoard.isDotAt(rowNum, colNum)):
+    #                 numCircles += 1
+    #
+    #     return (numCircles)
 
     # Checks if the two cells are next to each other (abut). Returns 'True' if they do; else 'False'.
     def __cellsAbut(self, r1, c1, r2, c2):
@@ -1215,7 +1220,8 @@ class Solver():
                         # then we can complete the puzzle by drawing the line between
                         # the 2 cells; otherwise, we need to block the path between
                         # the 2 cells.
-                        numCirclesInPuzzle = self.__getNumberOfCircles(puzzleBoard)
+                        # numCirclesInPuzzle = self.__getNumberOfCircles(puzzleBoard)
+                        numCirclesInPuzzle = Utilities.getNumberOfCircles(puzzleBoard)
 
                         if (numCirclesInPuzzle == numCirclesVisited):
                             # Puzzle is solved!
@@ -1237,5 +1243,6 @@ class Solver():
         return (changesMade)
 
     def __identifyProblems(self, puzzleBoard):
-        print("__identifyProblems")
-        # todo __identifyProblems
+        #print("__identifyProblems")
+        # todo __identifyProblem
+        foo = 0
