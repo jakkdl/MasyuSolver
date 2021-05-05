@@ -19,7 +19,7 @@ class WorkingWindow():
     # Controls the maximum number of dots shown
     MAX_DOTS = 5
 
-    def __init__(self, parentWindow, threadHandle):
+    def __init__(self, parentWindow, threadHandle, customTimerHandler=None, customTimerHandlerParam=None):
         # Each thread completion check occurs at approximately 0.1
         # second increments .. so 5 of those would equal 0.5 seconds.
         # It is after that amount of time that we will show the "working"
@@ -27,6 +27,11 @@ class WorkingWindow():
         self.iterationCounter = self.INITIAL_ITERATION_COUNTER_VALUE
         self.dotCounter = self.INITIAL_DOT_COUNTER_VALUE
         self.numDots = 0
+
+        # Allow a custom hook to be specified, which will be invoked each
+        # time the timer is processed
+        self.customTimerHandler = customTimerHandler
+        self.customTimerHandlerParam = customTimerHandlerParam
 
         # Store the handle to the thread, so we can detect when it is done
         self.threadHandle = threadHandle
@@ -80,6 +85,13 @@ class WorkingWindow():
 
                 # Reset the dot counter for the next pass
                 self.dotCounter = self.INITIAL_DOT_COUNTER_VALUE
+
+            # Invoke the custom timer handler, if one was specified
+            if (self.customTimerHandler != None):
+                if (self.customTimerHandlerParam != None):
+                    self.customTimerHandler(self.customTimerHandlerParam)
+                else:
+                    self.customTimerHandler()
 
             # Reschedule checking for the thread completion
             self.dialogWindow.after(100, self.checkForThreadDone)

@@ -66,9 +66,11 @@ class SolverUIWindow():
                     if (Utilities.checkIfPuzzleIsSolved(newPuzzleBoard)):
                         print("puzzle solved")
                         newPuzzleBoard.setSolved()
+                        self.bruteForceBtn['state'] = tk.DISABLED
                     else:
                         print("puzzle not solved")
                         newPuzzleBoard.setUnsolved()
+                        self.bruteForceBtn['state'] = tk.NORMAL
                 except Exception as e:
                     # The Loaded Puzzle Board generated an exception
                     numRows, numCols = newPuzzleBoard.getDimensions()
@@ -343,6 +345,26 @@ class SolverUIWindow():
         threadHandle.start()
         workingWindow.showWindow()
 
+    def __useBruteForce(self):
+        #clonedPuzzleBoard = self.puzzleBoardObject.cloneAll()
+        #self.solver.solve(clonedPuzzleBoard)
+        print("__useBruteForce(): Not implemented yet")
+        time.sleep(1)
+
+    # Custom timer handler, which monitors the thread events
+    def __bruteForceTimerHandler(self):
+        print ("__bruteForceTimerHandler(): Not implemented yet")
+
+    # This is the command attached to the 'Solve' button.  It attempts to
+    # solve the puzzle using a brute force approach.  The work is done in
+    # a different thread, to keep the UI from becoming unresponsive.
+    def __tryBruteForceSolvingInThread(self):
+        threadHandle = Thread(target=self.__useBruteForce, args=(), daemon=True)
+        workingWindow = WorkingWindow(self.mainWindow, threadHandle, self.__bruteForceTimerHandler)
+
+        threadHandle.start()
+        workingWindow.showWindow()
+
     ###############################################
     # ------ End of private helper functions ------
     ###############################################
@@ -403,9 +425,11 @@ class SolverUIWindow():
                 if (Utilities.checkIfPuzzleIsSolved(self.puzzleBoardObject)):
                     print("puzzle solved")
                     self.puzzleBoardObject.setSolved()
+                    self.bruteForceBtn['state'] = tk.DISABLED
                 else:
                     print("puzzle not solved")
                     self.puzzleBoardObject.setUnsolved()
+                    self.bruteForceBtn['state'] = tk.NORMAL
             except MasyuSolverException as e:
                 # puzzle is invalid
                 self.puzzleBoardObject.setCellInvalid(rowNum, colNum)
@@ -500,7 +524,8 @@ class SolverUIWindow():
         buttonFrame = tk.Frame(master=frame2, bg=checkboxFrameColor, relief=tk.FLAT, borderwidth=0)
         buttonFrame.pack(pady=(15, 0))
 
-        self.bruteForceBtn = tk.Button(master=buttonFrame, state=tk.DISABLED, text="Solve", padx=30)
+        self.bruteForceBtn = tk.Button(master=buttonFrame, state=tk.DISABLED, text="Solve", padx=30,
+                                       command=self.__tryBruteForceSolvingInThread)
         self.bruteForceBtn.pack()
 
         # Create the menubar components
