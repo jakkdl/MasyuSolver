@@ -19,7 +19,12 @@ class WorkingWindow():
     # Controls the maximum number of dots shown
     MAX_DOTS = 5
 
-    def __init__(self, parentWindow, threadHandle, customTimerHandler=None, customTimerHandlerParam=None):
+    def __cancelButtonCallback(self):
+        print("cancel")
+        if (self.cancelButtonHandler != None):
+            self.cancelButtonHandler()
+
+    def __init__(self, parentWindow, threadHandle, customTimerHandler=None, customTimerHandlerParam=None, cancelButtonHandler=None):
         # Each thread completion check occurs at approximately 0.1
         # second increments .. so 5 of those would equal 0.5 seconds.
         # It is after that amount of time that we will show the "working"
@@ -32,6 +37,9 @@ class WorkingWindow():
         # time the timer is processed
         self.customTimerHandler = customTimerHandler
         self.customTimerHandlerParam = customTimerHandlerParam
+
+        # Save the optional Cancel button callback
+        self.cancelButtonHandler = cancelButtonHandler
 
         # Store the handle to the thread, so we can detect when it is done
         self.threadHandle = threadHandle
@@ -48,7 +56,14 @@ class WorkingWindow():
         self.workingMessage = tk.StringVar()
         self.workingMessage.set(self.WORKING_MESSAGE + "      ")
         self.message = tk.Label(master=self.messageFrame, textvariable=self.workingMessage)
-        self.message.pack(side=tk.LEFT, padx=20, pady=20, anchor=tk.SW)
+        self.message.pack(side=tk.TOP, padx=20, pady=20, anchor=tk.SW)
+
+        # Only display a Cancel button if a callback was provided.
+        if (cancelButtonHandler != None):
+            self.cancelButton = tk.Button(master=self.messageFrame, text="Cancel", command=self.__cancelButtonCallback, width=10)
+            self.cancelButton.pack(side=tk.TOP, pady=(0,15))
+        else:
+            self.cancelButton = None
 
     # Our only option for detecting when the thread has completed (so that
     # we can stop showing the "working" window), is to periodically poll
