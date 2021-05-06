@@ -34,3 +34,14 @@ class MasyuInvalidPuzzleFileException(MasyuException):
 
     def __init__(self, msg):
         super().__init__(msg)
+
+class MasyuOrphanedRegionException(MasyuException):
+    '''Exception encountered during the processing of orphaned regions'''
+
+    def __init__(self, msg, startingLocation, endingLocation):
+        super().__init__(msg)
+        self.startingLocation = startingLocation    # this is a tuple
+        self.endingLocation = endingLocation  # this is a tuple
+
+    def __str__(self):
+        return(self.msg + " : " + repr(self.startingLocation) + " - " + repr(self.endingLocation))

@@ -46,6 +46,14 @@ class Utilities():
 
         return (numCircles)
 
+    # Enable all the cells in the specified puzzle board
+    @ classmethod
+    def enableAllCells(cls, puzzleBoard):
+        numRows, numCols = puzzleBoard.getDimensions
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                puzzleBoard.setCellEnabled(rowNum, colNum)
+
     # A puzzle is solved when there is a single closed path, which travels through
     # all of the circles in the puzzle.
     @classmethod
