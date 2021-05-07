@@ -1,7 +1,11 @@
 from MasyuExceptions import *
 from Utilities import *
+from OrphanedRegions import *
 
 class Solver():
+    def __init__(self):
+        self.__orphanedRegionDetector = OrphanedRegions()
+
     def solve(self,puzzleBoard):
         changed = True
         # You can't terminate the solving loop when the puzzle becomes solved, because this ends up
@@ -9,7 +13,11 @@ class Solver():
         # solving loop prematurely exited because it thought the puzzle was solved .. even though
         # the "solving" happened in the clone board, while trying to determine which cells needed to
         # be disabled!
-        #while (changed and puzzleBoard.isUnsolved()):
+
+        # Temporary flag to allow disabling of the orphaned region code,
+        # until the point where the bugs have been worked out
+        orphanedRegionCheckEnabled = False
+
         while (changed):
             changed = False
             changed = changed or self.__processSpecialCases(puzzleBoard)
@@ -33,6 +41,11 @@ class Solver():
             changed = changed or self.__processSubPaths(puzzleBoard)
             # print("Changed is = ", changed)
             changed = changed or self.__identifyProblems(puzzleBoard)
+
+            if not (changed) and orphanedRegionCheckEnabled:
+                # After all other processing has completed, we will check for
+                # problems caused by orphaned regions.
+                changed = self.__orphanedRegionDetector.checkForOrphanedRegions(puzzleBoard)
 
     def __updateBlockedPathways(self, puzzleBoard, rowNum, colNum):
         lineCount, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)

@@ -316,7 +316,7 @@ class SolverUIWindow():
 
                     try:
                         self.solver.solve(clonedPuzzleBoard)
-                    except MasyuSolverException as e:
+                    except (MasyuSolverException, MasyuOrphanedRegionException) as e:
                         self.puzzleBoardObject.setCellDisabled(rowNum, colNum)
                     else:
                         self.puzzleBoardObject.setCellEnabled(rowNum, colNum)

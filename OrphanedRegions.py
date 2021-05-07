@@ -107,7 +107,7 @@ class OrphanedRegions():
                 return (pb.isOpenLeft(rowNum, colNum) and pb.isOpenRight(rowNum, colNum))
             elif ((edges == self.LEFT) or (edges == self.RIGHT) or (edges == self.BOTTOM_LEFT) or
                   (edges == self.BOTTOM_RIGHT) or (edges == self.LEFT_RIGHT)):
-                return (pb.IsOpenUp(rowNum, colNum) and pb.isOpenDown(rowNum, colNum))
+                return (pb.isOpenUp(rowNum, colNum) and pb.isOpenDown(rowNum, colNum))
         else:  # (pointId == self.END)
             if ((edges == self.TOP) or (edges == self.BOTTOM) or (edges == self.BOTTOM_LEFT) or
                     (edges == self.BOTTOM_RIGHT) or (edges == self.TOP_BOTTOM)):
@@ -295,6 +295,11 @@ class OrphanedRegions():
     #       number of circles outside the region
     def countCirclesInOrphanedRegion(self, pb, region, edges):
         clone = pb.cloneBoardOnly()
+        print("pb=", pb)
+        print("clone=", clone)
+        print("region=", region)
+        print("edges=", edges)
+        print("-------")
         Utilities.enableAllCells(clone)
         numRows, numCols = clone.getDimensions()
 
@@ -339,13 +344,45 @@ class OrphanedRegions():
                                 # If it is a straight line through the cell, then it counts as a crossing
                                 if ((l and r) or (u and d)):
                                     crossings += 1
-                                elif ((quadrant == self.Q1) or (quadrant == self.Q4)):
+                                elif (quadrant == self.Q1):
                                     # Only certain lines are considered a crossing
                                     if ((l and u) or (r and d)):
                                         crossings += 1
-                                elif ((quadrant == self.Q2) or (quadrant == self.Q3)):
+                                    elif (((nextCellRowNum == 0) and ((crossings % 2) == 1) and d) or
+                                          ((nextCellColNum == 0) and ((crossings % 2) == 1) and r)):
+                                        # At the puzzle board boundary, if we are currently inside the
+                                        # region and we cross over the boundary where the region also
+                                        # meets with the boundary, then we need to count that as a crossing.
+                                        crossings += 1
+                                elif  (quadrant == self.Q4):
+                                    # Only certain lines are considered a crossing
+                                    if ((l and u) or (r and d)):
+                                        crossings += 1
+                                    elif (((nextCellRowNum == (numRows - 1)) and ((crossings % 2) == 1) and u) or
+                                          ((nextCellColNum == (numCols - 1)) and ((crossings % 2) == 1) and l)):
+                                        # At the puzzle board boundary, if we are currently inside the
+                                        # region and we cross over the boundary where the region also
+                                        # meets with the boundary, then we need to count that as a crossing.
+                                        crossings += 1
+                                elif (quadrant == self.Q2):
                                     # Only certain lines are considered a crossing
                                     if ((l and d) or (r and u)):
+                                        crossings += 1
+                                    elif (((nextCellRowNum == 0) and ((crossings % 2) == 1) and d) or
+                                          ((nextCellColNum == (numCols - 1)) and ((crossings % 2) == 1) and l)):
+                                        # At the puzzle board boundary, if we are currently inside the
+                                        # region and we cross over the boundary where the region also
+                                        # meets with the boundary, then we need to count that as a crossing.
+                                        crossings += 1
+                                elif (quadrant == self.Q3):
+                                    # Only certain lines are considered a crossing
+                                    if ((l and d) or (r and u)):
+                                        crossings += 1
+                                    elif (((nextCellRowNum == (numRows - 1)) and ((crossings % 2) == 1) and u) or
+                                          ((nextCellColNum == 0) and ((crossings % 2) == 1) and r)):
+                                        # At the puzzle board boundary, if we are currently inside the
+                                        # region and we cross over the boundary where the region also
+                                        # meets with the boundary, then we need to count that as a crossing.
                                         crossings += 1
                             elif not (clone.isCellEnabled(nextCellRowNum, nextCellColNum)):
                                 # Entering a disabled cell (the "implied" boundary) counts as a crossing
@@ -555,17 +592,19 @@ class OrphanedRegions():
                 self.hasLineIn(clone, self.END, edges, endCellRowNum, endCellColNum)):
                 raise MasyuOrphanedRegionException("Error 5 - Invalid puzzle", startCell, endCell)
 
-            # If both ends of the line are open, and if there are no circles inside the region
-            # but there are circles on the outside,
+            # If one or both ends of the line are open, and if there are no circles
+            # inside the region, but there are circles on the outside,
             # then we can block the paths into the region, since they are invalid anyways. We
             # need to do this in the puzzle board which was passed in .. not in the clone we're
             # using to do our work in!
-            if ((numCirclesInside == 0) and (numCirclesOutside > 0) and
-                    self.isOpen(clone, self.START, edges, startCellRowNum, startCellColNum) and
-                    self.isOpen(clone, self.END, edges, endCellRowNum, endCellColNum)):
-                self.blockPathIn(pb, self.START, edges, startCellRowNum, startCellColNum)
-                self.blockPathIn(pb, self.END, edges, endCellRowNum, endCellColNum)
-                changesMade = True
+            if ((numCirclesInside == 0) and (numCirclesOutside > 0)):
+                if (self.isOpen(clone, self.START, edges, startCellRowNum, startCellColNum)):
+                    self.blockPathIn(pb, self.START, edges, startCellRowNum, startCellColNum)
+                    changesMade = True
+
+                if (self.isOpen(clone, self.END, edges, endCellRowNum, endCellColNum)):
+                    self.blockPathIn(pb, self.END, edges, endCellRowNum, endCellColNum)
+                    changesMade = True
 
             # Case 1:
             # Both ends have lines leading away from the region, but there are circles inside
