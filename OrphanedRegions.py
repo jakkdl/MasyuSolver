@@ -508,7 +508,7 @@ class OrphanedRegions():
     #
     # Each orphaned region starts where the line left the puzzle board edge, and ends
     # where it comes back in contact with the puzzle board edge.
-    def checkForOrphanedCircles(self, pb):
+    def checkForOrphanedRegions(self, pb):
         orphanedRegions = []
         changesMade = False
 
