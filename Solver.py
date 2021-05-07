@@ -16,7 +16,7 @@ class Solver():
 
         # Temporary flag to allow disabling of the orphaned region code,
         # until the point where the bugs have been worked out
-        orphanedRegionCheckEnabled = False
+        orphanedRegionCheckEnabled = True
 
         while (changed):
             changed = False

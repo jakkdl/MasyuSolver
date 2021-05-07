@@ -272,7 +272,7 @@ class OrphanedRegions():
             self.markRowImpliedBoundary(pb, (numRows - 1), 0, regionEndCol)
         else:   # edges == self.LEFT_RIGHT
             # Implied boundary is first row, and first and last columns
-            self.markColImpliedBoundary(pb, 0, 0, regionEndRow)
+            self.markColImpliedBoundary(pb, 0, 0, regionStartRow)
             self.markRowImpliedBoundary(pb, 0, 1, (numCols - 1))
             self.markColImpliedBoundary(pb, (numCols - 1), 0, regionEndRow)
 
@@ -534,6 +534,30 @@ class OrphanedRegions():
             elif (edges == self.BOTTOM_RIGHT):
                 pb.markBlockedRight(rowNum, colNum)
 
+    # In the rare case where a region starts on the left edge and goes to the right
+    # edge, it is possible that the end cell came before the start cell .. which breaks
+    # and assumption made by this code (that the start cell always comes first).  In this
+    # situation, we need to reverse the order of the cells in the region (normalizing the
+    # list).
+    def normalizeRegions(self, pb, orphanedRegions):
+        normalizedRegions = []
+        numRows, numCols = pb.getDimensions()
+
+        for region in orphanedRegions:
+            startCellRowNum, startCellColNum = region[0]
+            endCellRowNum, endCellColNum = region[-1]
+
+            if ((startCellColNum == 0) and (endCellColNum == (numCols - 1)) and
+                    (startCellRowNum > endCellRowNum)):
+                # Reverse the order of the cells defining the region
+                normalizedRegion = region.reverse()
+                normalizedRegions.append(normalizedRegion)
+            else:
+                # No need to normalize this region
+                normalizedRegions.append(region)
+
+        return(normalizedRegions)
+
     # This method is responsible for searching the puzzle board to see if there exists any orphaned regions.
     # an orphaned region is formed when a pathway (line) forms a closed region with 1-2 sides of the region
     # being formed by the edges of the puzzle board.  Although not always a problem, they can be a problem
@@ -554,11 +578,20 @@ class OrphanedRegions():
         clone.clearAllCellProcessedFlags()
 
         # Search for orphaned regions starting in:
-        #   (1) top row  (2) bottom row   (3) left column   (4) right column
+        #   (1) top row  (2) left column   (3) right column  (4) bottom row
+        # Note that it is critical that the search be done in the above order!
+        # With the exception of one case (where the region runs from the left edge
+        # to the right edge), this order guarantees that the "start" cell comes
+        # before the "end" cell .. and is thus "normalized".
         orphanedRegions = self.findOrphanedRegions(clone, self.TOP_ROW, orphanedRegions)
-        orphanedRegions = self.findOrphanedRegions(clone, self.BOTTOM_ROW, orphanedRegions)
         orphanedRegions = self.findOrphanedRegions(clone, self.LEFT_COLUMN, orphanedRegions)
         orphanedRegions = self.findOrphanedRegions(clone, self.RIGHT_COLUMN, orphanedRegions)
+        orphanedRegions = self.findOrphanedRegions(clone, self.BOTTOM_ROW, orphanedRegions)
+
+        # We need to "normalize" the regions; the general assumption by the processing code
+        # is that the points (cells) defining the region are ordered in such a way that the
+        # starting cell comes first (when scanning the puzzle board in "t->b, l->r" order.
+        orphanedRegions = self.normalizeRegions(clone, orphanedRegions)
 
         # If there are any orphaned regions, then check to see if they violate the puzzle rules
         totalNumCircles = Utilities.getNumberOfCircles(clone)
