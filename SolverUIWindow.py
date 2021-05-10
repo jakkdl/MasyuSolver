@@ -9,6 +9,8 @@ from Solver import *
 from FileIO import *
 from ErrorDialog import *
 from WorkingWindow import *
+from ProgressDialog import *
+import threading
 
 class SolverUIWindow():
 
@@ -348,22 +350,49 @@ class SolverUIWindow():
     def __useBruteForce(self):
         #clonedPuzzleBoard = self.puzzleBoardObject.cloneAll()
         #self.solver.solve(clonedPuzzleBoard)
-        print("__useBruteForce(): Not implemented yet")
-        time.sleep(1)
+        for i in range (0, 5):
+            time.sleep(5)
+            self.__showResults.set()
+            while ((not self.__cancelEvent.isSet()) and (not self.__resumeEvent.isSet())):
+                time.sleep(0.1)
+            if (self.__cancelEvent.isSet()):
+                self.__cancelEvent.clear()
+                self.__bruteForceResult = None
+                return
+            else:
+                self.__resumeEvent.clear()
 
     # Custom timer handler, which monitors the thread events
     def __bruteForceTimerHandler(self):
-        print ("__bruteForceTimerHandler(): Not implemented yet")
+        if (self.__showResults.isSet()):
+            self.__showResults.clear()
+            self.__progressDialog = ProgressDialog(self.__workingWindow, self.__bruteForceResult, self.__cancelEvent, self.__resumeEvent)
+            self.__progressDialog.showDialog()
 
     # This is the command attached to the 'Solve' button.  It attempts to
     # solve the puzzle using a brute force approach.  The work is done in
     # a different thread, to keep the UI from becoming unresponsive.
     def __tryBruteForceSolvingInThread(self):
+        self.bruteForceBtn['state'] = tk.DISABLED
+        self.__bruteForceResult = self.puzzleBoardObject
         threadHandle = Thread(target=self.__useBruteForce, args=(), daemon=True)
-        workingWindow = WorkingWindow(self.mainWindow, threadHandle, self.__bruteForceTimerHandler)
+        self.__cancelEvent = threading.Event()
+        self.__cancelEvent.clear()
+        self.__resumeEvent = threading.Event()
+        self.__resumeEvent.clear()
+        self.__showResults = threading.Event()
+        self.__showResults.clear()
+        self.__workingWindow = WorkingWindow(self.mainWindow, threadHandle, self.__bruteForceTimerHandler)
 
         threadHandle.start()
-        workingWindow.showWindow()
+        self.__workingWindow.showWindow()
+
+        if (self.__bruteForceResult != None):
+            self.registerPuzzleBoard(self.__bruteForceResult)
+
+        else:
+            print("No solution found")
+            #TODO: Add No Solution Found Dialog
 
     ###############################################
     # ------ End of private helper functions ------
