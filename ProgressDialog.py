@@ -14,12 +14,12 @@ class ProgressDialog(MasyuDialog):
     def cancelHandler(self):
         self.__cancelButton['state'] = tk.DISABLED
         self.__cancelEvent.set()
-        self.__topLevel.destroy()
+        self.__toplevel.destroy()
 
     def resumeHandler(self):
         self.__resumeButton['state'] = tk.DISABLED
         self.__resumeEvent.set()
-        self.__topLevel.destroy()
+        self.__toplevel.destroy()
 
     def showDialog(self):
         self.__toplevel = tk.Toplevel()
@@ -40,6 +40,8 @@ class ProgressDialog(MasyuDialog):
         self.__cancelButton.grid(row=0, column=0, padx=(2, 35), pady=(15, 15), sticky="e")
         self.__resumeButton = tk.Button(buttonFrame, text="Resume", command=self.resumeHandler, width=10)
         self.__resumeButton.grid(row=0, column=1, padx=(2, 35), pady=(15, 15), sticky="e")
+
+        super().showDialog(self.__toplevel)
 
 if __name__ == '__main__':
 

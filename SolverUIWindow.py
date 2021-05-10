@@ -366,8 +366,11 @@ class SolverUIWindow():
     def __bruteForceTimerHandler(self):
         if (self.__showResults.isSet()):
             self.__showResults.clear()
-            self.__progressDialog = ProgressDialog(self.__workingWindow, self.__bruteForceResult, self.__cancelEvent, self.__resumeEvent)
+            self.__progressDialog = ProgressDialog(self.__workingWindow.getDialogWindow(), self.__bruteForceResult, self.__cancelEvent, self.__resumeEvent)
             self.__progressDialog.showDialog()
+            return (True)
+        else:
+            return (False)
 
     # This is the command attached to the 'Solve' button.  It attempts to
     # solve the puzzle using a brute force approach.  The work is done in
@@ -392,6 +395,7 @@ class SolverUIWindow():
 
         else:
             print("No solution found")
+            self.bruteForceBtn['state'] = tk.NORMAL
             #TODO: Add No Solution Found Dialog
 
     ###############################################

@@ -65,6 +65,9 @@ class WorkingWindow():
         else:
             self.cancelButton = None
 
+    def getDialogWindow(self):
+        return (self.dialogWindow)
+
     # Our only option for detecting when the thread has completed (so that
     # we can stop showing the "working" window), is to periodically poll
     # the status of the thread.
@@ -104,9 +107,13 @@ class WorkingWindow():
             # Invoke the custom timer handler, if one was specified
             if (self.customTimerHandler != None):
                 if (self.customTimerHandlerParam != None):
-                    self.customTimerHandler(self.customTimerHandlerParam)
+                    raiseParentWindow = self.customTimerHandler(self.customTimerHandlerParam)
                 else:
-                    self.customTimerHandler()
+                    raiseParentWindow = self.customTimerHandler()
+
+                if (raiseParentWindow):
+                    self.parentWindow.lift()
+                    self.dialogWindow.lift()
 
             # Reschedule checking for the thread completion
             self.dialogWindow.after(100, self.checkForThreadDone)
