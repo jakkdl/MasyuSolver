@@ -2,6 +2,7 @@ from MasyuDialog import *
 import tkinter as tk
 from threading import Thread
 from PuzzleBoard import *
+from CanvasManager import *
 
 class ProgressDialog(MasyuDialog):
     def __init__(self, parentWindow, puzzleBoard, cancelEvent, resumeEvent):
@@ -22,13 +23,16 @@ class ProgressDialog(MasyuDialog):
 
     def showDialog(self):
         self.__toplevel = tk.Toplevel()
-        puzzleBoardFrame = tk.Frame(master=self.__toplevel, relief=tk.RAISED, borderwidth=5, bg="grey")
+        puzzleBoardFrame = tk.Frame(master=self.__toplevel, relief=tk.RAISED, highlightthickness=0, borderwidth=10)
         puzzleBoardFrame.grid(row=0, column=0)
 
         # Create the Canvas in which the Puzzle Board will be drawn
-        puzzleBoardCanvas = tk.Canvas(master=puzzleBoardFrame, bg='grey', height=300, width=300,
+        self.__puzzleBoardCanvas = tk.Canvas(master=puzzleBoardFrame, height=300, width=300,
                                       highlightthickness=0, relief=tk.FLAT, borderwidth=0)
-        puzzleBoardCanvas.grid(row=0, column=0)
+        self.__puzzleBoardCanvas.grid(row=0, column=0)
+
+        self.__canvasManager = CanvasManager(self.__puzzleBoardCanvas, True, True, True)
+        self.__canvasManager.registerPuzzleBoard(self.__puzzleBoard)
 
         buttonFrame = tk.Frame(master=self.__toplevel, relief=tk.RAISED, borderwidth=0)
         buttonFrame.grid(row=1, column=0)
