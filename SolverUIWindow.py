@@ -36,6 +36,11 @@ class SolverUIWindow():
     BLACK_ITEM = 1
     DOT_ITEM = 2
 
+    LEFT = 0
+    RIGHT = 1
+    UP = 2
+    DOWN =3
+
     ############################################
     # -------- Start of menu bar handlers ------
     ############################################
@@ -347,20 +352,156 @@ class SolverUIWindow():
         threadHandle.start()
         workingWindow.showWindow()
 
+    def __findBlackCircleWithOneLine(self, pb):
+        numRows, numCols = pb.getDimensions()
+        for rowNum in range (0, numRows):
+            for colNum in range (0, numCols):
+                if (pb.isBlackCircleAt(rowNum, colNum)):
+                    numLines, l, r, u, d = pb.getLines(rowNum, colNum)
+                    if (numLines == 1):
+                        numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
+                        if (u):
+                            return((rowNum, colNum, self.UP))
+                        if (d):
+                            return((rowNum, colNum, self.DOWN))
+                        if (l):
+                            return((rowNum, colNum, self.LEFT))
+                        if (r):
+                            return((rowNum, colNum, self.RIGHT))
+
+                        return ((-1, -1, -1))
+
+        return ((-1, -1, -1))
+
+    def __findWhiteCircleWithNoLines(self, pb):
+        return ((-1, -1, -1))
+
+    def __findBlackCircleWithNoLines(self, pb):
+        return ((-1, -1, -1))
+
+    def __findDotWithOneLine(self, pb):
+        return ((-1, -1, -1))
+
+    def __findNextGuess(self, pb):
+        rowNum, colNum, direction = self.__findBlackCircleWithOneLine(pb)
+        if ((rowNum != -1) and (colNum != -1)):
+            return (rowNum, colNum, direction)
+
+        rowNum, colNum, direction = self.__findWhiteCircleWithNoLines(pb)
+        if ((rowNum != -1) and (colNum != -1)):
+            return (rowNum, colNum, direction)
+
+        rowNum, colNum, direction = self.__findBlackCircleWithNoLines(pb)
+        if ((rowNum != -1) and (colNum != -1)):
+            return (rowNum, colNum, direction)
+
+        rowNum, colNum, direction = self.__findDotWithOneLine(pb)
+        if ((rowNum != -1) and (colNum != -1)):
+            return (rowNum, colNum, direction)
+
+        return ((-1,-1,-1))
+
+    def __findNextDirection(self, pb, lastGuess):
+        return ((-1, -1, -1))
+
+    def __applyNextGuess(self, pb, nextGuess):
+        pbClone = pb.cloneAll()
+        rowNum, colNum, direction = nextGuess
+        if (direction == self.UP):
+            self.solver.__drawLineUpWrapper(pbClone,rowNum, colNum)
+        elif (direction == self.DOWN):
+            self.solver.__drawLineDownWrapper(pbClone, rowNum, colNum)
+        elif (direction == self.LEFT):
+            self.solver.drawLineLeftWrapper(pbClone, rowNum, colNum)
+        elif (direction == self.RIGHT):
+            self.solver.__drawLineRightWrapper(pbClone, rowNum, colNum)
+
+        return(pbClone)
+
+    def __showInterimResults(self, pb):
+        self.__bruteForceResult = pb
+        self.__showResults.set()
+
+        while ((not self.__cancelEvent.isSet()) and (not self.__resumeEvent.isSet())):
+            time.sleep(0.1)
+
+        if (self.__cancelEvent.isSet()):
+            self.__cancelEvent.clear()
+            self.__bruteForceResult = None
+            return
+        else:
+            self.__resumeEvent.clear()
+
+
     def __useBruteForce(self):
+        pbClone = self.puzzleBoardObject
+        cloneStack = []
+        guessStack = []
+
+        nextGuess = self.__findNextGuess(pbClone)
+        rowNum, colNum, direction = nextGuess
+
+        if ((rowNum == -1) and (colNum == -1)):
+            self.__bruteForceResult = None
+            return
+
+        while (True):
+            guessStack.append(nextGuess)
+            pbClone = self.__applyNextGuess (pbClone, nextGuess)
+            cloneStack.append(pbClone)
+            self.__showInterimResults(pbClone)
+
+            try:
+                if (self.__cancelEvent.isSet()):
+                    self.__cancelEvent.clear()
+                    self.__bruteForceResult = None
+                    return
+
+                Solver.solve(pbClone)
+                self.__showInterimResults(pbClone)
+
+            except Exception as e:
+                rowNum = -1
+                colNum = -1
+
+            else:
+                if (Utilities.checkIfPuzzleIsSolved(pbClone)):
+                    self.__bruteForceResult = pbClone
+                    return
+
+                nextGuess = self.__findNextGuess(pbClone)
+                rowNum, colNum, direction = nextGuess
+
+            finally:
+                while ((rowNum == -1) and (colNum == -1)):
+                    if (len (guessStack) <= 0):
+                        self.__bruteForceResult = None
+                        return
+
+                    cloneStack.pop()
+                    lastGuess = guessStack.pop()
+                    if (len (cloneStack) <= 0):
+                        self.__bruteForceResult = None
+                        return
+
+                    pbClone = cloneStack[-1]
+                    nextGuess = self.__findNextDirection(pbClone, lastGuess)
+                    rowNum, colNum, direction = nextGuess
+
+
         #clonedPuzzleBoard = self.puzzleBoardObject.cloneAll()
         #self.solver.solve(clonedPuzzleBoard)
-        for i in range (0, 5):
-            time.sleep(5)
-            self.__showResults.set()
-            while ((not self.__cancelEvent.isSet()) and (not self.__resumeEvent.isSet())):
-                time.sleep(0.1)
-            if (self.__cancelEvent.isSet()):
-                self.__cancelEvent.clear()
-                self.__bruteForceResult = None
-                return
-            else:
-                self.__resumeEvent.clear()
+        # for i in range (0, 5):
+        #     time.sleep(5)
+        #     self.__showResults.set()
+        #     while ((not self.__cancelEvent.isSet()) and (not self.__resumeEvent.isSet())):
+        #         time.sleep(0.1)
+        #     if (self.__cancelEvent.isSet()):
+        #         self.__cancelEvent.clear()
+        #         self.__bruteForceResult = None
+        #         return
+        #     else:
+        #         self.__resumeEvent.clear()
 
     # Custom timer handler, which monitors the thread events
     def __bruteForceTimerHandler(self):

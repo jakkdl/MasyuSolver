@@ -65,6 +65,8 @@ class Solver():
         elif (lineCount > 2):
             raise MasyuSolverException("Cell has more than 2 lines", (rowNum, colNum))
 
+    def drawLineLeftWrapper(self, puzzleBoard, rowNum, colNum):
+        self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
 
     # The following methods are "wrappers" for the four "drawLine" methods of the PuzzleBoard
     # class.  They not only draw the line, but they then immediately call the method which
