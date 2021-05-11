@@ -68,6 +68,15 @@ class Solver():
     def drawLineLeftWrapper(self, puzzleBoard, rowNum, colNum):
         self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
 
+    def drawLineRightWrapper(self, puzzleBoard, rowNum, colNum):
+        self.__drawLineRightWrapper(puzzleBoard, rowNum, colNum)
+
+    def drawLineUpWrapper(self, puzzleBoard, rowNum, colNum):
+        self.__drawLineUpWrapper(puzzleBoard, rowNum, colNum)
+
+    def drawLineDownWrapper(self, puzzleBoard, rowNum, colNum):
+        self.__drawLineDownWrapper(puzzleBoard, rowNum, colNum)
+
     # The following methods are "wrappers" for the four "drawLine" methods of the PuzzleBoard
     # class.  They not only draw the line, but they then immediately call the method which
     # blocks paths affected by the line we just drew

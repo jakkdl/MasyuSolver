@@ -402,19 +402,49 @@ class SolverUIWindow():
         return ((-1,-1,-1))
 
     def __findNextDirection(self, pb, lastGuess):
+        rowNum, colNum, direction = lastGuess
+        if (pb.isBlackCircleAt(rowNum, colNum)):
+            numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
+            if (direction == self.UP):
+                if (d):
+                    return ((rowNum, colNum, self.DOWN))
+                elif (l):
+                    return ((rowNum, colNum, self.LEFT))
+                elif (r):
+                    return ((rowNum, colNum, self.RIGHT))
+
+            elif (direction == self.DOWN):
+                if (l):
+                    return ((rowNum, colNum, self.LEFT))
+                elif (r):
+                    return ((rowNum, colNum, self.RIGHT))
+
+            elif (direction == self.LEFT):
+                if (r):
+                    return ((rowNum, colNum, self.RIGHT))
+
         return ((-1, -1, -1))
 
     def __applyNextGuess(self, pb, nextGuess):
         pbClone = pb.cloneAll()
         rowNum, colNum, direction = nextGuess
+        isBlackCircle = pb.isBlackCircleAt(rowNum, colNum)
         if (direction == self.UP):
-            self.solver.__drawLineUpWrapper(pbClone,rowNum, colNum)
+            self.solver.drawLineUpWrapper(pbClone,rowNum, colNum)
+            #if (isBlackCircle):
+                #self.solver.drawLineUpWrapper(pbClone, (rowNum - 1), colNum)
         elif (direction == self.DOWN):
-            self.solver.__drawLineDownWrapper(pbClone, rowNum, colNum)
+            self.solver.drawLineDownWrapper(pbClone, rowNum, colNum)
+            #if (isBlackCircle):
+                #self.solver.drawLineDownWrapper(pbClone, (rowNum + 1), colNum)
         elif (direction == self.LEFT):
             self.solver.drawLineLeftWrapper(pbClone, rowNum, colNum)
+            #if (isBlackCircle):
+                #self.solver.drawLineLeftWrapper(pbClone, rowNum, (colNum - 1))
         elif (direction == self.RIGHT):
-            self.solver.__drawLineRightWrapper(pbClone, rowNum, colNum)
+            self.solver.drawLineRightWrapper(pbClone, rowNum, colNum)
+            #if (isBlackCircle):
+                #self.solver.drawLineRightWrapper(pbClone, rowNum, (colNum + 1))
 
         return(pbClone)
 
@@ -428,14 +458,16 @@ class SolverUIWindow():
         if (self.__cancelEvent.isSet()):
             self.__cancelEvent.clear()
             self.__bruteForceResult = None
-            return
+            return (False)
         else:
             self.__resumeEvent.clear()
+            return (True)
 
 
     def __useBruteForce(self):
-        pbClone = self.puzzleBoardObject
+        pbClone = self.puzzleBoardObject.cloneAll()
         cloneStack = []
+        cloneStack.append(pbClone)
         guessStack = []
 
         nextGuess = self.__findNextGuess(pbClone)
@@ -449,7 +481,8 @@ class SolverUIWindow():
             guessStack.append(nextGuess)
             pbClone = self.__applyNextGuess (pbClone, nextGuess)
             cloneStack.append(pbClone)
-            self.__showInterimResults(pbClone)
+            if (self.__showInterimResults(pbClone) == False):
+                return
 
             try:
                 if (self.__cancelEvent.isSet()):
@@ -457,8 +490,9 @@ class SolverUIWindow():
                     self.__bruteForceResult = None
                     return
 
-                Solver.solve(pbClone)
-                self.__showInterimResults(pbClone)
+                self.solver.solve(pbClone)
+                if (self.__showInterimResults(pbClone) == False):
+                    return
 
             except Exception as e:
                 rowNum = -1
