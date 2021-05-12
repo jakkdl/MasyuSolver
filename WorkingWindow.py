@@ -132,7 +132,7 @@ class WorkingWindow():
         # window to avoid update_idletasks() drawing the window in the wrong
         # position.
         self.dialogWindow.withdraw()
-        self.dialogWindow.config(cursor='watch')
+        #self.dialogWindow.config(cursor='watch')
         self.dialogWindow.update_idletasks()
 
         dialogX = self.parentWindow.winfo_x() + (self.parentWindow.winfo_width() / 2) - (self.dialogWindow.winfo_width() / 2)

@@ -295,11 +295,11 @@ class OrphanedRegions():
     #       number of circles outside the region
     def countCirclesInOrphanedRegion(self, pb, region, edges):
         clone = pb.cloneBoardOnly()
-        print("pb=", pb)
-        print("clone=", clone)
-        print("region=", region)
-        print("edges=", edges)
-        print("-------")
+        #print("pb=", pb)
+        #print("clone=", clone)
+        #print("region=", region)
+        #print("edges=", edges)
+        #print("-------")
         Utilities.enableAllCells(clone)
         numRows, numCols = clone.getDimensions()
 
