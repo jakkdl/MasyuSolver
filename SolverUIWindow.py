@@ -10,6 +10,7 @@ from FileIO import *
 from ErrorDialog import *
 from WorkingWindow import *
 from ProgressDialog import *
+from NoSolutionDialog import *
 import threading
 
 class SolverUIWindow():
@@ -641,7 +642,8 @@ class SolverUIWindow():
         else:
             print("No solution found")
             self.bruteForceBtn['state'] = tk.NORMAL
-            #TODO: Add No Solution Found Dialog
+            dialog = NoSolutionDialog(self.mainWindow)
+            dialog.showDialog()
 
     ###############################################
     # ------ End of private helper functions ------
