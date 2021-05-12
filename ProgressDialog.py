@@ -23,6 +23,7 @@ class ProgressDialog(MasyuDialog):
 
     def showDialog(self):
         self.__toplevel = tk.Toplevel()
+        self.__toplevel.protocol("WM_DELETE_WINDOW", self.cancelHandler)
         puzzleBoardFrame = tk.Frame(master=self.__toplevel, relief=tk.RAISED, highlightthickness=0, borderwidth=10)
         puzzleBoardFrame.grid(row=0, column=0)
 
