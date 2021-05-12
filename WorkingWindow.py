@@ -20,6 +20,8 @@ class WorkingWindow():
     MAX_DOTS = 5
 
     def __cancelButtonCallback(self):
+        self.cancelButton['state'] = tk.DISABLED
+
         print("cancel")
         if (self.cancelButtonHandler != None):
             self.cancelButtonHandler()

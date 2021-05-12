@@ -613,9 +613,13 @@ class SolverUIWindow():
         else:
             return (False)
 
+    def __cancelBruteForceSolving(self):
+        self.__cancelEvent.set()
+
     # This is the command attached to the 'Solve' button.  It attempts to
     # solve the puzzle using a brute force approach.  The work is done in
     # a different thread, to keep the UI from becoming unresponsive.
+
     def __tryBruteForceSolvingInThread(self):
         self.bruteForceBtn['state'] = tk.DISABLED
         self.__bruteForceResult = self.puzzleBoardObject
@@ -626,7 +630,7 @@ class SolverUIWindow():
         self.__resumeEvent.clear()
         self.__showResults = threading.Event()
         self.__showResults.clear()
-        self.__workingWindow = WorkingWindow(self.mainWindow, threadHandle, self.__bruteForceTimerHandler)
+        self.__workingWindow = WorkingWindow(self.mainWindow, threadHandle, self.__bruteForceTimerHandler, cancelButtonHandler=self.__cancelBruteForceSolving)
 
         threadHandle.start()
         self.__workingWindow.showWindow()
