@@ -69,6 +69,8 @@ class SolverUIWindow():
                     self.solver.solve(newPuzzleBoard)
                     print("File -> Open successful")
 
+                    self.enableSmartPlacement['state'] = tk.NORMAL
+
                     # Check to see if the puzzle was solved
                     if (Utilities.checkIfPuzzleIsSolved(newPuzzleBoard)):
                         print("puzzle solved")
@@ -89,6 +91,8 @@ class SolverUIWindow():
                     # Since the board is empty, this should be fast,
                     # so it doesn't need to be run in a thread
                     self.__determineCellsToDisable()
+
+                    self.enableSmartPlacement['state'] = tk.NORMAL
 
                     errorDialog = ErrorDialog(self.mainWindow)
                     errorDialog.showDialog("Invalid Puzzle File", str(e))
@@ -179,6 +183,8 @@ class SolverUIWindow():
 
             # Force a refresh
             self.puzzleBoardCanvasManager.refreshCanvas()
+
+            self.enableSmartPlacement['state'] = tk.NORMAL
 
     ############################################
     # -------- End of menu bar handlers --------
@@ -657,6 +663,9 @@ class SolverUIWindow():
                     (self.puzzleBoardObject.isDotAt(rowNum, colNum))):
                 return
 
+            if not (self.smartPlacementModeVar.get()):
+                self.enableSmartPlacement['state'] = tk.DISABLED
+
             # Set cell to active item
             if (self.selectedItem == self.blackItem):
                 self.puzzleBoardObject.setBlackCircleAt(rowNum, colNum)
@@ -771,10 +780,10 @@ class SolverUIWindow():
 
         self.smartPlacementModeVar = tk.BooleanVar()
         self.smartPlacementModeVar.set(True)
-        enableSmartPlacement = tk.Checkbutton(checkboxFrame, text="Smart placement mode",
+        self.enableSmartPlacement = tk.Checkbutton(checkboxFrame, text="Smart placement mode",
                                               variable=self.smartPlacementModeVar,
                                               bg=checkboxColor, command=self.__smartPlacementModeCallback)
-        enableSmartPlacement.pack(side=tk.BOTTOM, anchor=tk.W)
+        self.enableSmartPlacement.pack(side=tk.BOTTOM, anchor=tk.W)
 
         self.showProgressVar = tk.BooleanVar()
         self.showProgressVar.set(True)
