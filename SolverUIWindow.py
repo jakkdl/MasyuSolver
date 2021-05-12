@@ -374,12 +374,62 @@ class SolverUIWindow():
         return ((-1, -1, -1))
 
     def __findWhiteCircleWithNoLines(self, pb):
+        numRows, numCols = pb.getDimensions()
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if (pb.isWhiteCircleAt(rowNum, colNum)):
+                    numLines, l, r, u, d = pb.getLines(rowNum, colNum)
+                    if (numLines == 0):
+                        numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
+                        if (u and d):
+                            return ((rowNum, colNum, self.UP))
+                        if (l and r):
+                            return ((rowNum, colNum, self.LEFT))
+
+                        return ((-1, -1, -1))
+
         return ((-1, -1, -1))
 
     def __findBlackCircleWithNoLines(self, pb):
+        numRows, numCols = pb.getDimensions()
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if (pb.isBlackCircleAt(rowNum, colNum)):
+                    numLines, l, r, u, d = pb.getLines(rowNum, colNum)
+                    if (numLines == 0):
+                        numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
+                        if (u):
+                            return ((rowNum, colNum, self.UP))
+                        if (d):
+                            return ((rowNum, colNum, self.DOWN))
+                        if (l):
+                            return ((rowNum, colNum, self.LEFT))
+                        if (r):
+                            return ((rowNum, colNum, self.RIGHT))
+
+                        return ((-1, -1, -1))
+
         return ((-1, -1, -1))
 
     def __findDotWithOneLine(self, pb):
+        numRows, numCols = pb.getDimensions()
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if (pb.isDotAt(rowNum, colNum)):
+                    numLines, l, r, u, d = pb.getLines(rowNum, colNum)
+                    if (numLines == 1):
+                        numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
+                        if (u):
+                            return ((rowNum, colNum, self.UP))
+                        if (d):
+                            return ((rowNum, colNum, self.DOWN))
+                        if (l):
+                            return ((rowNum, colNum, self.LEFT))
+                        if (r):
+                            return ((rowNum, colNum, self.RIGHT))
+
+                        return ((-1, -1, -1))
+
         return ((-1, -1, -1))
 
     def __findNextGuess(self, pb):
@@ -403,7 +453,7 @@ class SolverUIWindow():
 
     def __findNextDirection(self, pb, lastGuess):
         rowNum, colNum, direction = lastGuess
-        if (pb.isBlackCircleAt(rowNum, colNum)):
+        if (pb.isBlackCircleAt(rowNum, colNum) or pb.isDotAt(rowNum, colNum)):
             numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
             if (direction == self.UP):
                 if (d):
@@ -422,6 +472,12 @@ class SolverUIWindow():
             elif (direction == self.LEFT):
                 if (r):
                     return ((rowNum, colNum, self.RIGHT))
+
+        elif (pb.isWhiteCircleAt(rowNum, colNum)):
+            numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
+            if (direction == self.UP):
+                if (l):
+                    return ((rowNum, colNum, self.LEFT))
 
         return ((-1, -1, -1))
 
@@ -448,7 +504,11 @@ class SolverUIWindow():
 
         return(pbClone)
 
+    enableShowInterimResults = False
+
     def __showInterimResults(self, pb):
+        if not (self.enableShowInterimResults):
+            return (True)
         self.__bruteForceResult = pb
         self.__showResults.set()
 
