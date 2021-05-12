@@ -8,7 +8,7 @@ import time
 class WorkingWindow():
 
     # Base message displayed in the 'working' window
-    WORKING_MESSAGE = "working "
+    WORKING_MESSAGE = "WORKING "
 
     # Controls the delay between when we update the dots showing progress
     INITIAL_DOT_COUNTER_VALUE = 10
