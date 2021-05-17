@@ -669,8 +669,7 @@ class SolverUIWindow():
                     (self.puzzleBoardObject.isDotAt(rowNum, colNum))):
                 return
 
-            if not (self.smartPlacementModeVar.get()):
-                self.enableSmartPlacement['state'] = tk.DISABLED
+            savedPuzzleBoard = self.puzzleBoardObject.cloneAll()
 
             # Set cell to active item
             if (self.selectedItem == self.blackItem):
@@ -693,9 +692,6 @@ class SolverUIWindow():
             # Set puzzleBoard state to unsolved
             # self.puzzleBoardObject.setUnsolved()
 
-            # Need to update the solver state (see state diagram)
-            PuzzleStateMachine.puzzleChanged()
-
             # Determine which cells to disable
 
             self.__determineCellsToDisableInThread()
@@ -703,6 +699,12 @@ class SolverUIWindow():
             # call the solver
             try:
                 self.solver.solve(self.puzzleBoardObject)
+
+                if not (self.smartPlacementModeVar.get()):
+                    self.enableSmartPlacement['state'] = tk.DISABLED
+
+                # Need to update the solver state (see state diagram)
+                PuzzleStateMachine.puzzleChanged()
 
                 # Check to see if the puzzle was solved
                 if (Utilities.checkIfPuzzleIsSolved(self.puzzleBoardObject)):
@@ -713,13 +715,18 @@ class SolverUIWindow():
                     print("puzzle not solved")
                     self.puzzleBoardObject.setUnsolved()
                     self.bruteForceBtn['state'] = tk.NORMAL
+
+                self.puzzleBoardCanvasManager.refreshCanvas()
+
             except MasyuSolverException as e:
                 # puzzle is invalid
                 self.puzzleBoardObject.setCellInvalid(rowNum, colNum)
-                self.puzzleBoardObject.setInvalid()
-
-            self.puzzleBoardCanvasManager.refreshCanvas()
-
+                self.puzzleBoardCanvasManager.refreshCanvas()
+                errorDialog = ErrorDialog(self.mainWindow)
+                errorDialog.showDialog("Invalid Item Placement", "Cannot place item in the selected cell")
+                #self.puzzleBoardObject.setInvalid()
+                #self.puzzleBoardObject = savedPuzzleBoard
+                self.registerPuzzleBoard(savedPuzzleBoard)
 
     # Constructor method
     def __init__(self):

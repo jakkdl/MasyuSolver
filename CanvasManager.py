@@ -454,12 +454,12 @@ class CanvasManager():
                     self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, stipple="gray25")
 
                 backgroundItemTag = baseItemTag + self.CELL_BACKGROUND_TAG
-                #if (self.puzzleBoard.isCellValid(rowNum, colNum)):
-                    #self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, fill=self.color)
-                #else:
-                    #self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, fill="red")
+                if (self.puzzleBoard.isCellValid(rowNum, colNum)):
+                    self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, fill=self.color)
+                else:
+                    self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, fill="red")
 
-                self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, fill=self.color)
+                #self.puzzleBoardCanvas.itemconfigure(backgroundItemTag, fill=self.color)
 
     ######################################################################
     # Helper methods used during the construction of the Game Board canvas
