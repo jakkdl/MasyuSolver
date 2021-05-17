@@ -83,6 +83,9 @@ class SolverUIWindow():
                         self.bruteForceBtn['state'] = tk.NORMAL
                 except Exception as e:
                     # The Loaded Puzzle Board generated an exception
+                    errorDialog = ErrorDialog(self.mainWindow)
+                    errorDialog.showDialog("Invalid Puzzle File", str(e))
+
                     numRows, numCols = newPuzzleBoard.getDimensions()
                     newPuzzleBoard = PuzzleBoard(size=(numRows, numCols))
                     PuzzleStateMachine.reset()
@@ -94,9 +97,6 @@ class SolverUIWindow():
                     self.__determineCellsToDisable()
 
                     self.enableSmartPlacement['state'] = tk.NORMAL
-
-                    errorDialog = ErrorDialog(self.mainWindow)
-                    errorDialog.showDialog("Invalid Puzzle File", str(e))
 
                 self.puzzleBoardCanvasManager.refreshCanvas()
 
