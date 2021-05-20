@@ -23,10 +23,9 @@ class WorkingWindow():
         self.cancelButton['state'] = tk.DISABLED
 
         print("cancel")
-        if (self.cancelButtonHandler != None):
-            self.cancelButtonHandler()
+        self.__workThread.cancelWorkThread()
 
-    def __init__(self, parentWindow, threadHandle, customTimerHandler=None, customTimerHandlerParam=None, cancelButtonHandler=None):
+    def __init__(self, parentWindow, workThread):
         # Each thread completion check occurs at approximately 0.1
         # second increments .. so 5 of those would equal 0.5 seconds.
         # It is after that amount of time that we will show the "working"
@@ -35,16 +34,8 @@ class WorkingWindow():
         self.dotCounter = self.INITIAL_DOT_COUNTER_VALUE
         self.numDots = 0
 
-        # Allow a custom hook to be specified, which will be invoked each
-        # time the timer is processed
-        self.customTimerHandler = customTimerHandler
-        self.customTimerHandlerParam = customTimerHandlerParam
-
-        # Save the optional Cancel button callback
-        self.cancelButtonHandler = cancelButtonHandler
-
         # Store the handle to the thread, so we can detect when it is done
-        self.threadHandle = threadHandle
+        self.__workThread = workThread
 
         # Store the handle to the parent window, so we can re-enable it when the
         # work is done.
@@ -61,20 +52,17 @@ class WorkingWindow():
         self.message.pack(side=tk.TOP, padx=20, pady=20, anchor=tk.SW)
 
         # Only display a Cancel button if a callback was provided.
-        if (cancelButtonHandler != None):
+        if (self.__workThread.supportsCancelRequest()):
             self.cancelButton = tk.Button(master=self.messageFrame, text="Cancel", command=self.__cancelButtonCallback, width=10)
             self.cancelButton.pack(side=tk.TOP, pady=(0,15))
         else:
             self.cancelButton = None
 
-    def getDialogWindow(self):
-        return (self.dialogWindow)
-
     # Our only option for detecting when the thread has completed (so that
     # we can stop showing the "working" window), is to periodically poll
     # the status of the thread.
     def checkForThreadDone(self):
-        if not (self.threadHandle.is_alive()):
+        if not (self.__workThread.isAlive()):
             # The work thread is done, so remove the "waiting" window
             self.dialogWindow.destroy()
 
@@ -106,16 +94,12 @@ class WorkingWindow():
                 # Reset the dot counter for the next pass
                 self.dotCounter = self.INITIAL_DOT_COUNTER_VALUE
 
-            # Invoke the custom timer handler, if one was specified
-            if (self.customTimerHandler != None):
-                if (self.customTimerHandlerParam != None):
-                    raiseParentWindow = self.customTimerHandler(self.customTimerHandlerParam)
-                else:
-                    raiseParentWindow = self.customTimerHandler()
+            # Invoke the work thread's timer handler
+            raiseParentWindow = self.__workThread.timerHandler(self.dialogWindow)
 
-                if (raiseParentWindow):
-                    self.parentWindow.lift()
-                    self.dialogWindow.lift()
+            if (raiseParentWindow):
+                self.parentWindow.lift()
+                self.dialogWindow.lift()
 
             # Reschedule checking for the thread completion
             self.dialogWindow.after(100, self.checkForThreadDone)

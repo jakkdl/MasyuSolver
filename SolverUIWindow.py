@@ -11,6 +11,8 @@ from ErrorDialog import *
 from WorkingWindow import *
 from ProgressDialog import *
 from NoSolutionDialog import *
+from BruteForceSolveWorkThread import *
+from DetermineCellsToDisableWorkThread import *
 import threading
 
 class SolverUIWindow():
@@ -63,7 +65,6 @@ class SolverUIWindow():
                 self.__setActiveItem(self.dotItem)
 
                 # Determine which cells to disable
-                #self.__determineCellsToDisable()
                 self.__determineCellsToDisableInThread()
 
                 try:
@@ -91,10 +92,9 @@ class SolverUIWindow():
                     PuzzleStateMachine.reset()
                     self.registerPuzzleBoard(newPuzzleBoard)
                     self.__setWindowTitle(None)
+
                     # Determine which cells to disable
-                    # Since the board is empty, this should be fast,
-                    # so it doesn't need to be run in a thread
-                    self.__determineCellsToDisable()
+                    self.__determineCellsToDisableInThread()
 
                     self.enableSmartPlacement['state'] = tk.NORMAL
 
@@ -177,10 +177,8 @@ class SolverUIWindow():
             pb = PuzzleBoard(size=(rowVal, colVal))
             self.registerPuzzleBoard(pb)
 
-            # Determine which cells to disable; since this is an
-            # empty puzzle board, it should be fast, so we don't
-            # need to run it in a thread
-            self.__determineCellsToDisable()
+            # Determine which cells to disable
+            self.__determineCellsToDisableInThread()
 
             # Force a refresh
             self.puzzleBoardCanvasManager.refreshCanvas()
@@ -221,7 +219,6 @@ class SolverUIWindow():
             self.__setActiveItem(item)
 
             # Determine which cells to disable
-            # self.__determineCellsToDisable()
             self.__determineCellsToDisableInThread()
 
             self.puzzleBoardCanvasManager.refreshCanvas()
@@ -294,328 +291,36 @@ class SolverUIWindow():
 
         self.puzzleBoardCanvasManager.setShowDisabledCells(self.smartPlacementModeVar.get())
 
-
-    def __determineCellsToDisable(self):
+    def __determineCellsToDisableInThread(self):
+        # If smart placement mode is disabled, then simply enable all the cells
+        # on the puzzle board
         if not (self.smartPlacementModeVar.get()):
             for rowNum in range(0, self.numRows):
                 for colNum in range(0, self.numCols):
                     self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
             return
 
+        # If the selected item is the 'dot', then there are no restrictions on
+        # where it can be placed, so enable all the cells.
         if (self.selectedItem == self.dotItem):
             for rowNum in range (0, self.numRows):
                 for colNum in range (0, self.numCols):
                     self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
+            return
 
+        if (self.selectedItem == self.blackItem):
+            selectedItem = Cell.TYPE_BLACK_CIRCLE
         else:
-            clonedPuzzleBoard = self.puzzleBoardObject.cloneBoardOnly()
-
-            for rowNum in range (0, self.numRows):
-                for colNum in range (0, self.numCols):
-                    # Save the current cell type
-                    if (clonedPuzzleBoard.isBlackCircleAt(rowNum, colNum)):
-                        currentCell = Cell.TYPE_BLACK_CIRCLE
-                    elif (clonedPuzzleBoard.isWhiteCircleAt(rowNum, colNum)):
-                        currentCell = Cell.TYPE_WHITE_CIRCLE
-                    else:
-                        currentCell = Cell.TYPE_DOT
-
-                    # Set cell to active item
-                    if (self.selectedItem == self.blackItem):
-                        clonedPuzzleBoard.setBlackCircleAt(rowNum, colNum)
-                    elif (self.selectedItem == self.whiteItem):
-                        clonedPuzzleBoard.setWhiteCircleAt(rowNum, colNum)
-                    else:
-                        clonedPuzzleBoard.setDotAt(rowNum, colNum)
-
-                    try:
-                        self.solver.solve(clonedPuzzleBoard)
-                    except (MasyuSolverException, MasyuOrphanedRegionException) as e:
-                        self.puzzleBoardObject.setCellDisabled(rowNum, colNum)
-                    else:
-                        self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
-                    finally:
-                        if (currentCell == Cell.TYPE_BLACK_CIRCLE):
-                            clonedPuzzleBoard.setBlackCircleAt(rowNum, colNum)
-                        elif (currentCell == Cell.TYPE_WHITE_CIRCLE):
-                            clonedPuzzleBoard.setWhiteCircleAt(rowNum, colNum)
-                        else:
-                            clonedPuzzleBoard.setDotAt(rowNum, colNum)
-
-                        clonedPuzzleBoard.clearSolution()
-
-    # This is the time-intensive "work" which is run in a
-    # separate thread, so the UI doesn't become unresponsive
-    def analyzePuzzle(self):
-        self.__determineCellsToDisable()
-
-    def __determineCellsToDisableInThread(self):
+            selectedItem = Cell.TYPE_WHITE_CIRCLE
 
         # Create a thread for doing the time-intensive work; otherwise,
         # the main UI will appear frozen and unresponsive
-        threadHandle = Thread(target=self.analyzePuzzle, args=(), daemon=True)
-        workingWindow = WorkingWindow(self.mainWindow, threadHandle)
+        determineCellsToDisable = DetermineCellsToDisableWorkThread(self.solver, self.puzzleBoardObject, selectedItem)
 
-        threadHandle.start()
+        workingWindow = WorkingWindow(self.mainWindow, determineCellsToDisable)
+
+        determineCellsToDisable.start()
         workingWindow.showWindow()
-
-    def __findBlackCircleWithOneLine(self, pb):
-        numRows, numCols = pb.getDimensions()
-        for rowNum in range (0, numRows):
-            for colNum in range (0, numCols):
-                if (pb.isBlackCircleAt(rowNum, colNum)):
-                    numLines, l, r, u, d = pb.getLines(rowNum, colNum)
-                    if (numLines == 1):
-                        numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
-                        if (u):
-                            return((rowNum, colNum, self.UP))
-                        if (d):
-                            return((rowNum, colNum, self.DOWN))
-                        if (l):
-                            return((rowNum, colNum, self.LEFT))
-                        if (r):
-                            return((rowNum, colNum, self.RIGHT))
-
-                        return ((-1, -1, -1))
-
-        return ((-1, -1, -1))
-
-    def __findWhiteCircleWithNoLines(self, pb):
-        numRows, numCols = pb.getDimensions()
-        for rowNum in range(0, numRows):
-            for colNum in range(0, numCols):
-                if (pb.isWhiteCircleAt(rowNum, colNum)):
-                    numLines, l, r, u, d = pb.getLines(rowNum, colNum)
-                    if (numLines == 0):
-                        numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
-                        if (u and d):
-                            return ((rowNum, colNum, self.UP))
-                        if (l and r):
-                            return ((rowNum, colNum, self.LEFT))
-
-                        return ((-1, -1, -1))
-
-        return ((-1, -1, -1))
-
-    def __findBlackCircleWithNoLines(self, pb):
-        numRows, numCols = pb.getDimensions()
-        for rowNum in range(0, numRows):
-            for colNum in range(0, numCols):
-                if (pb.isBlackCircleAt(rowNum, colNum)):
-                    numLines, l, r, u, d = pb.getLines(rowNum, colNum)
-                    if (numLines == 0):
-                        numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
-                        if (u):
-                            return ((rowNum, colNum, self.UP))
-                        if (d):
-                            return ((rowNum, colNum, self.DOWN))
-                        if (l):
-                            return ((rowNum, colNum, self.LEFT))
-                        if (r):
-                            return ((rowNum, colNum, self.RIGHT))
-
-                        return ((-1, -1, -1))
-
-        return ((-1, -1, -1))
-
-    def __findDotWithOneLine(self, pb):
-        numRows, numCols = pb.getDimensions()
-        for rowNum in range(0, numRows):
-            for colNum in range(0, numCols):
-                if (pb.isDotAt(rowNum, colNum)):
-                    numLines, l, r, u, d = pb.getLines(rowNum, colNum)
-                    if (numLines == 1):
-                        numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
-                        if (u):
-                            return ((rowNum, colNum, self.UP))
-                        if (d):
-                            return ((rowNum, colNum, self.DOWN))
-                        if (l):
-                            return ((rowNum, colNum, self.LEFT))
-                        if (r):
-                            return ((rowNum, colNum, self.RIGHT))
-
-                        return ((-1, -1, -1))
-
-        return ((-1, -1, -1))
-
-    def __findNextGuess(self, pb):
-        rowNum, colNum, direction = self.__findBlackCircleWithOneLine(pb)
-        if ((rowNum != -1) and (colNum != -1)):
-            return (rowNum, colNum, direction)
-
-        rowNum, colNum, direction = self.__findWhiteCircleWithNoLines(pb)
-        if ((rowNum != -1) and (colNum != -1)):
-            return (rowNum, colNum, direction)
-
-        rowNum, colNum, direction = self.__findBlackCircleWithNoLines(pb)
-        if ((rowNum != -1) and (colNum != -1)):
-            return (rowNum, colNum, direction)
-
-        rowNum, colNum, direction = self.__findDotWithOneLine(pb)
-        if ((rowNum != -1) and (colNum != -1)):
-            return (rowNum, colNum, direction)
-
-        return ((-1,-1,-1))
-
-    def __findNextDirection(self, pb, lastGuess):
-        rowNum, colNum, direction = lastGuess
-        if (pb.isBlackCircleAt(rowNum, colNum) or pb.isDotAt(rowNum, colNum)):
-            numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
-            if (direction == self.UP):
-                if (d):
-                    return ((rowNum, colNum, self.DOWN))
-                elif (l):
-                    return ((rowNum, colNum, self.LEFT))
-                elif (r):
-                    return ((rowNum, colNum, self.RIGHT))
-
-            elif (direction == self.DOWN):
-                if (l):
-                    return ((rowNum, colNum, self.LEFT))
-                elif (r):
-                    return ((rowNum, colNum, self.RIGHT))
-
-            elif (direction == self.LEFT):
-                if (r):
-                    return ((rowNum, colNum, self.RIGHT))
-
-        elif (pb.isWhiteCircleAt(rowNum, colNum)):
-            numOpen, l, r, u, d = pb.getOpenPaths(rowNum, colNum)
-            if (direction == self.UP):
-                if (l):
-                    return ((rowNum, colNum, self.LEFT))
-
-        return ((-1, -1, -1))
-
-    def __applyNextGuess(self, pb, nextGuess):
-        pbClone = pb.cloneAll()
-        rowNum, colNum, direction = nextGuess
-        isBlackCircle = pb.isBlackCircleAt(rowNum, colNum)
-        if (direction == self.UP):
-            self.solver.drawLineUpWrapper(pbClone,rowNum, colNum)
-            #if (isBlackCircle):
-                #self.solver.drawLineUpWrapper(pbClone, (rowNum - 1), colNum)
-        elif (direction == self.DOWN):
-            self.solver.drawLineDownWrapper(pbClone, rowNum, colNum)
-            #if (isBlackCircle):
-                #self.solver.drawLineDownWrapper(pbClone, (rowNum + 1), colNum)
-        elif (direction == self.LEFT):
-            self.solver.drawLineLeftWrapper(pbClone, rowNum, colNum)
-            #if (isBlackCircle):
-                #self.solver.drawLineLeftWrapper(pbClone, rowNum, (colNum - 1))
-        elif (direction == self.RIGHT):
-            self.solver.drawLineRightWrapper(pbClone, rowNum, colNum)
-            #if (isBlackCircle):
-                #self.solver.drawLineRightWrapper(pbClone, rowNum, (colNum + 1))
-
-        return(pbClone)
-
-    enableShowInterimResults = False
-
-    def __showInterimResults(self, pb):
-        if not (self.enableShowInterimResults):
-            return (True)
-        self.__bruteForceResult = pb
-        self.__showResults.set()
-
-        while ((not self.__cancelEvent.isSet()) and (not self.__resumeEvent.isSet())):
-            time.sleep(0.1)
-
-        if (self.__cancelEvent.isSet()):
-            self.__cancelEvent.clear()
-            self.__bruteForceResult = None
-            return (False)
-        else:
-            self.__resumeEvent.clear()
-            return (True)
-
-
-    def __useBruteForce(self):
-        pbClone = self.puzzleBoardObject.cloneAll()
-        cloneStack = []
-        cloneStack.append(pbClone)
-        guessStack = []
-
-        nextGuess = self.__findNextGuess(pbClone)
-        rowNum, colNum, direction = nextGuess
-
-        if ((rowNum == -1) and (colNum == -1)):
-            self.__bruteForceResult = None
-            return
-
-        while (True):
-            guessStack.append(nextGuess)
-            pbClone = self.__applyNextGuess (pbClone, nextGuess)
-            cloneStack.append(pbClone)
-            if (self.__showInterimResults(pbClone) == False):
-                return
-
-            try:
-                if (self.__cancelEvent.isSet()):
-                    self.__cancelEvent.clear()
-                    self.__bruteForceResult = None
-                    return
-
-                self.solver.solve(pbClone)
-                if (self.__showInterimResults(pbClone) == False):
-                    return
-
-            except Exception as e:
-                rowNum = -1
-                colNum = -1
-
-            else:
-                if (Utilities.checkIfPuzzleIsSolved(pbClone)):
-                    self.__bruteForceResult = pbClone
-                    return
-
-                nextGuess = self.__findNextGuess(pbClone)
-                rowNum, colNum, direction = nextGuess
-
-            finally:
-                while ((rowNum == -1) and (colNum == -1)):
-                    if (len (guessStack) <= 0):
-                        self.__bruteForceResult = None
-                        return
-
-                    cloneStack.pop()
-                    lastGuess = guessStack.pop()
-                    if (len (cloneStack) <= 0):
-                        self.__bruteForceResult = None
-                        return
-
-                    pbClone = cloneStack[-1]
-                    nextGuess = self.__findNextDirection(pbClone, lastGuess)
-                    rowNum, colNum, direction = nextGuess
-
-
-        #clonedPuzzleBoard = self.puzzleBoardObject.cloneAll()
-        #self.solver.solve(clonedPuzzleBoard)
-        # for i in range (0, 5):
-        #     time.sleep(5)
-        #     self.__showResults.set()
-        #     while ((not self.__cancelEvent.isSet()) and (not self.__resumeEvent.isSet())):
-        #         time.sleep(0.1)
-        #     if (self.__cancelEvent.isSet()):
-        #         self.__cancelEvent.clear()
-        #         self.__bruteForceResult = None
-        #         return
-        #     else:
-        #         self.__resumeEvent.clear()
-
-    # Custom timer handler, which monitors the thread events
-    def __bruteForceTimerHandler(self):
-        if (self.__showResults.isSet()):
-            self.__showResults.clear()
-            self.__progressDialog = ProgressDialog(self.__workingWindow.getDialogWindow(), self.__bruteForceResult, self.__cancelEvent, self.__resumeEvent)
-            self.__progressDialog.showDialog()
-            return (True)
-        else:
-            return (False)
-
-    def __cancelBruteForceSolving(self):
-        self.__cancelEvent.set()
 
     # This is the command attached to the 'Solve' button.  It attempts to
     # solve the puzzle using a brute force approach.  The work is done in
@@ -623,21 +328,19 @@ class SolverUIWindow():
 
     def __tryBruteForceSolvingInThread(self):
         self.bruteForceBtn['state'] = tk.DISABLED
-        self.__bruteForceResult = self.puzzleBoardObject
-        threadHandle = Thread(target=self.__useBruteForce, args=(), daemon=True)
-        self.__cancelEvent = threading.Event()
-        self.__cancelEvent.clear()
-        self.__resumeEvent = threading.Event()
-        self.__resumeEvent.clear()
-        self.__showResults = threading.Event()
-        self.__showResults.clear()
-        self.__workingWindow = WorkingWindow(self.mainWindow, threadHandle, self.__bruteForceTimerHandler, cancelButtonHandler=self.__cancelBruteForceSolving)
 
-        threadHandle.start()
+        self.__bruteForceSolver = BruteForceSolveWorkThread(self.solver, self.puzzleBoardObject)
+
+        self.__workingWindow = WorkingWindow(self.mainWindow, self.__bruteForceSolver)
+
+        self.__bruteForceSolver.start()
         self.__workingWindow.showWindow()
 
-        if (self.__bruteForceResult != None):
-            self.registerPuzzleBoard(self.__bruteForceResult)
+        bruteForceResult = self.__bruteForceSolver.getBruteForceResults()
+        if (bruteForceResult != None):
+            print("puzzle solved")
+            bruteForceResult.setSolved()
+            self.registerPuzzleBoard(bruteForceResult)
 
         else:
             print("No solution found")
