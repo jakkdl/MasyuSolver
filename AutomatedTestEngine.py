@@ -9,6 +9,7 @@ from Utilities import *
 from BruteForceSolveWorkThread import *
 from WorkingWindow import *
 from Solver import *
+from pathlib import *
 import glob
 
 class AutomatedTestEngine:
@@ -64,7 +65,7 @@ class AutomatedTestEngine:
         self.cancelBtn.grid(row=0, column=1, ipadx=20, padx=(10, 10), pady=(10, 10))
         self.cancelBtn['state'] = tk.DISABLED
 
-        self.exitBtn = tk.Button(btnFrame, text="Exit", command=self.mainWindow.destroy)
+        self.exitBtn = tk.Button(btnFrame, text="Exit", command=quit)
         self.exitBtn.grid(row=0, column=2, ipadx=20, padx=(10, 10), pady=(10, 10))
 
     def showWindow(self):
@@ -76,10 +77,15 @@ class AutomatedTestEngine:
             self.folderVar.set(testDir)
 
     def stopTests(self):
-        print("stopping")
+        self.cancelBtn['state'] = tk.DISABLED
+        self.testsCancelled = True
+        if (self.__bruteForceSolver != None):
+            self.__bruteForceSolver.cancelWorkThread()
 
     def startTests(self):
         self.startBtn['state'] = tk.DISABLED
+        self.testsCancelled = False
+        self.testResults.delete(0, tk.END)
 
         # User must specify a valid folder with tests
         testFolder = self.folderVar.get()
@@ -108,15 +114,65 @@ class AutomatedTestEngine:
         ConfigMgr.setSettingValue(self.__FILE_SECTION, self.__FILE_TEST_DIRECTORY, testFolder)
 
         self.cancelBtn['state'] = tk.NORMAL
+        self.browseFolderBtn['state'] = tk.DISABLED
         self.runTests(testCases)
         self.startBtn['state'] = tk.NORMAL
         self.cancelBtn['state'] = tk.DISABLED
+        self.browseFolderBtn['state'] = tk.NORMAL
+
+    def checkForThreadDone(self):
+        if (self.__bruteForceSolver == None):
+                return
+
+        if not (self.__bruteForceSolver.isAlive()):
+            # The work thread is done, so exit the nested mainloop
+            self.mainWindow.quit()
+
+        else:
+            # Invoke the work thread's timer handler
+            raiseParentWindow = self.__bruteForceSolver.timerHandler(self.mainWindow)
+
+            if (raiseParentWindow):
+                self.mainWindow.lift()
+
+            # Reschedule checking for the thread completion
+            self.mainWindow.after(100, self.checkForThreadDone)
+
+    # Skip any test which is in a folder named "ignore"
+    def skipThisTest(self, testPath):
+        path = Path(testPath)
+        for dir in path.parts:
+            if (dir.lower() == "ignore"):
+                return(True)
+
+        return(False)
+
+    def addTimestamp(self, label):
+        # dd/mm/YY H:M:S
+        dtString = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        self.testResults.insert(tk.END, label + dtString)
+        self.testResults.see(tk.END)
+        self.mainWindow.update()
 
     def runTests(self, testCases):
         solver = Solver()
+
+        self.addTimestamp("Testing started at: ")
+
         for testCase in testCases:
+            if (self.testsCancelled):
+                break
+
             PuzzleStateMachine.reset()
             testCasePath, testCaseName = os.path.split(testCase)
+
+            if (self.skipThisTest(testCasePath)):
+                result = "Skipped - " + testCaseName
+                self.testResults.insert(tk.END, result)
+                self.testResults.see(tk.END)
+                self.mainWindow.update()
+                continue
+
             try:
                 result = "<solving> - " + testCaseName
                 self.testResults.insert(tk.END, result)
@@ -129,13 +185,20 @@ class AutomatedTestEngine:
                 else:
                     self.__bruteForceSolver = BruteForceSolveWorkThread(solver, pb)
 
-                    self.__workingWindow = WorkingWindow(self.mainWindow, self.__bruteForceSolver)
-
                     self.__bruteForceSolver.start()
-                    self.__workingWindow.showWindow()
+
+                    self.mainWindow.after(100, self.checkForThreadDone)
+                    self.mainWindow.mainloop()
 
                     if (self.__bruteForceSolver.wasRequestCancelledByUser()):
                         result = "Cancelled - " + testCaseName
+                        self.__bruteForceSolver = None
+                        self.testResults.delete(tk.END)
+                        self.testResults.insert(tk.END, result)
+                        self.testResults.see(tk.END)
+                        self.addTimestamp("Testing terminated at: ")
+                        self.testResults.see(tk.END)
+                        self.mainWindow.update()
                         return
                     else:
                         bruteForceResult = self.__bruteForceSolver.getBruteForceResults()
@@ -149,11 +212,21 @@ class AutomatedTestEngine:
             except Exception as e:
                 result = "Error - " + testCaseName
             finally:
-                print(result)
+                self.__bruteForceSolver = None
+
+            # embed in a try statement, in case the UI was closed
+            try:
                 self.testResults.delete(tk.END)
                 self.testResults.insert(tk.END, result)
                 self.testResults.see(tk.END)
                 self.mainWindow.update()
+            except Exception as e:
+                exit()
+
+        if (self.testsCancelled):
+            self.addTimestamp("Testing cancelled at: ")
+        else:
+            self.addTimestamp("Testing completed at: ")
 
 
 if __name__ == "__main__":
