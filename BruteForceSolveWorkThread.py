@@ -16,6 +16,7 @@ class BruteForceSolveWorkThread(WorkThread):
 
         # Initialize the variable holding the brute force results
         self.__bruteForceResults = None
+        self.__wasCancelledByUser = False
 
     # Find the first black circle, which has one line, and determine which
     # line we should try drawing (based on which pathways out of the cell are
@@ -229,10 +230,15 @@ class BruteForceSolveWorkThread(WorkThread):
         if (self.cancelEvent.isSet()):
             self.cancelEvent.clear()
             self.__bruteForceResults = None
+            self.__wasCancelledByUser = True
             return (False)
         else:
             self.resumeEvent.clear()
             return (True)
+
+    # Way for determining if the user had cancelled the brute force solving request
+    def wasRequestCancelledByUser(self):
+        return(self.__wasCancelledByUser)
 
     # After repetitively applying all of the standard solving rules, if we
     # still have not found a solution to the puzzle, then the user is able
@@ -271,6 +277,8 @@ class BruteForceSolveWorkThread(WorkThread):
         cloneStack.append(pbClone)
         guessStack = []
 
+        self.__wasCancelledByUser = False
+
         # Determine the next "guess" to try
         nextGuess = self.__findNextGuess(pbClone)
         rowNum, colNum, direction = nextGuess
@@ -298,6 +306,7 @@ class BruteForceSolveWorkThread(WorkThread):
                 if (self.cancelEvent.isSet()):
                     self.cancelEvent.clear()
                     self.__bruteForceResults = None
+                    self.__wasCancelledByUser = True
                     return
 
                 # Let the solver work on the modified puzzle.
