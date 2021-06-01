@@ -2,6 +2,8 @@
 import configparser
 import os
 
+# Wrapper class for managing the configuration values stored
+# in the configuration file
 class ConfigMgr():
 
     # Class variables

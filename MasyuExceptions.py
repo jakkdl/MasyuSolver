@@ -1,3 +1,4 @@
+# Base class for all exceptions we generate
 class MasyuException(Exception):
     '''Base class for all solver exceptions'''
 

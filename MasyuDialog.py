@@ -1,3 +1,5 @@
+# Base class for all of our custom modal dialogs.
+# Primarily deals with the centering of the modal dialogs.
 class MasyuDialog():
     # Constructor method
     def __init__(self, parentWindow):

@@ -1,6 +1,7 @@
 import tkinter as tk
 from MasyuDialog import *
 
+# Dialog for collecting the puzzle board size
 class GetPuzzleBoardSizeDialog(MasyuDialog):
 
     # This is the callback handler for the "OK" button.
@@ -59,7 +60,6 @@ class GetPuzzleBoardSizeDialog(MasyuDialog):
 
         # Create a new window, which will represent our modal dialog
         self.__dialogWindow = tk.Toplevel()
-        #self.__registerDialogWindow(self.__dialogWindow)
         self.__dialogWindow.title("Enter Puzzle Board Size")
 
         # Remove the maximize window frame options; can't seem to remove

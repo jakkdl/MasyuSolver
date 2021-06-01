@@ -1,6 +1,8 @@
 from MasyuDialog import *
 import tkinter as tk
 
+# Generic error dialog; subclassed from MasyuDialog, so that it
+# inherits the general behavior we want.
 class ErrorDialog(MasyuDialog):
     # Class constructor
 

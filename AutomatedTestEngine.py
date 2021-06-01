@@ -12,8 +12,11 @@ from Solver import *
 from pathlib import *
 import glob
 
+# This class implements the automated test engine, which provides a way of
+# easily running a series of test cases (saved puzzle boards).
 class AutomatedTestEngine:
-    # Configuration file tags
+    # Configuration file tags; used for storing the test case folder
+    # path specified by the tester
     __FILE_SECTION = 'File'
     __FILE_TEST_DIRECTORY = 'TestDirectory'
 
@@ -71,17 +74,29 @@ class AutomatedTestEngine:
     def showWindow(self):
         self.mainWindow.mainloop()
 
+    # Event handler for the "Browse" button.
+    # Displays the "askdirectory" dialog, and places the results into the
+    # test director input field
     def setTestFolder(self):
         testDir = fd.askdirectory(parent=self.mainWindow, initialdir=self.folderVar.get(), title="Choose test folder", mustexist=tk.TRUE)
         if (testDir != ""):
             self.folderVar.set(testDir)
 
+    # Event handler for the "cancel" button; terminates the
+    # current test run.
     def stopTests(self):
         self.cancelBtn['state'] = tk.DISABLED
         self.testsCancelled = True
         if (self.__bruteForceSolver != None):
             self.__bruteForceSolver.cancelWorkThread()
 
+    # Event handler for the "Start" button.
+    # Builds up a list of all test cases in the specified folder
+    # (along with any subfolders), and then runs them.  If the
+    # solver can't solve the puzzle using the standard rules, then
+    # the "brute force" solver will be tried; the "brute force"
+    # solver is run in a separate thread, to prevent the UI from
+    # freezing up.
     def startTests(self):
         self.startBtn['state'] = tk.DISABLED
         self.testsCancelled = False
@@ -111,6 +126,8 @@ class AutomatedTestEngine:
             self.startBtn['state'] = tk.NORMAL
             return
 
+        # Save the test folder information, so the user doesn't have to re-enter
+        # it each time the test engine is run!
         ConfigMgr.setSettingValue(self.__FILE_SECTION, self.__FILE_TEST_DIRECTORY, testFolder)
 
         self.cancelBtn['state'] = tk.NORMAL
@@ -120,6 +137,9 @@ class AutomatedTestEngine:
         self.cancelBtn['state'] = tk.DISABLED
         self.browseFolderBtn['state'] = tk.NORMAL
 
+    # Timer handler, periodically executed while the brute force solver
+    # is running in a separate thread.  Detects when the thread has completed,
+    # so we can record the results and then move onto the next test case.
     def checkForThreadDone(self):
         if (self.__bruteForceSolver == None):
                 return
@@ -147,6 +167,8 @@ class AutomatedTestEngine:
 
         return(False)
 
+    # Adds a timestamp and a specified string to the test log
+    # window.
     def addTimestamp(self, label):
         # dd/mm/YY H:M:S
         dtString = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -154,18 +176,20 @@ class AutomatedTestEngine:
         self.testResults.see(tk.END)
         self.mainWindow.update()
 
+    # Run all of the test cases in the specified directory hierarchy.
     def runTests(self, testCases):
         solver = Solver()
 
         self.addTimestamp("Testing started at: ")
 
         for testCase in testCases:
+            # Detect if the user cancelled the test run
             if (self.testsCancelled):
                 break
 
-            PuzzleStateMachine.reset()
             testCasePath, testCaseName = os.path.split(testCase)
 
+            # Skip any test case located in a folder named 'ignore'
             if (self.skipThisTest(testCasePath)):
                 result = "Skipped - " + testCaseName
                 self.testResults.insert(tk.END, result)
@@ -174,6 +198,8 @@ class AutomatedTestEngine:
                 continue
 
             try:
+                # Load the puzzle board defined in the test file, and if valid,
+                # pass it only the solver.
                 result = "<solving> - " + testCaseName
                 self.testResults.insert(tk.END, result)
                 self.testResults.see(tk.END)
@@ -183,14 +209,23 @@ class AutomatedTestEngine:
                 if (Utilities.checkIfPuzzleIsSolved(pb)):
                     result = "Solved - " + testCaseName
                 else:
+                    # Solver was not able to solve the puzzle board using the standard
+                    # set of rules, so give the brute-force solver the opportunity
+                    # to try solving it.
                     self.__bruteForceSolver = BruteForceSolveWorkThread(solver, pb)
 
                     self.__bruteForceSolver.start()
 
+                    # Set up a timer, so we can detect when the brute-force thread
+                    # is done.
                     self.mainWindow.after(100, self.checkForThreadDone)
+
+                    # Drop into an embedded mainloop, until the brute-force thread
+                    # completes
                     self.mainWindow.mainloop()
 
                     if (self.__bruteForceSolver.wasRequestCancelledByUser()):
+                        # User cancelled the test run
                         result = "Cancelled - " + testCaseName
                         self.__bruteForceSolver = None
                         self.testResults.delete(tk.END)
@@ -201,6 +236,8 @@ class AutomatedTestEngine:
                         self.mainWindow.update()
                         return
                     else:
+                        # Check whether the brute-force solver was able to solve
+                        # the test puzzle board
                         bruteForceResult = self.__bruteForceSolver.getBruteForceResults()
                         if (bruteForceResult != None):
                             result = "Solved - " + testCaseName

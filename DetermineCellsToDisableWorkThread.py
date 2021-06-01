@@ -27,7 +27,9 @@ class DetermineCellsToDisableWorkThread(WorkThread):
 
         # Cycle through each cell, and if it isn't already set to the indicated
         # item type, then save the current cell setting, and force it to the
-        # indicated item type (black circle or white circle)
+        # indicated item type (black circle or white circle). Then run the
+        # solver to see if an exception is thrown .. indicating that the item
+        # cannot be placed into that cell, so the cell must be disabled.
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):
                 # Save the current cell type

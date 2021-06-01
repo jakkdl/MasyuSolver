@@ -108,13 +108,13 @@ class Cell():
     #
     def print(self):
         if self.type == Cell.TYPE_DOT:
-            print("D", end = "")
+            print("D", end="")
         elif self.type == Cell.TYPE_BLACK_CIRCLE:
-            print("B", end = "")
+            print("B", end="")
         elif self.type == Cell.TYPE_WHITE_CIRCLE:
-            print("W", end = "")
+            print("W", end="")
         else:
-            print("?", end = "")
+            print("?", end="")
 
 if __name__ == "__main__":
     print("Running Tests")
