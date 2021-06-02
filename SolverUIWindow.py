@@ -562,10 +562,10 @@ class SolverUIWindow():
         menubar.add_cascade(label="File", menu=filemenu)
 
         # Create the 'Help' menu
-        helpmenu = tk.Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Instructions", command=self.__donothing)
-        helpmenu.add_command(label="About", command=self.__donothing)
-        menubar.add_cascade(label="Help", menu=helpmenu)
+        # helpmenu = tk.Menu(menubar, tearoff=0)
+        # helpmenu.add_command(label="Instructions", command=self.__donothing)
+        # helpmenu.add_command(label="About", command=self.__donothing)
+        # menubar.add_cascade(label="Help", menu=helpmenu)
 
         # Attach the menubar to the main application window
         self.mainWindow.config(menu=menubar)
