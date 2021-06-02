@@ -25,3 +25,5 @@ invalid location, the user will be notified and the change will not be
 allowed.  It also prevents the user from building an invalid puzzle!
 
 Puzzle boards can be saved to a file, and then loaded again later.
+
+To run the solver, execute the following Python class: SolverUIWindow.py
