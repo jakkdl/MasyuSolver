@@ -1,6 +1,8 @@
 from MasyuDialog import *
 import tkinter as tk
 
+# Dialog displayed when a solution cannot be found
+# for the current puzzle.
 class NoSolutionDialog(MasyuDialog):
     # Class constructor
 

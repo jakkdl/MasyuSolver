@@ -1,6 +1,9 @@
 from PuzzleBoard import *
 from MasyuExceptions import *
 
+# This class contains the functionality for saving a Puzzle Board to a
+# file, and for creating a PuzzleBoard object based on a puzzle board
+# defined in a file.
 class PuzzleBoardFile():
     # Class variables
     __BLACK_CIRCLE = 'B'
@@ -68,9 +71,11 @@ class PuzzleBoardFile():
             line = line.strip()
             length = len(line)
 
+            # Each line must begin with a '[' and end with a ']'
             if not (line.startswith("[")) or not (line.endswith("]")):
                 raise MasyuInvalidPuzzleFileException("Invalid Puzzle File")
             else:
+                # Prune off the '[' and ']'
                 line = line[1:(length - 1)]
                 length = len(line)
 
@@ -97,6 +102,7 @@ class PuzzleBoardFile():
         # Create a new PuzzleBoard object of the needed size
         newPuzzleBoard = PuzzleBoard(size=(len(rowData), numCols))
 
+        # Initialize the Cell values to match what was defined in the file
         for rowNum in range (0, len(rowData)):
             nextRow = rowData[rowNum]
 

@@ -1,13 +1,33 @@
+# This class is used to keep track of the "state" of the current Puzzle Board.
+# The state is important to know when the user tries to exit, open a saved Puzzle
+# Board or simply create a new Puzzle Board; if the current Puzzle Board has
+# unsaved changes, then the State Machine will track that, and will let us know
+# that we need to ask the user whether to save the changes, before moving on.
+#
+# The different puzzle states are:
+#   1) Unmodified and never saved to a file (new puzzle board)
+#   2) Modified, but never saved to a file
+#   3) Unmodified since the last 'file->open' operation
+#   4) Modified since the last 'file->open' operation
+#   5) Unmodified since the last 'file->save' operation
+#   6) Modified since the last 'file->save' operation
+#
+# The state also enables us to track whether there is already a filename
+# associated with the puzzle; if there is, then "file->save" can simply
+# save to the associated file; if there isn't, then "file->save" needs to
+# behave like "file->save as" (and prompt the user for the filename)
+
 class PuzzleStateMachine():
 
     # Class variables
-    __STATE1 = 1
-    __STATE2 = 2
-    __STATE3 = 3
-    __STATE4 = 4
-    __STATE5 = 5
-    __STATE6 = 6
+    __STATE1 = 1    # Unmodified and never saved to a file (new puzzle board)
+    __STATE2 = 2    # Modified, but never saved to a file
+    __STATE3 = 3    # Unmodified since the last 'file->open' operation
+    __STATE4 = 4    # Modified since the last 'file->open' operation
+    __STATE5 = 5    # Unmodified since the last 'file->save' operation
+    __STATE6 = 6    # Modified since the last 'file->save' operation
 
+    # Initial state: State 1, and no associated filename
     __lastFileName = None
     __state = __STATE1
 

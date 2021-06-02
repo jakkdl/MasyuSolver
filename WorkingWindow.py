@@ -4,7 +4,11 @@ import time
 
 # This is a modal dialog, but one which has no window manager decorations at all.
 # It's purpose is to provide the user with some feedback that the program is still
-# alive .. just busy doing something!
+# alive .. just busy doing something!  This is typically used when a time-consuming
+# operation is being done in another thread.  However, sometimes the work done in the
+# thread completes quickly.  To prevent the 'working' window from popping up for a
+# second, and then going away, we delay (for 0.5 seconds), before actually showing
+# the "working" window.
 class WorkingWindow():
 
     # Base message displayed in the 'working' window
@@ -19,6 +23,8 @@ class WorkingWindow():
     # Controls the maximum number of dots shown
     MAX_DOTS = 5
 
+    # User has selected the cancel button, so signal to the thread
+    # process that it should stop what it was doing.
     def __cancelButtonCallback(self):
         self.cancelButton['state'] = tk.DISABLED
 

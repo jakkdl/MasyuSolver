@@ -1,6 +1,10 @@
 from Pathway import *
 from Cell import *
 
+# This class encapsulates the Puzzle Board.  To the "outside world",
+# the puzzle board looks to be an RxC grid of cells.  Internally,
+# the puzzle board is composed of a grid of Cell objects, separated
+# by Pathway objects.
 class PuzzleBoard():
     STATE_UNSOLVED = 0
     STATE_SOLVED = 1
@@ -30,16 +34,19 @@ class PuzzleBoard():
             self.numRows = PuzzleBoard.__DEFAULT_NUM_ROWS
             self.numCols = PuzzleBoard.__DEFAULT_NUM_COLS
             self.__createPuzzleBoard()
-        elif (puzzleData != None):
-            # todo: define this case
-            print("not implemented")
         else:
             self.numRows, self.numCols = size
             self.__createPuzzleBoard()
 
     # Internal method for creating an empty PuzzleBoard
-    # for the specified numRows and numCols
+    # for the specified numRows and numCols.  Besides placing
+    # a Pathway object between each Cell, it also uses Pathway
+    # objects to define the border around the edge of the puzzle
+    # board, since the edges are (by definition) always blocked.
     #
+    # In the grid, even numbered rows contain just Pathway objects,
+    # while odd numbered rows contain alternating Pathway and Cell
+    # objects.
     def __createPuzzleBoard(self):
         self.puzzleBoard = []
         for r in range(0, self.numRows):
@@ -49,20 +56,30 @@ class PuzzleBoard():
             self.puzzleBoard.append(rowA)
             self.puzzleBoard.append(rowB)
 
+        # Need to add the last row, representing the puzzle board boundary.
         self.puzzleBoard.append(self.__createRowA())
 
+        # Block all pathways at the top puzzle border
         self.__blockTopOrBottomRow(self.puzzleBoard[0])
 
+        # Block the pathways at the left and right edges
         for row in range(1, (len(self.puzzleBoard) - 1), 2):
             self.puzzleBoard[row][0].setAsBlocked()
             self.puzzleBoard[row][len(self.puzzleBoard[row]) - 1].setAsBlocked()
 
+        # Block all pathways at the bottom puzzle border
         self.__blockTopOrBottomRow(self.puzzleBoard[len(self.puzzleBoard) - 1])
 
+    # All top & bottom pathways are always blocked; they represent the border
+    # of the puzzle board
     def __blockTopOrBottomRow(self, row):
         for colNum in range(1, len(row) - 1, 2):
             row[colNum].setAsBlocked()
 
+    # To improve efficiency, each cell has a "processed" flag, which can be
+    # set/cleared/queried; allows us to avoid reprecessing a cell during
+    # certain operations (like following a line in the puzzle; senseless to
+    # follow the line and then refollow it from the ending cell)!
     def wasCellProcessed(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum].wasCellProcessed())
@@ -80,6 +97,7 @@ class PuzzleBoard():
             for colNum in range(0, self.numCols):
                 self.clearCellProcessedFlag(rowNum, colNum)
 
+    # Convenience functions for tracking cell states
     def isCellEnabled(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum].isEnabled())
@@ -104,6 +122,8 @@ class PuzzleBoard():
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum][intColNum].setInvalid()
 
+    # Convenience functons for tracking state information about the
+    # Puzzle Board
     def isSolved(self):
         return (self.state == PuzzleBoard.STATE_SOLVED)
 
@@ -122,14 +142,7 @@ class PuzzleBoard():
     def setInvalid(self):
         self.state = PuzzleBoard.STATE_INVALID
 
-    def getSolution(self):
-        print("get solution not implemeted")
-        # todo implement getSolution()
-
-    def setSolution(self, solution):
-        print("set solution not implemented")
-        # todo implement setSolution()
-
+    # Clears any solution work
     def clearSolution(self):
         for rowNum in range(1, (len(self.puzzleBoard) - 1)):
             row = self.puzzleBoard[rowNum]
@@ -142,32 +155,24 @@ class PuzzleBoard():
                 for colNum in range(2, len(row)-2, 2):
                     row[colNum].setAsOpen()
 
-    def lookForBug(self, rowNum, colNum):
-        numLines, u, d, l, r = self.getLines(4, 2)
-        if (numLines > 2):
-            print("BUG!! Cell", 4, "x", 2, "has", numLines, "lines!")
-            print("\tThe line was drawn from cell:", rowNum, "x", colNum)
-
+    # Convenience functions for drawing a line from the specified cell.
     def drawLineUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum - 1][intColNum].setAsLine()
-        self.lookForBug(rowNum, colNum)
 
     def drawLineDown(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum + 1][intColNum].setAsLine()
-        self.lookForBug(rowNum, colNum)
 
     def drawLineLeft(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum][intColNum - 1].setAsLine()
-        self.lookForBug(rowNum, colNum)
 
     def drawLineRight(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum][intColNum + 1].setAsLine()
-        self.lookForBug(rowNum, colNum)
 
+    # Convenience functions for blocking pathways from a specified cell
     def markBlockedUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum - 1][intColNum].setAsBlocked()
@@ -184,6 +189,7 @@ class PuzzleBoard():
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum][intColNum + 1].setAsBlocked()
 
+    # Convenince functions for marking a pathway as "open"
     def markOpenUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum - 1][intColNum].setAsOpen()
@@ -200,12 +206,19 @@ class PuzzleBoard():
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum][intColNum + 1].setAsOpen()
 
+    # Since the outside world views the grid as being RxC, but
+    # internally, we have a mix of Cell and Pathway objects, we
+    # need to map the "outside worlds" cell coords in the
+    # coords based on the internal puzzle board layout.
     def __mapRowAndCol(self, rowNum, colNum):
         return((rowNum*2) + 1, (colNum*2) + 1)
 
+    # Returns the dimensions (row, col) for the current puzzle
     def getDimensions(self):
         return ((self.numRows,self.numCols))
 
+    # Convenience functions for setting the cell type (black circle,
+    # white circle, or dot) for the specified Cell object.
     def setBlackCircleAt(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum][intColNum].setAsBlackCircle()
@@ -230,6 +243,9 @@ class PuzzleBoard():
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum].isDot())
 
+    # Returns a tuple (# of lines, left, right, up, down) indicating
+    # the number of lines currently defined for a cell, along with
+    # boolean values indicating exactly which lines are defined).
     def getLines(self, rowNum, colNum):
         count = 0
         up = self.hasLineUp(rowNum, colNum)
@@ -246,7 +262,8 @@ class PuzzleBoard():
             count += 1
         return ((count, left, right, up, down))
 
-
+    # Convenience functions for querying the presence of a specific
+    # line in a cell
     def hasLineUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum - 1][intColNum].isLine())
@@ -263,6 +280,9 @@ class PuzzleBoard():
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum + 1].isLine())
 
+    # Returns a tuple (# of blocked paths, left, right, up, down) indicating
+    # the number of blocked paths currently defined for a cell, along with
+    # boolean values indicating exactly which paths are blocked).
     def getBlockedPaths(self, rowNum, colNum):
         count = 0
         up = self.isBlockedUp(rowNum, colNum)
@@ -279,6 +299,8 @@ class PuzzleBoard():
             count += 1
         return ((count, left, right, up, down))
 
+    # Convenience functions for querying the presence of a specific
+    # blockage in a cell
     def isBlockedUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum - 1][intColNum].isBlocked())
@@ -295,7 +317,9 @@ class PuzzleBoard():
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum + 1].isBlocked())
 
-
+    # Returns a tuple (# of open paths, left, right, up, down) indicating
+    # the number of open pathsways currently defined for a cell, along with
+    # boolean values indicating exactly which paths are open).
     def getOpenPaths(self, rowNum, colNum):
         count = 0
         up = self.isOpenUp(rowNum, colNum)
@@ -312,6 +336,8 @@ class PuzzleBoard():
             count += 1
         return ((count, left, right, up, down))
 
+    # Convenience functions for querying whether a specific
+    # pathway in a cell is open
     def isOpenUp(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum - 1][intColNum].isOpen())
@@ -332,6 +358,7 @@ class PuzzleBoard():
     # represents pathways above and below the cell row:
     #  'N P N P ... P N'
     #
+    # P=Pathway object and N=None
     def __createRowA(self):
         rowA = []
 
@@ -345,6 +372,7 @@ class PuzzleBoard():
     # Internal method for creating the cell row:
     # 'P C P C ... C P'
     #
+    # P=Pathway object and C=Cell object
     def __createRowB(self):
         rowB = []
 
@@ -367,6 +395,8 @@ class PuzzleBoard():
             print()
         print()
 
+    # Creates a clone (with or without any solution work) of
+    # the current puzzle board object.
     def __clone(self, doFullClone, pbClone):
         for rowNum in range (0, self.numRows):
             for colNum in range (0, self.numCols):
@@ -375,6 +405,7 @@ class PuzzleBoard():
                 elif (self.isWhiteCircleAt(rowNum, colNum)):
                     pbClone.setWhiteCircleAt(rowNum, colNum)
 
+                # Copy any solution work only if a full close was requested
                 if (doFullClone):
                     if (self.hasLineUp(rowNum, colNum)):
                         pbClone.drawLineUp(rowNum, colNum)
@@ -400,17 +431,19 @@ class PuzzleBoard():
                 else:
                     pbClone.setUnsolved()
 
-
+    # Returns a complete clone of the current Puzzle Board
     def cloneAll(self):
         pbClone = PuzzleBoard(size=(self.numRows, self.numCols))
         self.__clone(True, pbClone)
         return(pbClone)
 
+    # Returns a clone of the Puzzle Board definition only
     def cloneBoardOnly(self):
         pbClone = PuzzleBoard(size=(self.numRows, self.numCols))
         self.__clone(False, pbClone)
         return(pbClone)
 
+    # Resets the puzzle board to its "virgin" state
     def reset(self):
         self.state = PuzzleBoard.STATE_UNSOLVED
         self.puzzleData = self.__createPuzzleBoard()

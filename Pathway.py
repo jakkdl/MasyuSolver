@@ -1,5 +1,9 @@
 # This is a private class, used only by the PuzzleBoard class
-#
+# Pathways define the "connections" between cells; they can
+# represent a line between two cells, or they can represent a
+# blocked path between two cells, or they can be "open", which
+# means that it has not yet been determined whether the path
+# is a line or should be blocked.
 class Pathway():
     TYPE_OPEN = 0
     TYPE_LINE = 1

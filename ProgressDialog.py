@@ -4,6 +4,10 @@ from threading import Thread
 from PuzzleBoard import *
 from CanvasManager import *
 
+# This class is for a debugging modal dialog, which can be used
+# to display the interim results produced during the solving process.
+# While displayed, the solving process is suspended, until this
+# dialog has been closed.
 class ProgressDialog(MasyuDialog):
     def __init__(self, parentWindow, puzzleBoard, cancelEvent, resumeEvent):
         super().__init__(parentWindow)

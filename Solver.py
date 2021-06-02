@@ -2,10 +2,20 @@ from MasyuExceptions import *
 from Utilities import *
 from OrphanedRegions import *
 
+# This class implements the base solver functionality.
+# It is used in muliple situations:
+#   1) when trying to solve a Puzzle Board
+#   2) when trying to determine cells to disable (smart placement)
+#   3) when trying to determine if an item placed by the user was valid (smart placement off)
+#
+# If the solver detects a problem with the puzzle board, then and exception is raised.
 class Solver():
     def __init__(self):
         self.__orphanedRegionDetector = OrphanedRegions()
 
+    # This is the main solving loop.  It repeatedly goes through the process of applying the
+    # known solving rules, until either the puzzle has been solved, or a pass was made with
+    # no resulting changes (implies that the base solver could not currently solve the puzzle).
     def solve(self,puzzleBoard):
         changed = True
         # You can't terminate the solving loop when the puzzle becomes solved, because this ends up
@@ -14,39 +24,30 @@ class Solver():
         # the "solving" happened in the clone board, while trying to determine which cells needed to
         # be disabled!
 
-        # Temporary flag to allow disabling of the orphaned region code,
-        # until the point where the bugs have been worked out
-        orphanedRegionCheckEnabled = True
-
         while (changed):
             changed = False
             changed = changed or self.__processSpecialCases(puzzleBoard)
-            #print("before findPathwaysToBlock")
-            #puzzleBoard.print()
-            changed = changed or self.__findPathwaysToBlock(puzzleBoard)
-            #print("after findPathwaysToBlock")
-            #puzzleBoard.print()
-            changed = changed or self.__processDeadendPaths(puzzleBoard)
-            #print("after processDeadendPaths")
-            #puzzleBoard.print()
-            changed = changed or self.__processBlackCircles(puzzleBoard)
-            #print("after processBlackCircles")
-            #puzzleBoard.print()
-            changed = changed or self.__processWhiteCircles(puzzleBoard)
-            #print("after processWhiteCircles")
-            #puzzleBoard.print()
-            changed = changed or self.__addLines(puzzleBoard)
-            #print("after addLines")
-            #puzzleBoard.print()
-            changed = changed or self.__processSubPaths(puzzleBoard)
-            # print("Changed is = ", changed)
-            changed = changed or self.__identifyProblems(puzzleBoard)
 
-            if not (changed) and orphanedRegionCheckEnabled:
+            changed = changed or self.__findPathwaysToBlock(puzzleBoard)
+
+            changed = changed or self.__processDeadendPaths(puzzleBoard)
+
+            changed = changed or self.__processBlackCircles(puzzleBoard)
+
+            changed = changed or self.__processWhiteCircles(puzzleBoard)
+
+            changed = changed or self.__addLines(puzzleBoard)
+
+            changed = changed or self.__processSubPaths(puzzleBoard)
+
+            if not (changed):
                 # After all other processing has completed, we will check for
                 # problems caused by orphaned regions.
                 changed = self.__orphanedRegionDetector.checkForOrphanedRegions(puzzleBoard)
 
+    # A cell can only have a maximum of 2 lines.  Therefore, if we detect that a
+    # cell has 2 lines, then we know that we can block off the remaining 2 pathways (if
+    # not already blocked off)
     def __updateBlockedPathways(self, puzzleBoard, rowNum, colNum):
         lineCount, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
 
@@ -65,6 +66,8 @@ class Solver():
         elif (lineCount > 2):
             raise MasyuSolverException("Cell has more than 2 lines", (rowNum, colNum))
 
+    # Wrapper functions used by other classes to access the functions responsible
+    # for adding a line segment to a cell.
     def drawLineLeftWrapper(self, puzzleBoard, rowNum, colNum):
         self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
 
@@ -80,16 +83,22 @@ class Solver():
     # The following methods are "wrappers" for the four "drawLine" methods of the PuzzleBoard
     # class.  They not only draw the line, but they then immediately call the method which
     # blocks paths affected by the line we just drew
+
     def __drawLineLeftWrapper(self, puzzleBoard, rowNum, colNum):
         lineCount, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
         if (lineCount >= 2):
             raise MasyuSolverException("lineLeftWrapper: too many lines in cell", (rowNum, colNum))
 
         elif (lineCount == 1):
+            # Each line segment in the puzzle is considered a "subpath".  We need to check for cases
+            # where there is the potential for a fully closed subpath; this is an ok situation if the
+            # subpath visits all of the circles in the puzzle (it means that the subpath effectively is
+            # the puzzle solution).  But it is unacceptable if it doesn't visit all the circles .. in this
+            # case, we need to block the pathway which would allow the subpath to become completely "closed".
             endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
+
             # Check if the subpath ended in the cell to our left
             if ((endingCol == (colNum - 1)) and (endingRow == rowNum)):
-                # totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
                 totalNumCircles = Utilities.getNumberOfCircles(puzzleBoard)
                 if not (numCirclesVisited == totalNumCircles):
                     raise MasyuSolverException ("lineLeftWrapper: detected potential closed subloop", (rowNum, colNum))
@@ -109,10 +118,15 @@ class Solver():
             raise MasyuSolverException("lineRightWrapper: too many lines in cell", (rowNum, colNum))
 
         elif (lineCount == 1):
+            # Each line segment in the puzzle is considered a "subpath".  We need to check for cases
+            # where there is the potential for a fully closed subpath; this is an ok situation if the
+            # subpath visits all of the circles in the puzzle (it means that the subpath effectively is
+            # the puzzle solution).  But it is unacceptable if it doesn't visit all the circles .. in this
+            # case, we need to block the pathway which would allow the subpath to become completely "closed".
             endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
+
             # Check if the subpath ended in the cell to our right
             if ((endingCol == (colNum + 1)) and (endingRow == rowNum)):
-                # totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
                 totalNumCircles = Utilities.getNumberOfCircles(puzzleBoard)
                 if not (numCirclesVisited == totalNumCircles):
                     raise MasyuSolverException("lineRightWrapper: detected potential closed subloop", (rowNum, colNum))
@@ -132,10 +146,15 @@ class Solver():
             raise MasyuSolverException("lineUpWrapper: too many lines in cell", (rowNum, colNum))
 
         elif (lineCount == 1):
+            # Each line segment in the puzzle is considered a "subpath".  We need to check for cases
+            # where there is the potential for a fully closed subpath; this is an ok situation if the
+            # subpath visits all of the circles in the puzzle (it means that the subpath effectively is
+            # the puzzle solution).  But it is unacceptable if it doesn't visit all the circles .. in this
+            # case, we need to block the pathway which would allow the subpath to become completely "closed".
             endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
+
             # Check if the subpath ended in the cell above
             if ((endingCol == colNum) and (endingRow == (rowNum - 1))):
-                # totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
                 totalNumCircles = Utilities.getNumberOfCircles(puzzleBoard)
                 if not (numCirclesVisited == totalNumCircles):
                     raise MasyuSolverException("lineUpWrapper: detected potential closed subloop", (rowNum, colNum))
@@ -155,10 +174,15 @@ class Solver():
             raise MasyuSolverException("lineDownWrapper: too many lines in cell", (rowNum, colNum))
 
         elif (lineCount == 1):
+            # Each line segment in the puzzle is considered a "subpath".  We need to check for cases
+            # where there is the potential for a fully closed subpath; this is an ok situation if the
+            # subpath visits all of the circles in the puzzle (it means that the subpath effectively is
+            # the puzzle solution).  But it is unacceptable if it doesn't visit all the circles .. in this
+            # case, we need to block the pathway which would allow the subpath to become completely "closed".
             endingRow, endingCol, numCirclesVisited = self.__processSubPath(puzzleBoard, rowNum, colNum)
+
             # Check if the subpath ended in the cell below
             if ((endingCol == colNum) and (endingRow == (rowNum + 1))):
-                # totalNumCircles = self.__getNumberOfCircles(puzzleBoard)
                 totalNumCircles = Utilities.getNumberOfCircles(puzzleBoard)
                 if not (numCirclesVisited == totalNumCircles):
                     raise MasyuSolverException("lineDownWrapper: detected potential closed subloop", (rowNum, colNum))
@@ -189,7 +213,7 @@ class Solver():
 
         # If the cell only has 1 line, then we've reached the end of the line
         lineCount, l, r, u, d = puzzleBoard.getLines(row, col)
-        # print("processing: ", row, "x", col, "linecount =", lineCount, l, r, u, d)
+
         if (lineCount == 1):
             # We're done! Return where we stopped and the # of circles visited
             return ((row, col, numCirclesVisited))
@@ -218,17 +242,6 @@ class Solver():
                 return (self.__moveToNextCell(puzzleBoard, (row + 1), col, row, col, numCirclesVisited))
 
             # We should never drop through to here!!
-
-    # Returns number of circles in the puzzle
-    # def __getNumberOfCircles(self, puzzleBoard):
-    #     numCircles = 0
-    #     numRows, numCols = puzzleBoard.getDimensions()
-    #     for rowNum in range(0, numRows):
-    #         for colNum in range(0, numCols):
-    #             if not (puzzleBoard.isDotAt(rowNum, colNum)):
-    #                 numCircles += 1
-    #
-    #     return (numCircles)
 
     # Checks if the two cells are next to each other (abut). Returns 'True' if they do; else 'False'.
     def __cellsAbut(self, r1, c1, r2, c2):
@@ -259,7 +272,6 @@ class Solver():
         if ((r2 == r1) and (c2 == (c1 - 1))):
             if not (puzzleBoard.hasLineLeft(r1, c1)):
                 # Draw the line
-                # puzzleBoard.drawLineLeft(r1, c1)
                 self.__drawLineLeftWrapper(puzzleBoard, r1, c1)
                 return (True)
             else:
@@ -270,7 +282,6 @@ class Solver():
         if ((r2 == r1) and (c2 == (c1 + 1))):
             if not (puzzleBoard.hasLineRight(r1, c1)):
                 # Draw the line
-                # puzzleBoard.drawLineRight(r1, c1)
                 self.__drawLineRightWrapper(puzzleBoard, r1, c1)
                 return (True)
             else:
@@ -281,7 +292,6 @@ class Solver():
         if ((r2 == (r1 - 1)) and (c2 == c1)):
             if not (puzzleBoard.hasLineUp(r1, c1)):
                 # Draw the line
-                # puzzleBoard.drawLineUp(r1, c1)
                 self.__drawLineUpWrapper(puzzleBoard, r1, c1)
                 return (True)
             else:
@@ -292,7 +302,6 @@ class Solver():
         if ((r2 == (r1 + 1)) and (c2 == c1)):
             if not (puzzleBoard.hasLineDown(r1, c1)):
                 # Draw the line
-                # puzzleBoard.drawLineDown(r1, c1)
                 self.__drawLineDownWrapper(puzzleBoard, r1, c1)
                 return (True)
             else:
@@ -309,7 +318,6 @@ class Solver():
         if ((r2 == r1) and (c2 == (c1 - 1))):
             if not (puzzleBoard.isBlockedLeft(r1, c1)):
                 # Block the path
-                # print("Blocking Left ", r1, c1, r2, c2)
                 puzzleBoard.markBlockedLeft(r1, c1)
                 return (True)
             else:
@@ -320,7 +328,6 @@ class Solver():
         if ((r2 == r1) and (c2 == (c1 + 1))):
             if not (puzzleBoard.isBlockedRight(r1, c1)):
                 # Block the path
-                # print("Blocking Right ", r1, c1, r2, c2)
                 puzzleBoard.markBlockedRight(r1, c1)
                 return (True)
             else:
@@ -331,7 +338,6 @@ class Solver():
         if ((r2 == (r1 - 1)) and (c2 == c1)):
             if not (puzzleBoard.isBlockedUp(r1, c1)):
                 # Block the path
-                # print("Blocking Up ", r1, c1, r2, c2)
                 puzzleBoard.markBlockedUp(r1, c1)
                 return (True)
             else:
@@ -342,7 +348,6 @@ class Solver():
         if ((r2 == (r1 + 1)) and (c2 == c1)):
             if not (puzzleBoard.isBlockedDown(r1, c1)):
                 # Block the path
-                # print("Blocking Down ", r1, c1, r2, c2)
                 puzzleBoard.markBlockedDown(r1, c1)
                 return (True)
             else:
@@ -410,7 +415,9 @@ class Solver():
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):
                 if(puzzleBoard.isWhiteCircleAt(rowNum, colNum)):
-                    # Check for vertical line of white circles
+                    # Special checks for cells which have a white circle
+
+                    # Case 9a: Check for vertical line of white circles
                     iAmFirst, count = self.__numConsecutiveWhiteCirclesInCol(puzzleBoard, rowNum, colNum)
 
                     # Skip if not the first in the series
@@ -443,7 +450,7 @@ class Solver():
                         # Not first, or less than 3 in a row
                         # Do Nothing
 
-                    # Check for horizontal line of white circles
+                    # Case 9b: Check for horizontal line of white circles
                     iAmFirst, count = self.__numConsecutiveWhiteCirclesInRow(puzzleBoard, rowNum, colNum)
 
                     # Skip if not the first in the series
@@ -475,8 +482,9 @@ class Solver():
                     # Not first, or less than 3 in a row
                     # Do Nothing
 
-                    # Handle case 14
-                    # Check for 2 vertically adjacent white circles
+                    # Case 14-1
+                    # Check for 2 vertically adjacent white circles; they can't be approached
+                    # by a straight line!
                     iAmFirst, count = self.__numConsecutiveWhiteCirclesInCol(puzzleBoard, rowNum, colNum)
 
                     # Skip if not the first in the series
@@ -511,6 +519,7 @@ class Solver():
                                         puzzleBoard.markBlockedDown((rowNum + 1), colNum)
                                         changesMade = True
 
+                    # Case 14-2
                     # Check for horizontal line of white circles
                     iAmFirst, count = self.__numConsecutiveWhiteCirclesInRow(puzzleBoard, rowNum, colNum)
                     # Skip if not the first in the series
@@ -545,7 +554,7 @@ class Solver():
                                         puzzleBoard.markBlockedRight(rowNum, (colNum + 1))
                                         changesMade = True
 
-                    # Handle case 15-1
+                    # Case 15-1
                     if (1 < rowNum < (numRows - 2)):
                         if ((puzzleBoard.hasLineUp((rowNum - 1), colNum)) and (puzzleBoard.hasLineDown((rowNum + 1), colNum))):
                             if (puzzleBoard.hasLineUp(rowNum, colNum)):
@@ -574,6 +583,9 @@ class Solver():
                                 changesMade = True
 
                 elif (puzzleBoard.isBlackCircleAt(rowNum, colNum)):
+                    # Special checks for cells which have a black circle
+
+                    # Case 10: black circle with 2 diagonally adjacent white circles (on the same side)
 
                     # Case 10-1: both white circles are below the black circle
                     if ((colNum > 0) and (colNum < (numCols - 1)) and (rowNum < (numRows - 1))):
@@ -627,6 +639,8 @@ class Solver():
                             else:
                                 raise MasyuSolverException("Illegal black circle location in case 10-4", (rowNum, colNum))
 
+                    # Case 12: black circle, empty cell, then 2 consecutive white circles
+
                     # Case 12-1: Both white circles are below the black circle
                     if (rowNum < (numRows - 3)):
                         if ((puzzleBoard.isDotAt((rowNum + 1), colNum)) and
@@ -679,6 +693,7 @@ class Solver():
                             else:
                                 raise MasyuSolverException("Illegal black circle location in case 12-4", (rowNum, colNum))
 
+    # Use the base solver rules to determine pathways which must be blocked.
     def __findPathwaysToBlock(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
         changesMade = False
@@ -850,7 +865,8 @@ class Solver():
 
         return (changesMade)
 
-
+    # Analyze the current solution work, and block off any pathways which are effectively
+    # deadends.
     def __processDeadendPaths(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
         changesMade = False
@@ -861,6 +877,9 @@ class Solver():
                 for colNum in range(0, numCols):
                     if (puzzleBoard.isDotAt(rowNum, colNum)):
                         count, l, r, u, d = puzzleBoard.getBlockedPaths(rowNum, colNum)
+
+                        # Any 'dot' cell which has 3 of it's pathways already blocked, is a deadend,
+                        # so the fourth pathway can be blocked.
                         if (count == 3):
                             numLines, lineLeft, lineRight, lineUp, lineDown = puzzleBoard.getLines(rowNum, colNum)
                             if (numLines != 0):
@@ -887,6 +906,7 @@ class Solver():
 
         return (changesMade)
 
+    # Locate the black circles in the puzzle, and apply the basic solving rules.
     def __processBlackCircles(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
         changesMade = False
@@ -983,9 +1003,7 @@ class Solver():
                         if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
                             changesMade = True
                             puzzleBoard.markBlockedLeft(rowNum, colNum)
-                        #if (colNum == (numCols - 1)):
-                        #    puzzleBoard.print()
-                        #    print ("bad stuff")
+
                         if not (puzzleBoard.isBlockedUp(rowNum, (colNum + 1))):
                             changesMade = True
                             puzzleBoard.markBlockedUp(rowNum, (colNum + 1))
@@ -1022,6 +1040,7 @@ class Solver():
 
         return (changesMade)
 
+    # Locate the white circles and apply the basic solving rules
     def __processWhiteCircles(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
         changesMade = False
@@ -1031,21 +1050,17 @@ class Solver():
 
                     if (puzzleBoard.isBlockedUp(rowNum,colNum) or puzzleBoard.isBlockedDown(rowNum,colNum)):
                         if ((colNum == 0) or (colNum == (numCols-1))):
-                            # print("White circle cannot be in first or last column", (rowNum, colNum))
                             raise MasyuSolverException("White circle cannot be in first or last column",
                                                        (rowNum, colNum))
                         elif (puzzleBoard.isBlockedLeft(rowNum, colNum) or
                               puzzleBoard.isBlockedRight(rowNum, colNum)):
-                            # print("White circle blocked L/R", (rowNum, colNum))
                             raise MasyuSolverException("White circle blocked L/R", (rowNum, colNum))
                         else:
                             if not (puzzleBoard.hasLineLeft(rowNum, colNum)):
                                 changesMade = True
-                                # puzzleBoard.drawLineLeft(rowNum, colNum)
                                 self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.hasLineRight(rowNum, colNum)):
                                 changesMade = True
-                                # puzzleBoard.drawLineRight(rowNum, colNum)
                                 self.__drawLineRightWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.isBlockedUp(rowNum, colNum)):
                                 changesMade = True
@@ -1055,21 +1070,17 @@ class Solver():
                                 puzzleBoard.markBlockedDown(rowNum, colNum)
                     elif (puzzleBoard.isBlockedLeft(rowNum,colNum) or puzzleBoard.isBlockedRight(rowNum,colNum)):
                         if ((rowNum == 0) or (rowNum == (numRows-1))):
-                            # print("White circle cannot be in first or last row", (rowNum, colNum))
                             raise MasyuSolverException("White circle cannot be in first or last row",
                                                        (rowNum, colNum))
                         elif (puzzleBoard.isBlockedUp(rowNum, colNum) or
                               puzzleBoard.isBlockedDown(rowNum, colNum)):
-                            # print("White circle blocked U/D,", (rowNum, colNum))
                             raise MasyuSolverException("White circle blocked U/D", (rowNum, colNum))
                         else:
                             if not (puzzleBoard.hasLineUp(rowNum, colNum)):
                                 changesMade = True
-                                # puzzleBoard.drawLineUp(rowNum, colNum)
                                 self.__drawLineUpWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.hasLineDown(rowNum, colNum)):
                                 changesMade = True
-                                # puzzleBoard.drawLineDown(rowNum, colNum)
                                 self.__drawLineDownWrapper(puzzleBoard, rowNum, colNum)
                             if not (puzzleBoard.isBlockedLeft(rowNum, colNum)):
                                 changesMade = True
@@ -1081,19 +1092,15 @@ class Solver():
                     count, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
                     if (count == 1):
                         if (l):
-                            # puzzleBoard.drawLineRight(rowNum, colNum)
                             self.__drawLineRightWrapper(puzzleBoard, rowNum, colNum)
                             changesMade = True
                         elif (r):
-                            # puzzleBoard.drawLineLeft(rowNum, colNum)
                             self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
                             changesMade = True
                         elif (u):
-                            # puzzleBoard.drawLineDown(rowNum, colNum)
                             self.__drawLineDownWrapper(puzzleBoard, rowNum, colNum)
                             changesMade = True
                         elif (d):
-                            # puzzleBoard.drawLineUp(rowNum, colNum)
                             self.__drawLineUpWrapper(puzzleBoard, rowNum, colNum)
                             changesMade = True
 
@@ -1114,21 +1121,6 @@ class Solver():
                 if (puzzleBoard.isDotAt(rowNum, colNum)):
                     numLines, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
                     numOpenPaths, openL, openR, openU, openD = puzzleBoard.getOpenPaths(rowNum, colNum)
-                    # if ((rowNum == 3) and (colNum == 4)):
-                    #     print("NumLines = ", numLines, l, r, u, d)
-                    #     print("OpenPaths= ", numOpenPaths, openL, openR, openU, openD)
-                    #     print("Up = ", puzzleBoard.isOpenUp(rowNum, colNum))
-                    #     print("Down = ", puzzleBoard.isOpenDown(rowNum, colNum))
-                    #     print("Left = ", puzzleBoard.isOpenLeft(rowNum, colNum))
-                    #     print("Right = ", puzzleBoard.isOpenRight(rowNum, colNum))
-                    #     numOpenPathsX, openLX, openRX, openUX, openDX = puzzleBoard.getOpenPaths((rowNum - 1), colNum)
-                    #     print("OpenPaths= ", numOpenPathsX, openLX, openRX, openUX, openDX)
-                    #     print("Up = ", puzzleBoard.isOpenUp((rowNum - 1), colNum))
-                    #     print("Down = ", puzzleBoard.isOpenDown((rowNum - 1), colNum))
-                    #     print("Left = ", puzzleBoard.isOpenLeft((rowNum - 1), colNum))
-                    #     print("Right = ", puzzleBoard.isOpenRight((rowNum - 1), colNum))
-                    #     puzzleBoard.print()
-
 
                     # If there is only 1 line into the cell and only 1 open path, then we know
                     # that the line must extend out through the open path .. it is the only
@@ -1136,16 +1128,12 @@ class Solver():
                     if ((numLines == 1) and (numOpenPaths == 1)):
                         changesMade = True
                         if (openL):
-                            # puzzleBoard.drawLineLeft(rowNum, colNum)
                             self.__drawLineLeftWrapper(puzzleBoard, rowNum, colNum)
                         elif (openR):
-                            # puzzleBoard.drawLineRight(rowNum, colNum)
                             self.__drawLineRightWrapper(puzzleBoard, rowNum, colNum)
                         elif (openU):
-                            # puzzleBoard.drawLineUp(rowNum, colNum)
                             self.__drawLineUpWrapper(puzzleBoard, rowNum, colNum)
                         else:
-                            # puzzleBoard.drawLineDown(rowNum, colNum)
                             self.__drawLineDownWrapper(puzzleBoard, rowNum, colNum)
 
         return (changesMade)
@@ -1167,22 +1155,18 @@ class Solver():
         # Follow the line to the next cell
         if (l):
             # Proceed to the cell to the left (cell(rowNum, colNum-1))
-            # print("starting:", rowNum, "x", colNum)
             result = self.__moveToNextCell(puzzleBoard, rowNum, colNum - 1, rowNum, colNum, numCirclesVisited)
 
         elif (r):
             # Proceed to the cell to the right (cell(rowNum, colNum+1))
-            # print("starting:", rowNum, "x", colNum)
             result = self.__moveToNextCell(puzzleBoard, rowNum, colNum + 1, rowNum, colNum, numCirclesVisited)
 
         elif (u):
             # Proceed to the cell above (cell(rowNum-1, colNum))
-            # print("starting:", rowNum, "x", colNum)
             result = self.__moveToNextCell(puzzleBoard, rowNum - 1, colNum, rowNum, colNum, numCirclesVisited)
 
         else:
             # Proceed to the cell below (cell(rowNum+1, colNum))
-            # print("starting:", rowNum, "x", colNum)
             result = self.__moveToNextCell(puzzleBoard, rowNum + 1, colNum, rowNum, colNum, numCirclesVisited)
 
         endRowNum, endColNum, na = result
@@ -1220,7 +1204,6 @@ class Solver():
                 numLines, l, r, u, d = puzzleBoard.getLines(rowNum, colNum)
                 if (numLines == 1):
                     if (puzzleBoard.wasCellProcessed(rowNum, colNum)):
-                        # print("skipping path at ", (rowNum, colNum))
                         continue
                     numCirclesVisited = 0
                     startingRow = rowNum
@@ -1244,7 +1227,6 @@ class Solver():
                         # then we can complete the puzzle by drawing the line between
                         # the 2 cells; otherwise, we need to block the path between
                         # the 2 cells.
-                        # numCirclesInPuzzle = self.__getNumberOfCircles(puzzleBoard)
                         numCirclesInPuzzle = Utilities.getNumberOfCircles(puzzleBoard)
 
                         if (numCirclesInPuzzle == numCirclesVisited):
@@ -1266,7 +1248,3 @@ class Solver():
 
         return (changesMade)
 
-    def __identifyProblems(self, puzzleBoard):
-        #print("__identifyProblems")
-        # todo __identifyProblem
-        foo = 0

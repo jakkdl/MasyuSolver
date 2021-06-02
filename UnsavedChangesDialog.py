@@ -1,6 +1,9 @@
 from MasyuDialog import *
 import tkinter as tk
 
+# Simple modal dialog, used to ask the user what to do with
+# their unsaved changes.  Returns True (yes), False (no) or
+# None (cancel)
 class UnsavedChangesDialog(MasyuDialog):
 
     # Class constructor
@@ -42,5 +45,6 @@ class UnsavedChangesDialog(MasyuDialog):
         b3.grid(row=1, column=3, padx=(2, 35), pady=(0,15), sticky="e")
 
         self.__result = None
+        # Center the dialog
         super().showDialog(toplevel)
         return(self.__result)

@@ -15,6 +15,9 @@ from BruteForceSolveWorkThread import *
 from DetermineCellsToDisableWorkThread import *
 import threading
 
+# This is the primary class for the solver; it is the class which should be
+# run when you want to create and solve a puzzle
+
 class SolverUIWindow():
 
     # Define class variables here
@@ -52,6 +55,7 @@ class SolverUIWindow():
     def __donothing(self):
         print("do nothing")
 
+    # Open a puzzle board file, validate it and then attempt to solve it
     def __fileOpenHandler(self):
         # Call FileIO class to save existing puzzle board and then load a new one
         try:
@@ -64,7 +68,7 @@ class SolverUIWindow():
                 # Force active item to dot
                 self.__setActiveItem(self.dotItem)
 
-                # Determine which cells to disable
+                # Determine which cells to disable (smart placement mode)
                 self.__determineCellsToDisableInThread()
 
                 try:
@@ -114,6 +118,7 @@ class SolverUIWindow():
             errorDialog.showDialog("Invalid Puzzle File", str(mipfe))
             print("Attempted to load invalid puzzle file")
 
+    # Exit the application; but prompt the user first, if there are unsaved changes
     def __fileExitMenuHandler(self):
         # Call FileIO class to save existing puzzle board then exit
         try:
@@ -127,6 +132,8 @@ class SolverUIWindow():
             errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Exit")
 
+    # Allow the user to select the file into which the puzzle will be saved.
+    # This will then become the filename associated with this puzzle.
     def __fileSaveAsMenuHandler(self):
         # Call FileIO class to save existing puzzle board but allow the user to specify a new filename
         try:
@@ -140,6 +147,8 @@ class SolverUIWindow():
             errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save As")
 
+    # Save the puzzle board in the current file, and if there isn't a current filename
+    # associated with the puzzle board, then prompt the user to specify a filename
     def __fileSaveMenuHandler(self):
         # Call FileIO class to save existing puzzle board using the name already associated
         # with this puzzle board
@@ -154,6 +163,8 @@ class SolverUIWindow():
             errorDialog.showDialog("Error Saving Puzzle File", str(mfse))
             print("Exception during File -> Save")
 
+    # Prompt the user to save any unsaved changes (if there are any), and then prompt
+    # them to define the size for the new (and empty) puzzle board
     def __fileNewMenuHandler(self):
         try:
             status, unusedReturnValue = FileIO.fileNew(self.mainWindow, self.puzzleBoardObject)
@@ -173,6 +184,8 @@ class SolverUIWindow():
             # Reset the State Machine
             PuzzleStateMachine.reset()
             self.__setWindowTitle(None)
+
+            self.bruteForceBtn['state'] = tk.DISABLED
 
             pb = PuzzleBoard(size=(rowVal, colVal))
             self.registerPuzzleBoard(pb)
@@ -203,6 +216,7 @@ class SolverUIWindow():
         y2 = (self.ITEM_HEIGHT + (self.ITEM_HIGHLIGHT_THICKNESS * 2)) - 1
         return(x1, y1, x2, y2)
 
+    # Update the window title to include the puzzle name (if there is one)
     def __setWindowTitle(self, puzzleName):
         if (puzzleName == None):
             puzzleName = "<unnamed>"
@@ -210,7 +224,8 @@ class SolverUIWindow():
         self.mainWindow.title("Maysu: " + puzzleName)
 
     # Event handler for processing <button-1> events in one of the items;
-    # causes the selected item to becoome the active item.
+    # causes the selected item to become the active item.  If smart placement
+    # mode is enabled, then it also determines which cells to disable.
     def __itemSelectionHandler(self, event):
 
         item = event.widget
@@ -222,7 +237,6 @@ class SolverUIWindow():
             self.__determineCellsToDisableInThread()
 
             self.puzzleBoardCanvasManager.refreshCanvas()
-
 
     # Draw the highlight around the indicated item.
     # If the item is already the selected item, then nothing needs to be done.
@@ -275,12 +289,24 @@ class SolverUIWindow():
         self.blackItem = self.__createItem(parent, self.MENU_ITEM_BLACK_CIRCLE_SIZE, 'black')
         self.dotItem = self.__createItem(parent, self.MENU_ITEM_DOT_SIZE, 'dark grey')
 
+    # Callback for the 'show progress' checkbox.
+    # Controls whether the solution work is displayed
     def __showProgressCallback(self):
         self.puzzleBoardCanvasManager.setShowProgress(self.showProgressVar.get())
 
+    # Callback for the 'show blocked paths' checkbox.
+    # Controls whether the blocked pathways are displayed
     def __showBlockedPathsCallback(self):
         self.puzzleBoardCanvasManager.setShowBlockedPaths(self.showBlockedPathsVar.get())
 
+    # Callback for the 'smart placement' checkbox.
+    # Smart placement is slow and time consuming, because it analyzes each cell (based
+    # on the currently selected item), to determine which cells must be disabled, because
+    # the selected item cannot be placed there.  Disabling 'smart placement' mode speeds
+    # things up, but then the user is not given visual feedback that a cell is disabled.
+    # Instead, they will be notified when they try to change a cell, that that placement
+    # is invalid (and not allowed).  It still prevents them from creating an invalid
+    # puzzle!
     def __smartPlacementModeCallback(self):
         if not (self.smartPlacementModeVar.get()):
             for rowNum in range(0, self.numRows):
@@ -291,6 +317,9 @@ class SolverUIWindow():
 
         self.puzzleBoardCanvasManager.setShowDisabledCells(self.smartPlacementModeVar.get())
 
+    # When 'smart placement' mode is enabled, this will spawn a thread, which does
+    # the time-intensive work of analyzing the puzzle to determine which cells to
+    # disable; if 'smart placement' mode is disabled, then all cells are enabled.
     def __determineCellsToDisableInThread(self):
         # If smart placement mode is disabled, then simply enable all the cells
         # on the puzzle board
@@ -356,6 +385,10 @@ class SolverUIWindow():
     # ------ Start of public class methods ------
     #############################################
 
+    # Callback invoked when a cell in the puzzle board has been selected.
+    # Saves a copy of the current puzzle board (in case the cell change
+    # ends up being invalid), before changing the cell and then invoking
+    # the solver.
     def __cellSelectionCallBack(self, rowNum, colNum):
         if not (self.puzzleBoardObject.isCellEnabled(rowNum, colNum)):
             self.mainWindow.bell()
@@ -392,11 +425,7 @@ class SolverUIWindow():
                     self.puzzleBoardObject.setCellEnabled(r, c)
                     self.puzzleBoardObject.setCellValid(r, c)
 
-            # Set puzzleBoard state to unsolved
-            # self.puzzleBoardObject.setUnsolved()
-
             # Determine which cells to disable
-
             self.__determineCellsToDisableInThread()
 
             # call the solver
@@ -427,8 +456,6 @@ class SolverUIWindow():
                 self.puzzleBoardCanvasManager.refreshCanvas()
                 errorDialog = ErrorDialog(self.mainWindow)
                 errorDialog.showDialog("Invalid Item Placement", "Cannot place item in the selected cell")
-                #self.puzzleBoardObject.setInvalid()
-                #self.puzzleBoardObject = savedPuzzleBoard
                 self.registerPuzzleBoard(savedPuzzleBoard)
 
     # Constructor method
@@ -566,7 +593,7 @@ class SolverUIWindow():
 
     # ------ End of public class methods ------
 
-# ------ Begin test code ------
+# ------ Begin main application code ------
 if __name__ == '__main__':
     basePath = os.path.expandvars('$APPDATA')
     appBasePath = os.path.join(basePath, 'MasyuSolver')
@@ -574,50 +601,5 @@ if __name__ == '__main__':
     ConfigMgr.loadSettings(appBasePath, settingsFileName)
     uiWindow = SolverUIWindow()
     pb = PuzzleBoard()
-    runTests = False
-    if (runTests):
-        pb.setBlackCircleAt(1, 1)
-        pb.setWhiteCircleAt(4, 2)
-        pb.markBlockedUp(1, 1)
-        pb.markBlockedLeft(1, 1)
-        pb.markBlockedUp(4, 2)
-        pb.drawLineRight(1, 1)
-        pb.drawLineRight(1, 2)
-        pb.drawLineDown(1, 1)
-        pb.drawLineDown(2, 1)
-        pb.drawLineLeft(4, 2)
-        pb.drawLineRight(4, 2)
-        pb.print()
-        print(pb.getLines(1, 1))
-        print(pb.getBlockedPaths(1, 1))
-        print(pb.getOpenPaths(1, 1))
-        print("is solved =", pb.isSolved())
-        print("is unsolved =", pb.isUnsolved())
-        print("is invalid =",pb.isInvalid())
-        pb.setSolved()
-        print("is solved =", pb.isSolved())
-        print("is unsolved =", pb.isUnsolved())
-        print("is invalid =", pb.isInvalid())
-        pb.setInvalid()
-        print("is solved =", pb.isSolved())
-        print("is unsolved =", pb.isUnsolved())
-        print("is invalid =", pb.isInvalid())
-        pb.setUnsolved()
-        print("is solved =", pb.isSolved())
-        print("is unsolved =", pb.isUnsolved())
-        print("is invalid =", pb.isInvalid())
-
-        print("is Enabled =", pb.isCellEnabled(0, 0))
-        print("is Valid =", pb.isCellValid(1, 1))
-        pb.setCellDisabled(0, 0)
-        pb.setCellInvalid(1, 1)
-        print("is Enabled =", pb.isCellEnabled(0, 0))
-        print("is Valid =", pb.isCellValid(1, 1))
-        pb.setCellEnabled(0, 0)
-        pb.setCellValid(1, 1)
-        print("is Enabled =", pb.isCellEnabled(0, 0))
-        print("is Valid =", pb.isCellValid(1, 1))
-        # pb.setCellInvalid(0, 0)
-
     uiWindow.registerPuzzleBoard(pb)
     uiWindow.showWindow()

@@ -4,7 +4,7 @@ class Utilities():
     # Given how the current cell was entered (specified by lastRowOffset and lastColOffset),
     # disable that particular line (to prevent backtracking), and return the offset to be
     # used to travel to the next cell .. or (-1, -1), it there isn't a second line leading
-    # out or the current cell.
+    # out of the current cell.
     def chooseNextLineToFollow(cls, lastRowOffset, lastColOffset, l, r, u, d):
         # Disable the line we used to enter the current cell
         if ((lastRowOffset == 1) and (lastColOffset == 0)):
@@ -34,7 +34,7 @@ class Utilities():
             # No path to follow!
             return((-1, -1))
 
-    # Returns number of circles in the puzzle
+    # Returns number of black and white circles in the puzzle
     @classmethod
     def getNumberOfCircles(cls, puzzleBoard):
         numCircles = 0
