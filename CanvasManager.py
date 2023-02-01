@@ -10,6 +10,7 @@ class CanvasManager():
 
     BOARD_ITEM_WHITE_CIRCLE_SIZE = 10  # Size of the white circle item
     BOARD_ITEM_BLACK_CIRCLE_SIZE = 10  # Size of the black circle item
+    BOARD_ITEM_GREY_CIRCLE_SIZE = 10  # Size of the black circle item
     BOARD_ITEM_DOT_SIZE = 4  # Size of the dot item
 
     CELL_LINE_WIDTH = 2
@@ -28,6 +29,7 @@ class CanvasManager():
     ALL_BLOCKS_TAG = "allBlocks"
     ALL_WHITE_CIRCLES_TAG = "allWhiteCircles"
     ALL_BLACK_CIRCLES_TAG = "allBlackCircles"
+    ALL_GREY_CIRCLES_TAG = "allGreyCircles"
     ALL_DOTS_TAG = "allDots"
 
     # Tag used to identify all items within a given cell
@@ -41,6 +43,7 @@ class CanvasManager():
     CELL_DOT_TAG = "_Dot"
     CELL_WHITE_CIRCLE_TAG = "_WhiteCircle"
     CELL_BLACK_CIRCLE_TAG = "_BlackCircle"
+    CELL_GREY_CIRCLE_TAG = "_GreyCircle"
 
     # Tags used to identify all items of a specific type within a cell
     CELL_ALL_PATHWAYS_TAG = "_AllPathways"
@@ -275,6 +278,11 @@ class CanvasManager():
                     allWhiteCirclesTag = self.ALL_WHITE_CIRCLES_TAG
                     tags = (itemTagBase, allWhiteCirclesTag, whiteCircleTag)
                     item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_WHITE_CIRCLE_SIZE, 'white', tags, 'normal')
+                    
+                    greyCircleTag = itemTagBase + self.CELL_GREY_CIRCLE_TAG
+                    allGreyCirclesTag = self.ALL_GREY_CIRCLES_TAG
+                    tags = (itemTagBase, allGreyCirclesTag, greyCircleTag)
+                    item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_GREY_CIRCLE_SIZE, 'red', tags, 'normal')
 
                     # Add a listener for notifications that the item was "entered" by the mouse
                     self.puzzleBoardCanvas.tag_bind(itemTagBase, '<Enter>',
@@ -291,6 +299,7 @@ class CanvasManager():
         #       Turn on all of the dots
         self.puzzleBoardCanvas.itemconfigure(self.ALL_BLACK_CIRCLES_TAG, state='hidden')
         self.puzzleBoardCanvas.itemconfigure(self.ALL_WHITE_CIRCLES_TAG, state='hidden')
+        self.puzzleBoardCanvas.itemconfigure(self.ALL_GREY_CIRCLES_TAG, state='hidden')
         self.puzzleBoardCanvas.itemconfigure(self.ALL_PATHWAYS_TAG, state='hidden')
         self.puzzleBoardCanvas.itemconfigure(self.ALL_DOTS_TAG, state='normal')
 
@@ -308,6 +317,8 @@ class CanvasManager():
             self.__setBlackCircleAt(rowNum, colNum)
         elif self.puzzleBoard.isWhiteCircleAt(rowNum, colNum):
             self.__setWhiteCircleAt(rowNum, colNum)
+        elif self.puzzleBoard.isGreyCircleAt(rowNum, colNum):
+            self.__setGreyCircleAt(rowNum, colNum)
         else:
             self.__setDotAt(rowNum, colNum)
 
@@ -319,6 +330,8 @@ class CanvasManager():
         self.puzzleBoardCanvas.itemconfigure(blackItemTag, state='normal')
         whiteItemTag = baseTag + self.CELL_WHITE_CIRCLE_TAG
         self.puzzleBoardCanvas.itemconfigure(whiteItemTag, state='hidden')
+        greyItemTag = baseTag + self.CELL_GREY_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(greyItemTag, state='hidden')
         dotItemTag = baseTag + self.CELL_DOT_TAG
         self.puzzleBoardCanvas.itemconfigure(dotItemTag, state='hidden')
 
@@ -330,6 +343,21 @@ class CanvasManager():
         self.puzzleBoardCanvas.itemconfigure(blackItemTag, state='hidden')
         whiteItemTag = baseTag + self.CELL_WHITE_CIRCLE_TAG
         self.puzzleBoardCanvas.itemconfigure(whiteItemTag, state='normal')
+        greyItemTag = baseTag + self.CELL_GREY_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(greyItemTag, state='hidden')
+        dotItemTag = baseTag + self.CELL_DOT_TAG
+        self.puzzleBoardCanvas.itemconfigure(dotItemTag, state='hidden')
+
+    # Internal method for turning on (visually) the cell components
+    # associated with a grey circle
+    def __setGreyCircleAt(self, rowNum, colNum):
+        baseTag = self.__createBaseItemTag(rowNum, colNum)
+        blackItemTag = baseTag + self.CELL_BLACK_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(blackItemTag, state='hidden')
+        whiteItemTag = baseTag + self.CELL_WHITE_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(whiteItemTag, state='hidden')
+        greyItemTag = baseTag + self.CELL_GREY_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(greyItemTag, state='normal')
         dotItemTag = baseTag + self.CELL_DOT_TAG
         self.puzzleBoardCanvas.itemconfigure(dotItemTag, state='hidden')
 
@@ -341,6 +369,8 @@ class CanvasManager():
         self.puzzleBoardCanvas.itemconfigure(blackItemTag, state='hidden')
         whiteItemTag = baseTag + self.CELL_WHITE_CIRCLE_TAG
         self.puzzleBoardCanvas.itemconfigure(whiteItemTag, state='hidden')
+        greyItemTag = baseTag + self.CELL_GREY_CIRCLE_TAG
+        self.puzzleBoardCanvas.itemconfigure(greyItemTag, state='hidden')
         dotItemTag = baseTag + self.CELL_DOT_TAG
         self.puzzleBoardCanvas.itemconfigure(dotItemTag, state='normal')
 

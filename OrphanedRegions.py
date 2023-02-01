@@ -317,7 +317,7 @@ class OrphanedRegions():
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):
                 # We only care about cells which have a circle
-                if not (clone.isDotAt(rowNum, colNum)):
+                if (clone.isCircleAt(rowNum, colNum)):
                     # If the circle has lines, then we know that it is along the "hard" boundary.
                     # If the cell is disabled, then we know that it is along the "implied" boundary,
                     # so it is considered to be inside the region

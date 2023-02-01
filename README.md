@@ -1,9 +1,6 @@
 # INSTRUCTIONS FOR MASYU MASTERS HOSTS
 You'll need to download this, have a working copy of python, and might also need to install tkinter or other stuff. Feel free to let me know if any of that is complicated.
 
-This is a proof of concept, where I implemented grey circles (in the UI it's a big RED circle) by blocking the four pathways going into the cell. If this is of use to you hosts, I can clean it up a little bit more and also make it render a grey circle.
-This, in conjunction with the already existing ability to toggle off "progress" (lines) and blocked paths means you can also get a clean board to screenshot and send to players.
-
 Original instructions for using the program are below.
 
 

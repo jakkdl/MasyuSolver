@@ -247,6 +247,9 @@ class PuzzleBoard():
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum].isGreyCircle())
 
+    def isCircleAt(self, rowNum, colNum):
+        return self.isWhiteCircleAt(rowNum, colNum) or self.isBlackCircleAt(rowNum, colNum)
+
     def isDotAt(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum].isDot())
@@ -412,6 +415,8 @@ class PuzzleBoard():
                     pbClone.setBlackCircleAt(rowNum, colNum)
                 elif (self.isWhiteCircleAt(rowNum, colNum)):
                     pbClone.setWhiteCircleAt(rowNum, colNum)
+                elif (self.isGreyCircleAt(rowNum, colNum)):
+                    pbClone.setGreyCircleAt(rowNum, colNum)
 
                 # Copy any solution work only if a full close was requested
                 if (doFullClone):

@@ -28,6 +28,8 @@ class Solver():
             changed = False
             changed = changed or self.__processSpecialCases(puzzleBoard)
 
+            changed = changed or self.__processGreyCircles(puzzleBoard)
+
             changed = changed or self.__findPathwaysToBlock(puzzleBoard)
 
             changed = changed or self.__processDeadendPaths(puzzleBoard)
@@ -692,19 +694,35 @@ class Solver():
                                     puzzleBoard.markBlockedRight(rowNum, colNum)
                             else:
                                 raise MasyuSolverException("Illegal black circle location in case 12-4", (rowNum, colNum))
+    
+    # Use the base solver rules to determine pathways which must be blocked.
+    def __processGreyCircles(self, puzzleBoard):
+        numRows, numCols = puzzleBoard.getDimensions()
+        changesMade = False
+
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if (puzzleBoard.isGreyCircleAt(rowNum, colNum) and not
+                        (
+                            puzzleBoard.isBlockedLeft(rowNum, colNum) and
+                            puzzleBoard.isBlockedRight(rowNum, colNum) and
+                            puzzleBoard.isBlockedUp(rowNum, colNum) and
+                            puzzleBoard.isBlockedDown(rowNum, colNum)
+                            )
+
+                    ):
+                    puzzleBoard.markBlockedLeft(rowNum, colNum)
+                    puzzleBoard.markBlockedRight(rowNum, colNum)
+                    puzzleBoard.markBlockedUp(rowNum, colNum)
+                    puzzleBoard.markBlockedDown(rowNum, colNum)
+                    changesMade = True
+        return (changesMade)
 
     # Use the base solver rules to determine pathways which must be blocked.
     def __findPathwaysToBlock(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
         changesMade = False
 
-        for rowNum in range(0, numRows):
-            for colNum in range(0, numCols):
-                if puzzleBoard.isGreyCircleAt(rowNum, colNum):
-                    puzzleBoard.markBlockedLeft(rowNum, colNum)
-                    puzzleBoard.markBlockedRight(rowNum, colNum)
-                    puzzleBoard.markBlockedUp(rowNum, colNum)
-                    puzzleBoard.markBlockedDown(rowNum, colNum)
         # Case 1
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):

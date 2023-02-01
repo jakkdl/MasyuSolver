@@ -278,7 +278,7 @@ class SolverUIWindow():
 
         item.create_line(itemX1, itemY1, itemX2, itemY1,
                          itemX2, itemY2, itemX1, itemY2,
-                         itemX1, itemY1, fill='red', tags=('hilite'))
+                         itemX1, itemY1, fill='grey', tags=('hilite'))
 
         item.itemconfigure('hilite', state = 'hidden')
 
@@ -289,7 +289,7 @@ class SolverUIWindow():
 
         self.whiteItem = self.__createItem(parent, self.MENU_ITEM_WHITE_CIRCLE_SIZE, 'white')
         self.blackItem = self.__createItem(parent, self.MENU_ITEM_BLACK_CIRCLE_SIZE, 'black')
-        self.greyItem = self.__createItem(parent, self.MENU_ITEM_GREY_CIRCLE_SIZE, 'red')
+        self.greyItem = self.__createItem(parent, self.MENU_ITEM_GREY_CIRCLE_SIZE, 'grey')
         self.dotItem = self.__createItem(parent, self.MENU_ITEM_DOT_SIZE, 'dark grey')
 
     # Callback for the 'show progress' checkbox.
@@ -334,7 +334,7 @@ class SolverUIWindow():
 
         # If the selected item is the 'dot', then there are no restrictions on
         # where it can be placed, so enable all the cells.
-        if (self.selectedItem == self.dotItem):
+        if (self.selectedItem in (self.dotItem, self.greyItem)):
             for rowNum in range (0, self.numRows):
                 for colNum in range (0, self.numCols):
                     self.puzzleBoardObject.setCellEnabled(rowNum, colNum)
@@ -409,7 +409,6 @@ class SolverUIWindow():
                 return
 
             savedPuzzleBoard = self.puzzleBoardObject.cloneAll()
-            print(self.selectedItem, self.greyItem)
 
             # Set cell to active item
             if (self.selectedItem == self.blackItem):
@@ -463,6 +462,7 @@ class SolverUIWindow():
                 errorDialog = ErrorDialog(self.mainWindow)
                 errorDialog.showDialog("Invalid Item Placement", "Cannot place item in the selected cell")
                 self.registerPuzzleBoard(savedPuzzleBoard)
+                raise
 
     # Constructor method
     def __init__(self):
@@ -470,7 +470,7 @@ class SolverUIWindow():
         self.numCols = 0
 
         frame1Color = "light grey"
-        self.itemCanvasColor = "grey"
+        self.itemCanvasColor = "teal"
         frame2Color = "light grey"
         puzzleBoardFrameColor = "light grey"
         puzzleBoardCanvasColor = "light grey"

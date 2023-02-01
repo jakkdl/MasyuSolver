@@ -41,7 +41,7 @@ class Utilities():
         numRows, numCols = puzzleBoard.getDimensions()
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):
-                if not (puzzleBoard.isDotAt(rowNum, colNum)):
+                if puzzleBoard.isCircleAt(rowNum, colNum):
                     numCircles += 1
 
         return (numCircles)
@@ -74,7 +74,7 @@ class Utilities():
                     return(False)
 
                 if (numLines == 0):
-                    if (puzzleBoard.isDotAt(rowNum, colNum)):
+                    if not (puzzleBoard.isCircleAt(rowNum, colNum)):
                         # Keep looking
                         continue
                     else:
@@ -102,7 +102,7 @@ class Utilities():
                 nextColNum = colNum + nextColOffset
 
                 # See if we are starting in a cell with a circle
-                if not (puzzleBoard.isDotAt(rowNum, colNum)):
+                if (puzzleBoard.isCircleAt(rowNum, colNum)):
                     numCirclesFound += 1
 
                 # Follow the path until we come back to where we started, or the line stops
@@ -120,7 +120,7 @@ class Utilities():
                         return (False)
 
                     # Track if this cell had a circle
-                    if not(puzzleBoard.isDotAt(nextRowNum, nextColNum)):
+                    if (puzzleBoard.isCircleAt(nextRowNum, nextColNum)):
                         numCirclesFound += 1
 
                     nextRowNum = nextRowNum + nextRowOffset
