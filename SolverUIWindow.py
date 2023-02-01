@@ -28,7 +28,7 @@ class SolverUIWindow():
     STATE_5 = 5     # Unchanged since the last 'save file' operation
     STATE_6 = 6     # Changed since the last 'save file' operation
 
-    NUM_ITEMS = 3                   # Dot, White Circle and Black Circle
+    NUM_ITEMS = 4                   # Dot, White Circle and Black Circle
     ITEM_PADDING = 3                # Padding around each of the items
     ITEM_HIGHLIGHT_THICKNESS = 2    # Thickness of highlight drawn around active item
     ITEM_WIDTH = 30                 # Width of each item
@@ -36,11 +36,13 @@ class SolverUIWindow():
     MENU_ITEM_WHITE_CIRCLE_SIZE = 20      # Size of the white circle item
     MENU_ITEM_BLACK_CIRCLE_SIZE = 20      # Size of the black circle item
     MENU_ITEM_DOT_SIZE = 8               # Size of the dot item
+    MENU_ITEM_GREY_CIRCLE_SIZE = 20
 
     NO_ITEM = -1
     WHITE_ITEM = 0
     BLACK_ITEM = 1
-    DOT_ITEM = 2
+    GREY_ITEM = 2
+    DOT_ITEM = 3
 
     LEFT = 0
     RIGHT = 1
@@ -287,6 +289,7 @@ class SolverUIWindow():
 
         self.whiteItem = self.__createItem(parent, self.MENU_ITEM_WHITE_CIRCLE_SIZE, 'white')
         self.blackItem = self.__createItem(parent, self.MENU_ITEM_BLACK_CIRCLE_SIZE, 'black')
+        self.greyItem = self.__createItem(parent, self.MENU_ITEM_GREY_CIRCLE_SIZE, 'red')
         self.dotItem = self.__createItem(parent, self.MENU_ITEM_DOT_SIZE, 'dark grey')
 
     # Callback for the 'show progress' checkbox.
@@ -406,12 +409,15 @@ class SolverUIWindow():
                 return
 
             savedPuzzleBoard = self.puzzleBoardObject.cloneAll()
+            print(self.selectedItem, self.greyItem)
 
             # Set cell to active item
             if (self.selectedItem == self.blackItem):
                 self.puzzleBoardObject.setBlackCircleAt(rowNum, colNum)
             elif (self.selectedItem == self.whiteItem):
                 self.puzzleBoardObject.setWhiteCircleAt(rowNum, colNum)
+            elif (self.selectedItem == self.greyItem):
+                self.puzzleBoardObject.setGreyCircleAt(rowNum, colNum)
             else:
                 self.puzzleBoardObject.setDotAt(rowNum, colNum)
 

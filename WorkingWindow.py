@@ -160,7 +160,7 @@ class WorkingWindow():
         # disable the main window; seems to be necessary, because otherwise the
         # user can still move the main window, causing it to appear "disconnected"
         # from the modal dialog!
-        self.parentWindow.attributes('-disabled', True)
+        #self.parentWindow.attributes('-disabled', True)
 
         # Now display the dialog as an application modal dialog; which means all of the
         # other application windows will not respond to user input, until we close
@@ -180,5 +180,5 @@ class WorkingWindow():
         # is no longer active!  We also need to force the window
         # to the top of the stacking order, because the re-enabling
         # seems to cause it to sink to the bottom of the stacking order!
-        self.parentWindow.attributes('-disabled', False)
+        #self.parentWindow.attributes('-disabled', False)
         self.parentWindow.lift()

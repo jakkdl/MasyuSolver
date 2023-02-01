@@ -697,6 +697,14 @@ class Solver():
     def __findPathwaysToBlock(self, puzzleBoard):
         numRows, numCols = puzzleBoard.getDimensions()
         changesMade = False
+
+        for rowNum in range(0, numRows):
+            for colNum in range(0, numCols):
+                if puzzleBoard.isGreyCircleAt(rowNum, colNum):
+                    puzzleBoard.markBlockedLeft(rowNum, colNum)
+                    puzzleBoard.markBlockedRight(rowNum, colNum)
+                    puzzleBoard.markBlockedUp(rowNum, colNum)
+                    puzzleBoard.markBlockedDown(rowNum, colNum)
         # Case 1
         for rowNum in range(0, numRows):
             for colNum in range(0, numCols):

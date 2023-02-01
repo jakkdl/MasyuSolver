@@ -226,6 +226,10 @@ class PuzzleBoard():
     def setWhiteCircleAt(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         self.puzzleBoard[intRowNum][intColNum].setAsWhiteCircle()
+    
+    def setGreyCircleAt(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        self.puzzleBoard[intRowNum][intColNum].setAsGreyCircle()
 
     def setDotAt(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
@@ -238,6 +242,10 @@ class PuzzleBoard():
     def isWhiteCircleAt(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
         return (self.puzzleBoard[intRowNum][intColNum].isWhiteCircle())
+
+    def isGreyCircleAt(self, rowNum, colNum):
+        intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)
+        return (self.puzzleBoard[intRowNum][intColNum].isGreyCircle())
 
     def isDotAt(self, rowNum, colNum):
         intRowNum, intColNum = self.__mapRowAndCol(rowNum, colNum)

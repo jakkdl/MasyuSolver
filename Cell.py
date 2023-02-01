@@ -4,6 +4,7 @@ class Cell():
     TYPE_DOT = 0
     TYPE_BLACK_CIRCLE = 1
     TYPE_WHITE_CIRCLE = 2
+    TYPE_GREY_CIRCLE = 3
 
     # Constructor with default type of 'TYPE_DOT'
     #
@@ -46,6 +47,8 @@ class Cell():
     #
     def isWhiteCircle(self):
         return(self.type == Cell.TYPE_WHITE_CIRCLE)
+    def isGreyCircle(self):
+        return(self.type == Cell.TYPE_GREY_CIRCLE)
 
     # Returns 'true' if cell is a DOT
     #
@@ -61,6 +64,8 @@ class Cell():
     #
     def setAsWhiteCircle(self):
         self.type = Cell.TYPE_WHITE_CIRCLE
+    def setAsGreyCircle(self):
+        self.type = Cell.TYPE_GREY_CIRCLE
 
     # Sets the cell to a DOT
     #
