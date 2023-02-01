@@ -15,8 +15,8 @@ class PuzzleBoard():
     MAX_NUM_ROWS = 15
     MAX_NUM_COLS = 15
 
-    __DEFAULT_NUM_ROWS = 8
-    __DEFAULT_NUM_COLS = 8
+    __DEFAULT_NUM_ROWS = 10
+    __DEFAULT_NUM_COLS = 10
 
     # Constructor
     # If given, the 'size' parameter is a tuple,

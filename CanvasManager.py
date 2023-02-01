@@ -282,7 +282,7 @@ class CanvasManager():
                     greyCircleTag = itemTagBase + self.CELL_GREY_CIRCLE_TAG
                     allGreyCirclesTag = self.ALL_GREY_CIRCLES_TAG
                     tags = (itemTagBase, allGreyCirclesTag, greyCircleTag)
-                    item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_GREY_CIRCLE_SIZE, 'red', tags, 'normal')
+                    item = self.__createBoardItem(x1, y1, self.BOARD_ITEM_GREY_CIRCLE_SIZE, 'grey', tags, 'normal')
 
                     # Add a listener for notifications that the item was "entered" by the mouse
                     self.puzzleBoardCanvas.tag_bind(itemTagBase, '<Enter>',
